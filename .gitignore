@@ -24,6 +24,8 @@ shared/build/
 .cxx
 out/
 bin/
+*.bin
+*.lock
 
 # Kotlin / Native / JS specific artifacts
 *.kexe
@@ -53,6 +55,7 @@ package-lock.json
 
 # Kotlin/Native metadata artifacts
 .kotlin
+.kotlin/
 *.k2
 *.kotlin_module
 *.kotlin_metadata

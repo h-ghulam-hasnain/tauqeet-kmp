@@ -1,8 +1,0 @@
-com.tauqeet.library.shared-pngs-0 /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/generated/res/pngs/release
-com.tauqeet.library.shared-resValues-1 /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/generated/res/resValues/release
-com.tauqeet.library.shared-mergeReleaseResources-2 /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
-com.tauqeet.library.shared-mergeReleaseResources-3 /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
-com.tauqeet.library.shared-merged_res-4 /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/merged_res/release
-com.tauqeet.library.shared-androidMain-5 /home/hasnain/code/tauqeet/tauqeet-kmp/shared/src/androidMain/res
-com.tauqeet.library.shared-main-6 /home/hasnain/code/tauqeet/tauqeet-kmp/shared/src/main/res
-com.tauqeet.library.shared-release-7 /home/hasnain/code/tauqeet/tauqeet-kmp/shared/src/release/res
