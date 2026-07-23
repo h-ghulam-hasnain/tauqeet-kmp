@@ -41,3 +41,20 @@ package-lock.json
 # Logs and databases
 *.log
 *.sqlite
+
+# Kotlin/Native incremental compilation artifacts (may appear at root)
+*.knd
+*.knf
+*.i_len
+*.bin
+
+# Java / JVM artifacts
+*.class
+
+# Kotlin/Native metadata artifacts
+.kotlin
+*.k2
+*.kotlin_module
+*.kotlin_metadata
+*.kotlin_builtins
+*.kotlin_source
