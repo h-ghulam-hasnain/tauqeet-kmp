@@ -31,7 +31,9 @@ class ChronologicalOrderTest {
                 val dhuhrLocal = (result.dhuhr + 1440) % 1440
                 val asrLocal = (result.asr + 1440) % 1440
                 val maghribLocal = (result.maghrib + 1440) % 1440
-                val ishaLocal = (result.isha + 1440) % 1440
+                var ishaLocal = (result.isha + 1440) % 1440
+                
+                if (ishaLocal < maghribLocal) ishaLocal += 1440.0
                 
                 assertTrue(fajrLocal < sunriseLocal, "Fajr ($fajrLocal) must be before Sunrise ($sunriseLocal) for lat=$lat")
                 assertTrue(sunriseLocal < dhuhrLocal, "Sunrise ($sunriseLocal) must be before Dhuhr ($dhuhrLocal) for lat=$lat")

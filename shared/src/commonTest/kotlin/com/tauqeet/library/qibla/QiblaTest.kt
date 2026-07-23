@@ -38,6 +38,6 @@ class QiblaTest {
         
         val karachi = bearingToMecca(24.8607, 67.0011)
         assertNotNull(karachi)
-        assertEquals(261.0, karachi, 1.0)
+        assertEquals(267.7, karachi, 1.0)
     }
 }

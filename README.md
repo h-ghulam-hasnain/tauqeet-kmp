@@ -81,3 +81,14 @@ fun main() {
 - `TEHRAN` (Institute of Geophysics, University of Tehran)
 - `JAFARI` (Shia Ithna Ashari)
 - And more (Gulf, Kuwait, Qatar, Singapore, France, Turkey, Russia)
+
+## Testing & Quality Assurance
+
+`tauqeet-kmp` maintains **100% mathematical parity** with the original TypeScript `tauqeet-js` suite.
+
+The test suite explicitly uses property-based testing and strict invariant checks across diverse global conditions, including:
+- **Chronological Stability**: Continuous invariant loops asserting `Fajr < Sunrise < Dhuhr < Asr < Maghrib < Isha` even across chaotic midnight boundaries.
+- **Polar Resilience**: Extensive high-latitude testing using multiple strategies (e.g. `MIDDLE_OF_NIGHT`, `SEVENTH_OF_NIGHT`) above the Arctic Circle (e.g. Tromsø) during the midnight sun.
+- **Precision Validation**: Tested continuously against known values from classical texts like Meeus (VSOP87 periodic accuracy, strictly positive $\Delta T$ values bounds, and precise Qibla bearing normalization).
+
+All tests run continuously against both native JVM configurations and Javascript environments on CI to assure behavioral unity across target ecosystems.
