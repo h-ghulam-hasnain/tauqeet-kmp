@@ -1,0 +1,18 @@
+{
+  "version": "9",
+  "items": {
+    "6c763c61992e82317a26f034c01352f5": {
+      "src": "/home/hasnain/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-js/2.0.0/67cd61983cdd9c8540c22958c8cbe52b58048d50/kotlin-stdlib-js-2.0.0.klib"
+    },
+    "3842d86367b245b9d6e22b89cfc4dada": {
+      "src": "/home/hasnain/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-dom-api-compat/2.0.0/bf998bede3d1e04ebe4303794efbbac59787a848/kotlin-dom-api-compat-2.0.0.klib"
+    },
+    "b4d60d3d5792ff3e790387848e667a0d": {
+      "src": "/home/hasnain/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test-js-runner/2.0.0/ade1b233b953dd2b2d2e0daf82af735a4a46d700/kotlin-test-js-runner-2.0.0.jar",
+      "target": "kotlin-test-js-runner/0.0.1"
+    },
+    "9be2f487ab269286e125f8da3be20829": {
+      "src": "/home/hasnain/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-test-js/2.0.0/ddbcfe6169002dc685b2cad715587a3d5293ecc9/kotlin-test-js-2.0.0.klib"
+    }
+  }
+}

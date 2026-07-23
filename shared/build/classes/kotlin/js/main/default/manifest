@@ -1,0 +1,10 @@
+abi_version=1.8.0
+builtins_platform=JS
+compiler_version=2.0.0
+depends=org.jetbrains.kotlin\:kotlin-dom-api-compat kotlin
+ir_signature_versions=1,2
+jsOutputName=tauqeet-kmp-shared
+metadata_version=1.4.1
+serializedIrFileFingerprints=2p7dl1lwaxvbm.1xeallp8mmhzo 3ojshs98wohf6.3kcncqzye677h 2dfbv7ur5ecau.xmzwdh0ftcor 27jj6sdra57r3.253jv6dir11pm 2rrmiaqic1eum.2jx48txvpdgmb 1jtnxr9pyrc0u.wbo9ex91pt25 1nu446odmzifb.3j42v9v5f2e2i j2b9tra9awav.2kwxk1jex500q q4l5pqd06ayj.3fvnic1zyfe66
+serializedKlibFingerprint=2xi2gha8fxtv9.1cascd2do1ejr
+unique_name=tauqeet-kmp\:shared

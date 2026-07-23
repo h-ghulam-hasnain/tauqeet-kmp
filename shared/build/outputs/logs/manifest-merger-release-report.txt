@@ -1,0 +1,16 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/tmp/ProcessLibraryManifest/release/tempAndroidManifest2877649248820193851.xml:2:13-83
+INJECTED from /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/tmp/ProcessLibraryManifest/release/tempAndroidManifest2877649248820193851.xml:2:13-83
+	package
+		INJECTED from /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/tmp/ProcessLibraryManifest/release/tempAndroidManifest2877649248820193851.xml
+	xmlns:android
+		ADDED from /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/tmp/ProcessLibraryManifest/release/tempAndroidManifest2877649248820193851.xml:2:23-81
+uses-sdk
+INJECTED from /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/tmp/ProcessLibraryManifest/release/tempAndroidManifest2877649248820193851.xml reason: use-sdk injection requested
+INJECTED from /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/tmp/ProcessLibraryManifest/release/tempAndroidManifest2877649248820193851.xml
+INJECTED from /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/tmp/ProcessLibraryManifest/release/tempAndroidManifest2877649248820193851.xml
+	android:targetSdkVersion
+		INJECTED from /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/tmp/ProcessLibraryManifest/release/tempAndroidManifest2877649248820193851.xml
+	android:minSdkVersion
+		INJECTED from /home/hasnain/code/tauqeet/tauqeet-kmp/shared/build/intermediates/tmp/ProcessLibraryManifest/release/tempAndroidManifest2877649248820193851.xml

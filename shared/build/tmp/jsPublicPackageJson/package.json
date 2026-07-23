@@ -1,0 +1,20 @@
+{
+  "name": "tauqeet-kmp-shared",
+  "version": "0.0.0-unspecified",
+  "main": "tauqeet-kmp-shared.js",
+  "types": "tauqeet-kmp-shared.d.ts",
+  "devDependencies": {
+    "typescript": "5.4.3",
+    "webpack": "5.91.0",
+    "webpack-cli": "5.1.4",
+    "source-map-loader": "5.0.0",
+    "webpack-dev-server": "5.0.4",
+    "source-map-support": "0.5.21"
+  },
+  "dependencies": {
+    "format-util": "^1.0.5"
+  },
+  "peerDependencies": {},
+  "optionalDependencies": {},
+  "bundledDependencies": []
+}
