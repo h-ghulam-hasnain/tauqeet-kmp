@@ -4,7 +4,7 @@
   else if (typeof exports === 'object')
     factory(module.exports);
   else
-    root['tauqeet-kmp:shared'] = factory(typeof this['tauqeet-kmp:shared'] === 'undefined' ? {} : this['tauqeet-kmp:shared']);
+    root['com.tauqeet:shared'] = factory(typeof this['com.tauqeet:shared'] === 'undefined' ? {} : this['com.tauqeet:shared']);
 }(globalThis, function (_) {
   'use strict';
   //region block: pre-declaration

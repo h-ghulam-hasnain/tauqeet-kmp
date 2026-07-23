@@ -1,6 +1,6 @@
+# IDE / Editor
 *.iml
-.gradle
-/local.properties
+.idea/
 /.idea/workspace.xml
 /.idea/tasks.xml
 /.idea/gradle.xml
@@ -9,13 +9,35 @@
 /.idea/libraries
 /.idea/caches
 .DS_Store
-/build
+
+# Gradle
+.gradle/
+/local.properties
+local.properties
+
+# Build directories & Outputs
+build/
+/build/
+shared/build/
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+out/
+bin/
+
+# Kotlin / Native / JS specific artifacts
+*.kexe
+*.klib
+*.dylib
+*.so
+*.dll
+*.js.map
+
+# Node / JS dependencies
 node_modules/
 yarn.lock
 package-lock.json
-build/
-shared/build/
+
+# Logs and databases
+*.log
+*.sqlite

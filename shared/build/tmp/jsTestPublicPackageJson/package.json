@@ -1,6 +1,6 @@
 {
   "name": "tauqeet-kmp-shared-test",
-  "version": "0.0.0-unspecified",
+  "version": "0.1.0",
   "main": "tauqeet-kmp-shared-test.js",
   "types": "tauqeet-kmp-shared-test.d.ts",
   "devDependencies": {

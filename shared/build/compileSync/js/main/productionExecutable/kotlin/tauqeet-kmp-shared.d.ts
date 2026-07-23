@@ -1,3 +1,3 @@
 type Nullable<T> = T | null | undefined
 
-export as namespace tauqeet_kmp_shared;
+export as namespace com_tauqeet_shared;

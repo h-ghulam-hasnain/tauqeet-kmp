@@ -3,7 +3,7 @@
     dir="/home/hasnain/code/tauqeet/tauqeet-kmp/shared"
     name=":shared"
     type="LIBRARY"
-    maven="tauqeet-kmp:shared:"
+    maven="com.tauqeet:shared:"
     agpVersion="8.2.2"
     buildFolder="build"
     bootClassPath="/home/hasnain/Android/Sdk/platforms/android-34/android.jar:/home/hasnain/Android/Sdk/build-tools/34.0.0/core-lambda-stubs.jar"

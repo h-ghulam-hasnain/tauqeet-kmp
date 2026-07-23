@@ -3,7 +3,7 @@
       roots=":@@:shared::debug,org.jetbrains.kotlin:kotlin-stdlib:2.0.0@jar,org.jetbrains:annotations:13.0@jar">
     <dependency
         name=":@@:shared::debug"
-        simpleName="tauqeet-kmp:shared"/>
+        simpleName="com.tauqeet:shared"/>
     <dependency
         name="org.jetbrains.kotlin:kotlin-stdlib:2.0.0@jar"
         simpleName="org.jetbrains.kotlin:kotlin-stdlib"/>
@@ -15,7 +15,7 @@
       roots=":@@:shared::debug,org.jetbrains.kotlin:kotlin-stdlib:2.0.0@jar,org.jetbrains:annotations:13.0@jar">
     <dependency
         name=":@@:shared::debug"
-        simpleName="tauqeet-kmp:shared"/>
+        simpleName="com.tauqeet:shared"/>
     <dependency
         name="org.jetbrains.kotlin:kotlin-stdlib:2.0.0@jar"
         simpleName="org.jetbrains.kotlin:kotlin-stdlib"/>

@@ -1,2 +1,2 @@
 
-<shared_commonMain>:com.tauqeet.library.astronomy:com.tauqeet.library.internal
+<shared_commonMain>:com.tauqeet.library:com.tauqeet.library.astronomy:com.tauqeet.library.internal:com.tauqeet.library.prayers:com.tauqeet.library.qibla:com.tauqeet.library.time

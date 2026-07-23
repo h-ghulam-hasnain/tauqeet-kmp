@@ -1,6 +1,6 @@
 {
-  "name": "tauqeet-kmp-shared",
-  "version": "0.0.0-unspecified",
+  "name": "tauqeet",
+  "version": "0.1.0",
   "main": "tauqeet-kmp-shared.js",
   "types": "tauqeet-kmp-shared.d.ts",
   "devDependencies": {
@@ -16,5 +16,11 @@
   },
   "peerDependencies": {},
   "optionalDependencies": {},
-  "bundledDependencies": []
+  "bundledDependencies": [],
+  "description": "A high-precision Islamic prayer times and Qibla calculation library.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tauqeet/tauqeet-kmp.git"
+  },
+  "license": "MIT"
 }
