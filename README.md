@@ -9,7 +9,29 @@ Ported from the robust [tauqeet-js](https://github.com/tauqeet/tauqeet-js) libra
 - **Highly Accurate**: Based on exact solar positions rather than rough approximations.
 - **Cross-Platform**: Supports Android, iOS, Web (Node.js/Browser), and desktop JVM apps.
 - **Customizable**: Multiple built-in Islamic methods and Madhab configurations.
-- **Extreme Latitudes**: Robust fallback strategies (e.g. Tromsø in midnight sun).
+- **Strict Mathematical Parity**: 100% numerical parity with `tauqeet-js`.
+- **Geodesic Qibla Engine**: Computes exact WGS-84 distances and precise bearings, complete with mathematically robust antipodal fallbacks.
+
+## High Latitudes & Extreme Scenarios
+
+`tauqeet-kmp` is designed to be mathematically rigorous. Rather than relying on arbitrary approximations (such as faking Asr times with hardcoded fallbacks), the engine natively propagates clean `Long?` (nullable) values when an astronomical event mathematically does not occur (e.g., during Polar Night or the Midnight Sun).
+- **Graceful Degradation**: If the sun never reaches the required twilight angle, `null` is returned instead of an invalid time.
+- **UI Context**: The `metadata.isPolarDay` and `metadata.isPolarNight` boolean flags explicitly inform the UI layer when the engine has entered a non-convergent state, allowing developers to safely degrade the interface or warn the user.
+
+## Dual-Tier Metadata System
+
+The library exposes metadata in two tiers to support both simple UIs and deep astronomical debugging without sacrificing performance:
+
+1. **Simple UI Metadata (`PrayerTimesMetadata`)**: 
+   Attached by default to `PrayerTimesResult.metadata`. It features zero-overhead fields indicating the configuration parameters applied (`method`, `madhab`, `highLatitudeRule`) and extreme state flags (`isPolarDay`, `isPolarNight`).
+   
+2. **Advanced Astronomical Metadata (`AstronomicalMetadata`)**:
+   An opt-in mapping of the exact internal solar mechanics generated during the iterative hour-angle calculations. When `includeAdvancedMetadata = true` is passed to the engine, it populates `astronomicalMetadata` with granular, per-event data classes (`TwilightMetadata`, `SunriseSunsetMetadata`, `DhahwaKubraMetadata`, `DhuhrMetadata`, `AsrMetadata`). 
+   To maintain physical precision, fields use explicit unit suffixes:
+   - `_deg` (Degrees)
+   - `_min` (Minutes of time)
+   - `_arcmin` (Arcminutes)
+   - `elevationMeters` (Meters)
 
 ## Installation
 
@@ -40,7 +62,7 @@ If using CocoaPods, include the shared framework in your Podfile (assuming integ
 
 ```kotlin
 import com.tauqeet.library.Tauqeet
-import com.tauqeet.library.qiblaBearing
+import com.tauqeet.library.qiblaDirection
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.Madhab
 import com.tauqeet.library.toTimeString
@@ -53,37 +75,44 @@ fun main() {
     )
 
     // Compute for London, UK (UTC+1 in summer)
+    // We explicitly enable `includeAdvancedMetadata` for astronomical logs
     val times = tauqeet.computePrayerTimes(
         year = 2024, 
         month = 6, 
         day = 21, 
         lat = 51.5072, 
         lng = -0.1276, 
-        timezoneOffset = 1.0
+        timezoneOffset = 1.0,
+        includeAdvancedMetadata = true
     )
 
-    println("Fajr: ${times.fajr.toTimeString()}")
-    println("Sunrise: ${times.sunrise.toTimeString()}")
-    println("Dhahwa Kubra: ${times.dhahwaKubra.toTimeString()}")
-    println("Dhuhr: ${times.dhuhr.toTimeString()}")
-    println("Asr: ${times.asr.toTimeString()}")
-    println("Maghrib: ${times.maghrib.toTimeString()}")
-    println("Isha: ${times.isha.toTimeString()}")
+    println("Fajr: ${times.fajr?.toTimeString() ?: "N/A"}")
+    println("Sunrise: ${times.sunrise?.toTimeString() ?: "N/A"}")
+    println("Dhahwa Kubra: ${times.dhahwaKubra?.toTimeString() ?: "N/A"}")
+    println("Dhuhr: ${times.dhuhr?.toTimeString() ?: "N/A"}")
+    println("Asr: ${times.asr?.toTimeString() ?: "N/A"}")
+    println("Maghrib: ${times.maghrib?.toTimeString() ?: "N/A"}")
+    println("Isha: ${times.isha?.toTimeString() ?: "N/A"}")
 
-    // Alternatively, you can format the times as ISO 8601 strings (HH:mm:ss) to match the JS library output
-    val isoTimes = times.toISOTimes()
-    println("Fajr (ISO): ${isoTimes.fajr}")
-    
-    // The raw times are returned as Long (milliseconds since midnight) for custom formatting
+    // The raw times are returned as nullable Long (milliseconds since midnight)
     println("Raw Sunrise ms: ${times.sunrise}")
 
-    // Metadata details
+    // Simple UI Metadata details
     println("Method Used: ${times.metadata?.method}")
     println("High Lat Rule: ${times.metadata?.highLatitudeRule}")
+    println("Is Polar Day: ${times.metadata?.isPolarDay}")
 
-    // Qibla Direction
-    val qibla = qiblaBearing(51.5072, -0.1276)
-    println("Qibla Bearing: $qibla degrees")
+    // Advanced Astronomical Metadata (safely access event-specific mechanics)
+    times.astronomicalMetadata?.fajr?.let { fajrMeta ->
+        println("\nFajr Calculation Status: ${fajrMeta.status}")
+        println("Solar Declination: ${fajrMeta.DEC_deg}°")
+        println("Equation of Time: ${fajrMeta.EOT_min} mins")
+    }
+
+    // Qibla Direction (Bearing & Distance)
+    val qibla = qiblaDirection(51.5072, -0.1276)
+    println("\nQibla Bearing: ${qibla?.bearing} degrees")
+    println("Distance to Mecca: ${qibla?.distanceKm} km")
 }
 ```
 

@@ -31,15 +31,25 @@ fun main() {
     println("Temp: ${tauqeet.temperatureC}°C, Pressure: ${tauqeet.pressureMbar} mbar, Elevation: ${tauqeet.elevationMeters} ft")
 
     try {
-        val times = tauqeet.computePrayerTimes(date, lat, lng, timeZone)
+        val times = tauqeet.computePrayerTimes(date, lat, lng, timeZone, includeAdvancedMetadata = true)
 
         println("\nResults:")
         println("   fajr           : ${times.fajr?.toTimeString() ?: "N/A"}")
         println("   sunrise        : ${times.sunrise?.toTimeString() ?: "N/A"}")
+        println("   dhahwa kubra   : ${times.dhahwaKubra?.toTimeString() ?: "N/A"}")
         println("   dhuhr          : ${times.dhuhr?.toTimeString() ?: "N/A"}")
         println("   asr            : ${times.asr?.toTimeString() ?: "N/A"}")
         println("   maghrib        : ${times.maghrib?.toTimeString() ?: "N/A"}")
         println("   isha           : ${times.isha?.toTimeString() ?: "N/A"}")
+
+        println("\nAdvanced Metadata:")
+        println("Fajr: ${times.astronomicalMetadata?.fajr}")
+        println("Sunrise: ${times.astronomicalMetadata?.sunrise}")
+        println("DhahwaKubra: ${times.astronomicalMetadata?.dhahwaKubra}")
+        println("Dhuhr: ${times.astronomicalMetadata?.dhuhr}")
+        println("Asr: ${times.astronomicalMetadata?.asr}")
+        println("Maghrib: ${times.astronomicalMetadata?.maghrib}")
+        println("Isha: ${times.astronomicalMetadata?.isha}")
 
     } catch (e: Exception) {
         println("Calculation Failed: ${e.message}")

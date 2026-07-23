@@ -77,11 +77,10 @@ fun rhumbLineBearing(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Do
     return ((radiansToDegrees(atan2(deltaLambda, deltaPhi)) % 360.0) + 360.0) % 360.0
 }
 
-// WGS-84 Ellipsoid flattening parameter (IUGG 1984)
-private const val WGS84_F = 1.0 / 298.257_223_563
+data class VincentyResult(val bearing: Double, val distanceKm: Double)
 
 /**
- * Vincenty Inverse formula — initial forward azimuth (bearing) on the WGS-84
+ * Vincenty Inverse formula — initial forward azimuth (bearing) and distance on the WGS-84
  * ellipsoid from point 1 to point 2.
  *
  * @remarks
@@ -96,18 +95,22 @@ private const val WGS84_F = 1.0 / 298.257_223_563
  * @param lon1 - Observer longitude in decimal degrees.
  * @param lat2 - Target latitude in decimal degrees.
  * @param lon2 - Target longitude in decimal degrees.
- * @returns Initial forward azimuth in degrees `[0, 360)`, or `null` if the
+ * @returns A VincentyResult containing bearing and distance, or `null` if the
  *   algorithm fails to converge (antipodal or co-incident points).
  */
-fun calculateVincentyInverseBearing(
+fun calculateVincentyInverse(
     lat1: Double,
     lon1: Double,
     lat2: Double,
     lon2: Double
-): Double? {
+): VincentyResult? {
+    val a = 6378137.0
+    val b = 6356752.314245
+    val f = 1.0 / 298.257_223_563
+
     // Reduced (parametric) latitudes on the auxiliary sphere
-    val u1 = atan((1.0 - WGS84_F) * tan(degreesToRadians(lat1)))
-    val u2 = atan((1.0 - WGS84_F) * tan(degreesToRadians(lat2)))
+    val u1 = atan((1.0 - f) * tan(degreesToRadians(lat1)))
+    val u2 = atan((1.0 - f) * tan(degreesToRadians(lat2)))
 
     val sinU1 = sin(u1)
     val cosU1 = cos(u1)
@@ -158,9 +161,9 @@ fun calculateVincentyInverseBearing(
             cosSigma - (2.0 * sinU1 * sinU2) / cosSqAlpha
         }
 
-        val C = (WGS84_F / 16.0) * cosSqAlpha * (4.0 + WGS84_F * (4.0 - 3.0 * cosSqAlpha))
+        val C = (f / 16.0) * cosSqAlpha * (4.0 + f * (4.0 - 3.0 * cosSqAlpha))
 
-        lambda = L + (1.0 - C) * WGS84_F * sinAlpha * (
+        lambda = L + (1.0 - C) * f * sinAlpha * (
             sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1.0 + 2.0 * cos2SigmaM * cos2SigmaM))
         )
 
@@ -172,7 +175,15 @@ fun calculateVincentyInverseBearing(
     // Maximum iterations exceeded — antipodal / near-antipodal non-convergence.
     if (iter >= maxIter) return null
 
-    // -- Final azimuth calculation --
+    // -- Final calculation --
+    val uSq = cosSqAlpha * (a * a - b * b) / (b * b)
+    val A = 1.0 + uSq / 16384.0 * (4096.0 + uSq * (-768.0 + uSq * (320.0 - 175.0 * uSq)))
+    val B = uSq / 1024.0 * (256.0 + uSq * (-128.0 + uSq * (74.0 - 47.0 * uSq)))
+    val deltaSigma = B * sinSigma * (cos2SigmaM + B / 4.0 * (cosSigma * (-1.0 + 2.0 * cos2SigmaM * cos2SigmaM) - B / 6.0 * cos2SigmaM * (-3.0 + 4.0 * sinSigma * sinSigma) * (-3.0 + 4.0 * cos2SigmaM * cos2SigmaM)))
+    
+    val s = b * A * (sigma - deltaSigma)
+    val distanceKm = s / 1000.0
+
     val sinLambdaFinal = sin(lambda)
     val cosLambdaFinal = cos(lambda)
 
@@ -181,5 +192,7 @@ fun calculateVincentyInverseBearing(
         cosU1 * sinU2 - sinU1 * cosU2 * cosLambdaFinal
     )
 
-    return ((radiansToDegrees(fwdAzimuthRad) % 360.0) + 360.0) % 360.0
+    val bearing = ((radiansToDegrees(fwdAzimuthRad) % 360.0) + 360.0) % 360.0
+
+    return VincentyResult(bearing, distanceKm)
 }

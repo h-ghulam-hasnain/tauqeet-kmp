@@ -1,10 +1,10 @@
 package com.tauqeet.manual.qibla
 
-import com.tauqeet.library.qiblaBearing
+import com.tauqeet.library.qiblaDirection
 
 fun main() {
     println("\n=============================================================")
-    println("🕋 EXAMPLE 1: QIBLA BEARING — DEFAULT")
+    println("🕋 EXAMPLE 1: QIBLA BEARING & DISTANCE — DEFAULT")
     println("=============================================================")
 
     // Faisalabad Coordinates
@@ -12,14 +12,15 @@ fun main() {
     val lng = 73.0791
 
     try {
-        val qibla = qiblaBearing(lat, lng)
+        val qibla = qiblaDirection(lat, lng)
 
         println("\nInputs:")
         println("  Latitude : $lat°")
         println("  Longitude: $lng°")
 
         println("\nResult:")
-        println("  Qibla Bearing: $qibla° (from North)")
+        println("  Qibla Bearing: ${qibla?.bearing}° (from North)")
+        println("  Distance     : ${qibla?.distanceKm} km")
 
     } catch (err: Exception) {
         println("Qibla Calculation failed: ${err.message}")

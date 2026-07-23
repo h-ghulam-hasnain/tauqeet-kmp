@@ -5,22 +5,7 @@ import com.tauqeet.library.DateComponents
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.HighLatitudeRule
 import com.tauqeet.library.prayers.Madhab
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.io.File
-
-@Serializable
-data class ParityResult(
-    val loc: String,
-    val date: String,
-    val fajr: Long?,
-    val sunrise: Long?,
-    val dhuhr: Long?,
-    val asr: Long?,
-    val maghrib: Long?,
-    val isha: Long?
-)
 
 fun main() {
     val locations = listOf(
@@ -45,26 +30,28 @@ fun main() {
         highLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT
     )
 
-    val results = mutableListOf<ParityResult>()
+    val results = mutableListOf<String>()
 
     for (loc in locations) {
         for (date in dates) {
             val times = tauqeet.computePrayerTimes(date, loc.second.first, loc.second.second, 0.0)
             val dateStr = "${date.year}-${date.month.toString().padStart(2, '0')}-${date.day.toString().padStart(2, '0')}"
-            results.add(ParityResult(
-                loc = loc.first,
-                date = dateStr,
-                fajr = times.fajr,
-                sunrise = times.sunrise,
-                dhuhr = times.dhuhr,
-                asr = times.asr,
-                maghrib = times.maghrib,
-                isha = times.isha
-            ))
+            results.add("""
+                {
+                    "loc": "${loc.first}",
+                    "date": "$dateStr",
+                    "fajr": ${times.fajr},
+                    "sunrise": ${times.sunrise},
+                    "dhuhr": ${times.dhuhr},
+                    "asr": ${times.asr},
+                    "maghrib": ${times.maghrib},
+                    "isha": ${times.isha}
+                }
+            """.trimIndent())
         }
     }
 
-    val jsonString = Json { prettyPrint = true }.encodeToString(results)
+    val jsonString = "[\n" + results.joinToString(",\n") + "\n]"
     File("../kmp_results.json").writeText(jsonString)
     println("KMP Done")
 }

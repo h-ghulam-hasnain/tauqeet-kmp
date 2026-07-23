@@ -6,6 +6,8 @@ import com.tauqeet.library.prayers.Madhab
 import com.tauqeet.library.prayers.PrayerTimesResult
 import com.tauqeet.library.prayers.computePrayerTimes as internalComputePrayerTimes
 import com.tauqeet.library.qibla.bearingToMecca
+import com.tauqeet.library.qibla.tauqeetQibla
+import com.tauqeet.library.qibla.QiblaResult
 import com.tauqeet.library.time.dateToJulianDay
 
 data class DateComponents(val year: Int, val month: Int, val day: Int)
@@ -35,13 +37,14 @@ class Tauqeet(
         day: Int,
         lat: Double,
         lng: Double,
-        timezoneOffset: Double = 0.0
+        timezoneOffset: Double = 0.0,
+        includeAdvancedMetadata: Boolean = false
     ): PrayerTimesResult {
         // Use standard fractional day (0.0 corresponds to 00:00 UTC)
         val jd = dateToJulianDay(year, month, day.toDouble())
         val paramsToUse = customMethodParams ?: method.params
         val methodName = if (customMethodParams != null) "CUSTOM" else method.name
-        val rawResult = internalComputePrayerTimes(lat, lng, jd, paramsToUse, methodName, madhab, highLatitudeRule, elevationMeters, temperatureC, pressureMbar)
+        val rawResult = internalComputePrayerTimes(lat, lng, jd, paramsToUse, methodName, madhab, highLatitudeRule, elevationMeters, temperatureC, pressureMbar, includeAdvancedMetadata)
 
         // The internal engine returns times in UTC milliseconds since midnight.
         // We add timezoneOffset * 3600000 to get local milliseconds.
@@ -56,7 +59,8 @@ class Tauqeet(
             asr = rawResult.asr?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
             maghrib = rawResult.maghrib?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
             isha = rawResult.isha?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
-            metadata = rawResult.metadata
+            metadata = rawResult.metadata,
+            astronomicalMetadata = rawResult.astronomicalMetadata
         )
     }
 
@@ -67,9 +71,10 @@ class Tauqeet(
         date: DateComponents,
         lat: Double,
         lng: Double,
-        timezoneOffset: Double = 0.0
+        timezoneOffset: Double = 0.0,
+        includeAdvancedMetadata: Boolean = false
     ): PrayerTimesResult {
-        return computePrayerTimes(date.year, date.month, date.day, lat, lng, timezoneOffset)
+        return computePrayerTimes(date.year, date.month, date.day, lat, lng, timezoneOffset, includeAdvancedMetadata)
     }
 }
 
@@ -81,4 +86,14 @@ class Tauqeet(
  */
 fun qiblaBearing(lat: Double, lng: Double): Double? {
     return bearingToMecca(lat, lng)
+}
+
+/**
+ * Top-level public function to compute the Qibla direction and distance.
+ * @param lat Observer's latitude
+ * @param lng Observer's longitude
+ * @return A QiblaResult containing bearing and distance, or null if coincident to Mecca.
+ */
+fun qiblaDirection(lat: Double, lng: Double): QiblaResult? {
+    return tauqeetQibla(lat, lng)
 }

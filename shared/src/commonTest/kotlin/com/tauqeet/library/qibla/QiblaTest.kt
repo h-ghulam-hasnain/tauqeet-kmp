@@ -4,14 +4,13 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import com.tauqeet.library.qibla.bearingToMecca
+import com.tauqeet.library.qibla.tauqeetQibla
 
 class QiblaTest {
     @Test
     fun testQiblaBearingNormalization() {
-        // Property-based test: Qibla bearing normalization
-        // Ensure qiblaBearing returns a value in [0, 360) for any valid latitude/longitude
-        
         val testLocations = listOf(
             Pair(24.8607, 67.0011),    // Karachi
             Pair(51.5072, -0.1276),    // London
@@ -23,21 +22,42 @@ class QiblaTest {
         )
         
         for ((lat, lng) in testLocations) {
-            val qibla = bearingToMecca(lat, lng)
+            val qibla = tauqeetQibla(lat, lng)
             assertNotNull(qibla, "Qibla should not be null for lat=$lat, lng=$lng")
-            assertTrue(qibla >= 0.0 && qibla < 360.0, "Qibla bearing $qibla out of bounds for lat=$lat, lng=$lng")
+            assertTrue(qibla.bearing >= 0.0 && qibla.bearing < 360.0, "Qibla bearing ${qibla.bearing} out of bounds for lat=$lat, lng=$lng")
+            assertTrue(qibla.distanceKm > 0.0, "Qibla distance ${qibla.distanceKm} should be positive")
         }
     }
     
     @Test
     fun testKnownQiblaValues() {
-        // Known values test
-        val london = bearingToMecca(51.5072, -0.1276)
+        val london = tauqeetQibla(51.5072, -0.1276)
         assertNotNull(london)
-        assertEquals(118.9, london, 1.0) // Approx 119 degrees
+        assertEquals(118.9, london.bearing, 1.0)
+        assertEquals(4798.0, london.distanceKm, 10.0) // Distance from London to Mecca is ~4798 km
         
-        val karachi = bearingToMecca(24.8607, 67.0011)
+        val karachi = tauqeetQibla(24.8607, 67.0011)
         assertNotNull(karachi)
-        assertEquals(267.7, karachi, 1.0)
+        assertEquals(267.7, karachi.bearing, 1.0)
+        assertEquals(2860.0, karachi.distanceKm, 10.0)
+    }
+
+    @Test
+    fun testAntipodalFallback() {
+        // Exact Antipode of Mecca (Latitude: -21.422487, Longitude: -140.173794)
+        // Vincenty fails here, but Spherical Law of Cosines should yield a valid bearing
+        val antipode = tauqeetQibla(-21.422487, -140.173794)
+        assertNotNull(antipode, "Antipode should fallback and not return null")
+        assertTrue(antipode.bearing >= 0.0 && antipode.bearing <= 360.0, "Bearing should be valid")
+        assertEquals(0.0, antipode.bearing, 1.0) // Spherical law of cosines bearing for exact antipode typically yields 0 (North) or is undefined but should be valid number
+        // The distance should be roughly half Earth's circumference (approx 20015 km)
+        assertEquals(20015.0, antipode.distanceKm, 50.0)
+    }
+
+    @Test
+    fun testCoincidentLocation() {
+        // Exactly at Mecca
+        val mecca = tauqeetQibla(21.422487, 39.826206)
+        assertNull(mecca, "Should return null for coincident coordinates (distance < 0.001 km)")
     }
 }
