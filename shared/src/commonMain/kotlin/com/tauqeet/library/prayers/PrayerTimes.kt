@@ -38,7 +38,10 @@ fun computePrayerTimes(
     jd: Double,
     method: CalculationMethod,
     madhab: Madhab = Madhab.SHAFI,
-    highLatRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT
+    highLatRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT,
+    elevationMeters: Double = 0.0,
+    temperatureC: Double = 10.0,
+    pressureMbar: Double = 1010.0
 ): PrayerTimesResult {
     // A nested function to solve for the exact UTC hour of an event iteratively
     fun solveIteratively(side: Int, targetZenith: (com.tauqeet.library.astronomy.SolarPositionResult) -> Double, initialHour: Double): Double? {
@@ -76,11 +79,23 @@ fun computePrayerTimes(
     val initialDhuhr = 12.0 - lng / 15.0
     val dhuhrHr = solveIteratively(0, { 0.0 }, initialDhuhr) ?: initialDhuhr
 
-    // Solar geometric zenith for sunrise/sunset includes refraction (~34 arcmin) and semidiameter (~16 arcmin)
-    val sunriseSunsetZenith = 90.0 + 0.8333
+    // Get SP at transit for Asr calculations
+    val dhuhrJd = jd + dhuhrHr / 24.0
+    val dhuhrApproxYear = 2000.0 + (dhuhrJd - 2451545.0) / 365.25
+    val dhuhrDeltaT = com.tauqeet.library.time.calculateDeltaT(dhuhrApproxYear)
+    val dhuhrJ0 = kotlin.math.floor(dhuhrJd - 0.5) + 0.5
+    val dhuhrUt = (dhuhrJd - dhuhrJ0) * 24.0
+    val transitSp = computeSolarPosition(dhuhrJ0, dhuhrUt, dhuhrDeltaT)
 
-    val sunriseHr = solveIteratively(-1, { sunriseSunsetZenith }, dhuhrHr - 6.0)
-    val sunsetHr = solveIteratively(1, { sunriseSunsetZenith }, dhuhrHr + 6.0)
+    val dip = computeDipAngle(elevationMeters)
+    val refraction0 = getRefractionDegrees(0.0, temperatureC, pressureMbar)
+    
+    val sunriseSunsetZenithFn: (com.tauqeet.library.astronomy.SolarPositionResult) -> Double = { sp ->
+        90.0 + refraction0 + sp.semidiameter / 60.0 - sp.horizontalParallax / 60.0 + dip
+    }
+
+    val sunriseHr = solveIteratively(-1, sunriseSunsetZenithFn, dhuhrHr - 6.0)
+    val sunsetHr = solveIteratively(1, sunriseSunsetZenithFn, dhuhrHr + 6.0)
 
     val fajrHr = solveIteratively(-1, { 90.0 + method.params.fajrAngle }, dhuhrHr - 8.0)
 
@@ -91,9 +106,16 @@ fun computePrayerTimes(
     }
 
     val asrHr = solveIteratively(1, { sp ->
-        val zZuhr = abs(lat - sp.declination)
-        val zAsr = atand(tand(zZuhr) + madhab.shadowFactor)
-        zAsr // Return the true geometric visual zenith
+        val zZuhr = abs(lat - transitSp.declination)
+        val sdZuhr = transitSp.semidiameter / 60.0
+        val refrZuhr = getRefractionDegrees(90.0 - zZuhr, temperatureC, pressureMbar)
+        val zZuhrVisual = zZuhr - refrZuhr - sdZuhr
+        
+        val zAsrVisual = atand(tand(zZuhrVisual) + madhab.shadowFactor)
+        val refrAsr = getRefractionDegrees(90.0 - zAsrVisual, temperatureC, pressureMbar)
+        val sdAsr = sp.semidiameter / 60.0
+        
+        zAsrVisual + refrAsr + sdAsr
     }, dhuhrHr + 4.0)
 
     val maghribHr = if (method.params.maghribInterval > 0 && sunsetHr != null) {

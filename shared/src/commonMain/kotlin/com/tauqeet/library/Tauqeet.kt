@@ -13,7 +13,10 @@ data class DateComponents(val year: Int, val month: Int, val day: Int)
 class Tauqeet(
     val method: CalculationMethod = CalculationMethod.MWL,
     val madhab: Madhab = Madhab.SHAFI,
-    val highLatitudeRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT
+    val highLatitudeRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT,
+    val elevationMeters: Double = 0.0,
+    val temperatureC: Double = 10.0,
+    val pressureMbar: Double = 1010.0
 ) {
     /**
      * Computes the prayer times for a given date and location.
@@ -35,7 +38,7 @@ class Tauqeet(
     ): PrayerTimesResult {
         // Use standard fractional day (0.0 corresponds to 00:00 UTC)
         val jd = dateToJulianDay(year, month, day.toDouble())
-        val rawResult = internalComputePrayerTimes(lat, lng, jd, method, madhab, highLatitudeRule)
+        val rawResult = internalComputePrayerTimes(lat, lng, jd, method, madhab, highLatitudeRule, elevationMeters, temperatureC, pressureMbar)
 
         // The internal engine returns times in UTC minutes since midnight.
         // We add timezoneOffset * 60 to get local minutes.

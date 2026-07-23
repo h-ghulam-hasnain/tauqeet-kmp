@@ -14,7 +14,8 @@ class SolarPositionResult(
     val declination: Double,
     val equationOfTime: Double,
     val semidiameter: Double,
-    val horizontalParallax: Double
+    val horizontalParallax: Double,
+    val distanceAU: Double
 )
 
 /**
@@ -197,6 +198,7 @@ fun computeSolarPosition(j: Double, ut: Double, deltaT: Double): SolarPositionRe
         declination = engine.declination,
         equationOfTime = engine.equationOfTime,
         semidiameter = engine.semidiameter,
-        horizontalParallax = engine.horizontalParallax
+        horizontalParallax = engine.horizontalParallax,
+        distanceAU = engine.earthState.radius
     )
 }
