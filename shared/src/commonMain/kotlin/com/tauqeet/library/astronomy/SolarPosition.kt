@@ -30,19 +30,19 @@ class SolarEphemeris(
     private var _timeArguments: TimeArgument? = null
     private var _earthState: EarthHeliocentricState? = null
     private var _nutation: NutationResult? = null
-    private var _aberration: Double? = null
-    private var _LSun: Double? = null
-    private var _BetaSun: Double? = null
-    private var _LPrime: Double? = null
-    private var _DeltaL: Double? = null
-    private var _DeltaB: Double? = null
-    private var _LCorr: Double? = null
-    private var _BCorr: Double? = null
-    private var _apparentLongitude: Double? = null
-    private var _Dec: Double? = null
-    private var _equationOfTime: Double? = null
-    private var _semidiameter: Double? = null
-    private var _horizontalParallax: Double? = null
+    private var _aberration: Double = Double.NaN
+    private var _LSun: Double = Double.NaN
+    private var _BetaSun: Double = Double.NaN
+    private var _LPrime: Double = Double.NaN
+    private var _DeltaL: Double = Double.NaN
+    private var _DeltaB: Double = Double.NaN
+    private var _LCorr: Double = Double.NaN
+    private var _BCorr: Double = Double.NaN
+    private var _apparentLongitude: Double = Double.NaN
+    private var _Dec: Double = Double.NaN
+    private var _equationOfTime: Double = Double.NaN
+    private var _semidiameter: Double = Double.NaN
+    private var _horizontalParallax: Double = Double.NaN
 
     val timeArgs: TimeArgument
         get() {
@@ -70,91 +70,91 @@ class SolarEphemeris(
 
     val aberration: Double
         get() {
-            if (_aberration == null) {
+            if (_aberration.isNaN()) {
                 _aberration = computeSolarAberration(earthState.radius)
             }
-            return _aberration!!
+            return _aberration
         }
 
     val LSun: Double
         get() {
-            if (_LSun == null) {
+            if (_LSun.isNaN()) {
                 val ldd = radiansToDegrees(earthState.longitude)
                 _LSun = normalizeDegrees(ldd + 180.0)
             }
-            return _LSun!!
+            return _LSun
         }
 
     val BetaSun: Double
         get() {
-            if (_BetaSun == null) {
+            if (_BetaSun.isNaN()) {
                 _BetaSun = -radiansToDegrees(earthState.latitude)
             }
-            return _BetaSun!!
+            return _BetaSun
         }
 
     val LPrime: Double
         get() {
-            if (_LPrime == null) {
+            if (_LPrime.isNaN()) {
                 _LPrime = normalizeDegrees(LSun - timeArgs.te * (1.397 + 0.00031 * timeArgs.te))
             }
-            return _LPrime!!
+            return _LPrime
         }
 
     val DeltaL: Double
         get() {
-            if (_DeltaL == null) {
+            if (_DeltaL.isNaN()) {
                 _DeltaL = (-0.09033 + 0.03916 * (cosd(LPrime) + sind(LPrime)) * tand(BCorr)) / 3600.0
             }
-            return _DeltaL!!
+            return _DeltaL
         }
 
     val DeltaB: Double
         get() {
-            if (_DeltaB == null) {
+            if (_DeltaB.isNaN()) {
                 _DeltaB = (0.03916 * (cosd(LPrime) - sind(LPrime))) / 3600.0
             }
-            return _DeltaB!!
+            return _DeltaB
         }
 
     val LCorr: Double
         get() {
-            if (_LCorr == null) {
+            if (_LCorr.isNaN()) {
                 _LCorr = LSun + DeltaL
             }
-            return _LCorr!!
+            return _LCorr
         }
 
     val BCorr: Double
         get() {
-            if (_BCorr == null) {
+            if (_BCorr.isNaN()) {
                 _BCorr = BetaSun + DeltaB
             }
-            return _BCorr!!
+            return _BCorr
         }
 
     val apparentLongitude: Double
         get() {
-            if (_apparentLongitude == null) {
+            if (_apparentLongitude.isNaN()) {
                 _apparentLongitude = LCorr + nutation.deltaPsi + aberration
             }
-            return _apparentLongitude!!
+            return _apparentLongitude
         }
 
     val declination: Double
         get() {
-            if (_Dec == null) {
+            if (_Dec.isNaN()) {
                 _Dec = asind(
                     sind(BCorr) * cosd(nutation.eps) +
                             cosd(BCorr) * sind(nutation.eps) * sind(apparentLongitude)
                 )
             }
-            return _Dec!!
+            return _Dec
         }
 
     val equationOfTime: Double
         get() {
-            if (_equationOfTime == null) {
+            if (_equationOfTime.isNaN()) {
                 val t = timeArgs.t
                 val L0 = ((280.46646 + 36000.76983 * t) % 360.0 + 360.0) % 360.0
 
@@ -172,23 +172,23 @@ class SolarEphemeris(
 
                 _equationOfTime = eotDeg * 4.0
             }
-            return _equationOfTime!!
+            return _equationOfTime
         }
 
     val semidiameter: Double
         get() {
-            if (_semidiameter == null) {
+            if (_semidiameter.isNaN()) {
                 _semidiameter = SOLAR_SEMIDIAMETER_SECONDS / earthState.radius / 60.0
             }
-            return _semidiameter!!
+            return _semidiameter
         }
 
     val horizontalParallax: Double
         get() {
-            if (_horizontalParallax == null) {
+            if (_horizontalParallax.isNaN()) {
                 _horizontalParallax = 8.794 / earthState.radius / 60.0
             }
-            return _horizontalParallax!!
+            return _horizontalParallax
         }
 }
 

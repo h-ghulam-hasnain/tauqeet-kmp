@@ -26,17 +26,20 @@ class ChronologicalOrderTest {
                 val result = computePrayerTimes(lat, lng, jd, CalculationMethod.MWL, Madhab.SHAFI, HighLatitudeRule.MIDDLE_OF_NIGHT)
                 
                 // Normalizing to local day
-                val fajrLocal = (result.fajr + 1440) % 1440
-                val sunriseLocal = (result.sunrise + 1440) % 1440
-                val dhuhrLocal = (result.dhuhr + 1440) % 1440
-                val asrLocal = (result.asr + 1440) % 1440
-                val maghribLocal = (result.maghrib + 1440) % 1440
-                var ishaLocal = (result.isha + 1440) % 1440
+                val msPerDay = 86400000L
+                val fajrLocal = (result.fajr + msPerDay) % msPerDay
+                val sunriseLocal = (result.sunrise + msPerDay) % msPerDay
+                val dhahwaKubraLocal = (result.dhahwaKubra + msPerDay) % msPerDay
+                val dhuhrLocal = (result.dhuhr + msPerDay) % msPerDay
+                val asrLocal = (result.asr + msPerDay) % msPerDay
+                val maghribLocal = (result.maghrib + msPerDay) % msPerDay
+                var ishaLocal = (result.isha + msPerDay) % msPerDay
                 
-                if (ishaLocal < maghribLocal) ishaLocal += 1440.0
+                if (ishaLocal < maghribLocal) ishaLocal += msPerDay
                 
                 assertTrue(fajrLocal < sunriseLocal, "Fajr ($fajrLocal) must be before Sunrise ($sunriseLocal) for lat=$lat")
-                assertTrue(sunriseLocal < dhuhrLocal, "Sunrise ($sunriseLocal) must be before Dhuhr ($dhuhrLocal) for lat=$lat")
+                assertTrue(sunriseLocal < dhahwaKubraLocal, "Sunrise ($sunriseLocal) must be before Dhahwa Kubra ($dhahwaKubraLocal) for lat=$lat")
+                assertTrue(dhahwaKubraLocal < dhuhrLocal, "Dhahwa Kubra ($dhahwaKubraLocal) must be before Dhuhr ($dhuhrLocal) for lat=$lat")
                 assertTrue(dhuhrLocal < asrLocal, "Dhuhr ($dhuhrLocal) must be before Asr ($asrLocal) for lat=$lat")
                 assertTrue(asrLocal < maghribLocal, "Asr ($asrLocal) must be before Maghrib ($maghribLocal) for lat=$lat")
                 assertTrue(maghribLocal < ishaLocal, "Maghrib ($maghribLocal) must be before Isha ($ishaLocal) for lat=$lat")

@@ -40,17 +40,20 @@ class Tauqeet(
         val jd = dateToJulianDay(year, month, day.toDouble())
         val rawResult = internalComputePrayerTimes(lat, lng, jd, method, madhab, highLatitudeRule, elevationMeters, temperatureC, pressureMbar)
 
-        // The internal engine returns times in UTC minutes since midnight.
-        // We add timezoneOffset * 60 to get local minutes.
-        val tzOffsetMinutes = timezoneOffset * 60.0
+        // The internal engine returns times in UTC milliseconds since midnight.
+        // We add timezoneOffset * 3600000 to get local milliseconds.
+        val tzOffsetMs = (timezoneOffset * 3600000.0).toLong()
         
+        val msPerDay = 86400000L
         return PrayerTimesResult(
-            fajr = (rawResult.fajr + tzOffsetMinutes + 1440.0) % 1440.0,
-            sunrise = (rawResult.sunrise + tzOffsetMinutes + 1440.0) % 1440.0,
-            dhuhr = (rawResult.dhuhr + tzOffsetMinutes + 1440.0) % 1440.0,
-            asr = (rawResult.asr + tzOffsetMinutes + 1440.0) % 1440.0,
-            maghrib = (rawResult.maghrib + tzOffsetMinutes + 1440.0) % 1440.0,
-            isha = (rawResult.isha + tzOffsetMinutes + 1440.0) % 1440.0
+            fajr = (rawResult.fajr + tzOffsetMs + msPerDay) % msPerDay,
+            sunrise = (rawResult.sunrise + tzOffsetMs + msPerDay) % msPerDay,
+            dhahwaKubra = (rawResult.dhahwaKubra + tzOffsetMs + msPerDay) % msPerDay,
+            dhuhr = (rawResult.dhuhr + tzOffsetMs + msPerDay) % msPerDay,
+            asr = (rawResult.asr + tzOffsetMs + msPerDay) % msPerDay,
+            maghrib = (rawResult.maghrib + tzOffsetMs + msPerDay) % msPerDay,
+            isha = (rawResult.isha + tzOffsetMs + msPerDay) % msPerDay,
+            metadata = rawResult.metadata
         )
     }
 

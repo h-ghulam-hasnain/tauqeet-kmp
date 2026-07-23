@@ -8,13 +8,23 @@ import com.tauqeet.library.internal.sind
 import com.tauqeet.library.internal.tand
 import kotlin.math.abs
 
+data class PrayerTimesMetadata(
+    val method: String,
+    val madhab: String,
+    val highLatitudeRule: String,
+    val isPolarDay: Boolean,
+    val isPolarNight: Boolean
+)
+
 data class PrayerTimesResult(
-    val fajr: Double,
-    val sunrise: Double,
-    val dhuhr: Double,
-    val asr: Double,
-    val maghrib: Double,
-    val isha: Double
+    val fajr: Long,
+    val sunrise: Long,
+    val dhahwaKubra: Long,
+    val dhuhr: Long,
+    val asr: Long,
+    val maghrib: Long,
+    val isha: Long,
+    val metadata: PrayerTimesMetadata? = null
 )
 
 /**
@@ -133,15 +143,24 @@ fun computePrayerTimes(
     var finalMaghrib = maghribHr ?: finalSunset
     var finalIsha = ishaHr ?: (dhuhrHr + 8.0)
     var finalAsr = asrHr ?: (dhuhrHr + 4.0)
+    
+    var isPolarDay = false
+    var isPolarNight = false
 
     if (sunriseHr != null && sunsetHr != null) {
-        val nightDuration = if (finalSunrise < finalSunset) {
+        var nightDuration = if (finalSunrise < finalSunset) {
             24.0 - (finalSunset - finalSunrise)
         } else {
             (finalSunrise - finalSunset) // shouldn't usually happen with valid data
         }
+        
+        // Prevent division by zero or NaN issues at polar boundaries
+        if (nightDuration < 0.001) {
+            nightDuration = 0.001
+        }
 
         if (fajrHr == null || ishaHr == null) {
+            isPolarDay = true
             when (highLatRule) {
                 HighLatitudeRule.MIDDLE_OF_NIGHT -> {
                     val halfNight = nightDuration / 2.0
@@ -161,15 +180,28 @@ fun computePrayerTimes(
                 }
             }
         }
+    } else {
+        isPolarNight = true
     }
 
-    // Times are calculated in UTC decimal hours. We return minutes since midnight UTC.
+    val dhahwaKubraHr = (finalFajr + finalSunset) / 2.0
+
+    // Times are calculated in UTC decimal hours. We convert to milliseconds since midnight UTC.
+    val hoursToMs = 3600000.0
     return PrayerTimesResult(
-        fajr = finalFajr * 60.0,
-        sunrise = finalSunrise * 60.0,
-        dhuhr = dhuhrHr * 60.0,
-        asr = finalAsr * 60.0,
-        maghrib = finalMaghrib * 60.0,
-        isha = finalIsha * 60.0
+        fajr = (finalFajr * hoursToMs).toLong(),
+        sunrise = (finalSunrise * hoursToMs).toLong(),
+        dhahwaKubra = (dhahwaKubraHr * hoursToMs).toLong(),
+        dhuhr = (dhuhrHr * hoursToMs).toLong(),
+        asr = (finalAsr * hoursToMs).toLong(),
+        maghrib = (finalMaghrib * hoursToMs).toLong(),
+        isha = (finalIsha * hoursToMs).toLong(),
+        metadata = PrayerTimesMetadata(
+            method = method.name,
+            madhab = madhab.name,
+            highLatitudeRule = highLatRule.name,
+            isPolarDay = isPolarDay,
+            isPolarNight = isPolarNight
+        )
     )
 }

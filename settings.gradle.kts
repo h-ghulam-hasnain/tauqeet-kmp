@@ -7,3 +7,4 @@ pluginManagement {
 }
 rootProject.name = "tauqeet-kmp"
 include(":shared")
+include(":manual_testing")
