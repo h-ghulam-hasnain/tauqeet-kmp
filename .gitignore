@@ -9,6 +9,7 @@
 /.idea/libraries
 /.idea/caches
 .DS_Store
+.vscode/
 
 # Gradle
 .gradle/

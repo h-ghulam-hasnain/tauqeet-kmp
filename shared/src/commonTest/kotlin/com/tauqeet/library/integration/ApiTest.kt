@@ -22,7 +22,7 @@ class ApiTest {
         val sunriseStr = result.sunrise.toTimeString()
         val ishaStr = result.isha.toTimeString()
         
-        assertTrue(fajrStr.length == 5, "Fajr time should be formatted as HH:mm")
+        assertTrue(fajrStr.length == 8, "Fajr time should be formatted as HH:mm:ss")
         assertTrue(sunriseStr.contains(":"))
         
         val qibla = qiblaBearing(24.8607, 67.0011)

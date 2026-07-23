@@ -8,5 +8,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.tauqeet.manual.prayer.PrayerDefaultValuesKt")
+    val target = project.findProperty("mainClass") as String?
+        ?: "com.tauqeet.manual.prayer.PrayerDefaultValuesKt"
+    mainClass.set(target)
 }

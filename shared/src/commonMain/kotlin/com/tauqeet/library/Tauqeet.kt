@@ -11,11 +11,11 @@ import com.tauqeet.library.time.dateToJulianDay
 data class DateComponents(val year: Int, val month: Int, val day: Int)
 
 class Tauqeet(
-    val method: CalculationMethod = CalculationMethod.MWL,
-    val madhab: Madhab = Madhab.SHAFI,
+    val method: CalculationMethod = CalculationMethod.KARACHI,
+    val madhab: Madhab = Madhab.HANAFI,
     val highLatitudeRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT,
     val elevationMeters: Double = 0.0,
-    val temperatureC: Double = 10.0,
+    val temperatureC: Double = 12.714,
     val pressureMbar: Double = 1010.0
 ) {
     /**

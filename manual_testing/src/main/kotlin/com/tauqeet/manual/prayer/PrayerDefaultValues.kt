@@ -4,28 +4,33 @@ import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.DateComponents
 import com.tauqeet.library.toTimeString
 
+import java.time.LocalDate
+
 fun main() {
     println("\n=============================================================")
     println("🧪 TEST 1: PRAYER TIMES WITH DEFAULT VALUES")
     println("=============================================================")
 
+    // Using Faisalabad / Punjab coordinates as a default testing point
     val lat = 31.39965
     val lng = 73.02003
-    val temperatureC = 12.714
-    val pressureMbar = 1010.0
-    val timeZone = 5.0
+    val timeZone = 5.0 // UTC
 
-    val tauqeet = Tauqeet(
-        temperatureC = temperatureC,
-        pressureMbar = pressureMbar
-    )
+    // Instantiating with default parameters (Karachi, Hanafi, 12.714C, 1010mbar, 0m elevation)
+    val tauqeet = Tauqeet()
+
+    val today = LocalDate.now()
+    val date = DateComponents(today.year, today.monthValue, today.dayOfMonth)
 
     println("Config inputs:")
+    println("Date: ${date.year}-${date.month}-${date.day} (Today)")
     println("Lat: $lat, Lng: $lng")
-    println("Timezone: +$timeZone")
+    println("Timezone: UTC")
+    println("Method: ${tauqeet.method.name}")
+    println("Madhab: ${tauqeet.madhab.name}")
+    println("Temp: ${tauqeet.temperatureC}°C, Pressure: ${tauqeet.pressureMbar} mbar, Elevation: ${tauqeet.elevationMeters} ft")
 
     try {
-        val date = DateComponents(2027, 1, 1)
         val times = tauqeet.computePrayerTimes(date, lat, lng, timeZone)
 
         println("\nResults:")
