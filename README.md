@@ -1,7 +1,9 @@
 # Tauqeet KMP
 
+[![CI](https://github.com/tauqeet/tauqeet-kmp/actions/workflows/build.yml/badge.svg)](https://github.com/tauqeet/tauqeet-kmp/actions/workflows/build.yml)
+
 A high-precision Islamic prayer times and Qibla calculation library for Kotlin Multiplatform (Android, iOS, JVM, JS).
-Ported from the robust [tauqeet-js] library, maintaining 1:1 mathematical precision based on VSOP87 algorithms.
+Ported from the robust [tauqeet-js](https://github.com/tauqeet/tauqeet-js) library, maintaining 1:1 mathematical precision based on VSOP87 algorithms.
 
 ## Features
 - **Highly Accurate**: Based on exact solar positions rather than rough approximations.
@@ -61,10 +63,15 @@ fun main() {
 
     println("Fajr: ${times.fajr.toTimeString()}")
     println("Sunrise: ${times.sunrise.toTimeString()}")
+    println("Dhahwa Kubra: ${times.dhahwaKubra.toTimeString()}")
     println("Dhuhr: ${times.dhuhr.toTimeString()}")
     println("Asr: ${times.asr.toTimeString()}")
     println("Maghrib: ${times.maghrib.toTimeString()}")
     println("Isha: ${times.isha.toTimeString()}")
+
+    // Metadata details
+    println("Method Used: ${times.metadata?.method}")
+    println("High Lat Rule: ${times.metadata?.highLatitudeRule}")
 
     // Qibla Direction
     val qibla = qiblaBearing(51.5072, -0.1276)
