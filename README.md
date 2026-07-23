@@ -95,7 +95,12 @@ fun main() {
 - `KARACHI` (University of Islamic Sciences, Karachi)
 - `TEHRAN` (Institute of Geophysics, University of Tehran)
 - `JAFARI` (Shia Ithna Ashari)
-- And more (Gulf, Kuwait, Qatar, Singapore, France, Turkey, Russia)
+- `ALGERIA` (18° Fajr, 12° Isha)
+- And more (`GULF`, `KUWAIT`, `QATAR`, `SINGAPORE`, `FRANCE`, `TURKEY`, `RUSSIA`)
+- **`CUSTOM`**: You can pass your own `CalculationMethodParameters` to `computePrayerTimes` or `Tauqeet` instance for custom angles.
+
+## Supported Madhabs
+The library supports all classical schools of thought. `SHAFI` mathematically encompasses `MALIKI`, `HANBALI`, and `JAAFARI` (shadow factor 1), while `HANAFI` uses shadow factor 2. For convenience, aliases (`MALIKI`, `HANBALI`, `JAAFARI`) are included in the enum.
 
 ## Testing & Quality Assurance
 

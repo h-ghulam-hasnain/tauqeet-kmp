@@ -23,10 +23,15 @@ enum class CalculationMethod(val params: CalculationMethodParameters) {
     SINGAPORE(CalculationMethodParameters(fajrAngle = 20.0, ishaAngle = 18.0)),
     FRANCE(CalculationMethodParameters(fajrAngle = 12.0, ishaAngle = 12.0)),
     TURKEY(CalculationMethodParameters(fajrAngle = 18.0, ishaAngle = 17.0)),
-    RUSSIA(CalculationMethodParameters(fajrAngle = 16.0, ishaAngle = 15.0))
+    RUSSIA(CalculationMethodParameters(fajrAngle = 16.0, ishaAngle = 15.0)),
+    ALGERIA(CalculationMethodParameters(fajrAngle = 18.0, ishaAngle = 12.0)),
+    CUSTOM(CalculationMethodParameters(fajrAngle = 18.0, ishaAngle = 18.0))
 }
 
 enum class Madhab(val shadowFactor: Int) {
-    SHAFI(1), // Includes Maliki and Hanbali
-    HANAFI(2)
+    SHAFI(1), // Includes Maliki, Hanbali, Jaafari
+    HANAFI(2),
+    MALIKI(1),
+    HANBALI(1),
+    JAAFARI(1)
 }

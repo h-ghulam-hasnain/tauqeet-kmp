@@ -16,7 +16,8 @@ class Tauqeet(
     val highLatitudeRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT,
     val elevationMeters: Double = 0.0,
     val temperatureC: Double = 12.714,
-    val pressureMbar: Double = 1010.0
+    val pressureMbar: Double = 1010.0,
+    val customMethodParams: com.tauqeet.library.prayers.CalculationMethodParameters? = null
 ) {
     /**
      * Computes the prayer times for a given date and location.
@@ -38,7 +39,9 @@ class Tauqeet(
     ): PrayerTimesResult {
         // Use standard fractional day (0.0 corresponds to 00:00 UTC)
         val jd = dateToJulianDay(year, month, day.toDouble())
-        val rawResult = internalComputePrayerTimes(lat, lng, jd, method, madhab, highLatitudeRule, elevationMeters, temperatureC, pressureMbar)
+        val paramsToUse = customMethodParams ?: method.params
+        val methodName = if (customMethodParams != null) "CUSTOM" else method.name
+        val rawResult = internalComputePrayerTimes(lat, lng, jd, paramsToUse, methodName, madhab, highLatitudeRule, elevationMeters, temperatureC, pressureMbar)
 
         // The internal engine returns times in UTC milliseconds since midnight.
         // We add timezoneOffset * 3600000 to get local milliseconds.
@@ -46,13 +49,13 @@ class Tauqeet(
         
         val msPerDay = 86400000L
         return PrayerTimesResult(
-            fajr = (rawResult.fajr + tzOffsetMs + msPerDay) % msPerDay,
-            sunrise = (rawResult.sunrise + tzOffsetMs + msPerDay) % msPerDay,
-            dhahwaKubra = (rawResult.dhahwaKubra + tzOffsetMs + msPerDay) % msPerDay,
-            dhuhr = (rawResult.dhuhr + tzOffsetMs + msPerDay) % msPerDay,
-            asr = (rawResult.asr + tzOffsetMs + msPerDay) % msPerDay,
-            maghrib = (rawResult.maghrib + tzOffsetMs + msPerDay) % msPerDay,
-            isha = (rawResult.isha + tzOffsetMs + msPerDay) % msPerDay,
+            fajr = rawResult.fajr?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            sunrise = rawResult.sunrise?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            dhahwaKubra = rawResult.dhahwaKubra?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            dhuhr = rawResult.dhuhr?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            asr = rawResult.asr?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            maghrib = rawResult.maghrib?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            isha = rawResult.isha?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
             metadata = rawResult.metadata
         )
     }

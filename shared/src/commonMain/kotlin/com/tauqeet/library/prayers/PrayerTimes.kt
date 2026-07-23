@@ -18,13 +18,13 @@ data class PrayerTimesMetadata(
 )
 
 data class PrayerTimesResult(
-    val fajr: Long,
-    val sunrise: Long,
-    val dhahwaKubra: Long,
-    val dhuhr: Long,
-    val asr: Long,
-    val maghrib: Long,
-    val isha: Long,
+    val fajr: Long?,
+    val sunrise: Long?,
+    val dhahwaKubra: Long?,
+    val dhuhr: Long?,
+    val asr: Long?,
+    val maghrib: Long?,
+    val isha: Long?,
     val metadata: PrayerTimesMetadata? = null
 )
 
@@ -48,6 +48,21 @@ fun computePrayerTimes(
     lng: Double,
     jd: Double,
     method: CalculationMethod,
+    madhab: Madhab = Madhab.SHAFI,
+    highLatRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT,
+    elevationMeters: Double = 0.0,
+    temperatureC: Double = 10.0,
+    pressureMbar: Double = 1010.0
+): PrayerTimesResult {
+    return computePrayerTimes(lat, lng, jd, method.params, method.name, madhab, highLatRule, elevationMeters, temperatureC, pressureMbar)
+}
+
+fun computePrayerTimes(
+    lat: Double,
+    lng: Double,
+    jd: Double,
+    methodParams: CalculationMethodParameters,
+    methodName: String = "CUSTOM",
     madhab: Madhab = Madhab.SHAFI,
     highLatRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT,
     elevationMeters: Double = 0.0,
@@ -108,12 +123,12 @@ fun computePrayerTimes(
     val sunriseHr = solveIteratively(-1, sunriseSunsetZenithFn, dhuhrHr - 6.0)
     val sunsetHr = solveIteratively(1, sunriseSunsetZenithFn, dhuhrHr + 6.0)
 
-    val fajrHr = solveIteratively(-1, { 90.0 + method.params.fajrAngle }, dhuhrHr - 8.0)
+    val fajrHr = solveIteratively(-1, { 90.0 + methodParams.fajrAngle }, dhuhrHr - 8.0)
 
-    val ishaHr = if (method.params.ishaInterval > 0 && sunsetHr != null) {
-        sunsetHr + method.params.ishaInterval / 60.0
+    val ishaHr = if (methodParams.ishaInterval > 0 && sunsetHr != null) {
+        sunsetHr + methodParams.ishaInterval / 60.0
     } else {
-        solveIteratively(1, { 90.0 + method.params.ishaAngle }, dhuhrHr + 8.0)
+        solveIteratively(1, { 90.0 + methodParams.ishaAngle }, dhuhrHr + 8.0)
     }
 
     val asrHr = solveIteratively(1, { sp ->
@@ -129,30 +144,30 @@ fun computePrayerTimes(
         zAsrVisual + refrAsr + sdAsr
     }, dhuhrHr + 4.0)
 
-    val maghribHr = if (method.params.maghribInterval > 0 && sunsetHr != null) {
-        sunsetHr + method.params.maghribInterval / 60.0
-    } else if (method.params.maghribAngle > 0.0) {
-        solveIteratively(1, { 90.0 + method.params.maghribAngle }, dhuhrHr + 6.5)
+    val maghribHr = if (methodParams.maghribInterval > 0 && sunsetHr != null) {
+        sunsetHr + methodParams.maghribInterval / 60.0
+    } else if (methodParams.maghribAngle > 0.0) {
+        solveIteratively(1, { 90.0 + methodParams.maghribAngle }, dhuhrHr + 6.5)
     } else {
         sunsetHr
     }
 
     // High latitude fallback logic
-    var finalFajr = fajrHr ?: (dhuhrHr - 8.0)
-    var finalSunrise = sunriseHr ?: (dhuhrHr - 6.0)
-    var finalSunset = sunsetHr ?: (dhuhrHr + 6.0)
-    var finalMaghrib = maghribHr ?: finalSunset
-    var finalIsha = ishaHr ?: (dhuhrHr + 8.0)
-    var finalAsr = asrHr ?: (dhuhrHr + 4.0)
+    var finalFajr: Double? = fajrHr ?: (dhuhrHr - 8.0)
+    var finalSunrise: Double? = sunriseHr ?: (dhuhrHr - 6.0)
+    var finalSunset: Double? = sunsetHr ?: (dhuhrHr + 6.0)
+    var finalMaghrib: Double? = maghribHr ?: finalSunset
+    var finalIsha: Double? = ishaHr ?: (dhuhrHr + 8.0)
+    var finalAsr: Double? = asrHr
     
     var isPolarDay = false
     var isPolarNight = false
 
-    if (sunriseHr != null && sunsetHr != null) {
-        var nightDuration = if (finalSunrise < finalSunset) {
-            24.0 - (finalSunset - finalSunrise)
+    if (finalSunrise != null && finalSunset != null && sunriseHr != null && sunsetHr != null) {
+        var nightDuration = if (finalSunrise!! < finalSunset!!) {
+            24.0 - (finalSunset!! - finalSunrise!!)
         } else {
-            (finalSunrise - finalSunset) // shouldn't usually happen with valid data
+            (finalSunrise!! - finalSunset!!) // shouldn't usually happen with valid data
         }
         
         // Prevent division by zero or NaN issues at polar boundaries
@@ -165,19 +180,19 @@ fun computePrayerTimes(
             when (highLatRule) {
                 HighLatitudeRule.MIDDLE_OF_NIGHT -> {
                     val halfNight = nightDuration / 2.0
-                    if (fajrHr == null) finalFajr = finalSunrise - halfNight
-                    if (ishaHr == null) finalIsha = finalSunset + halfNight
+                    if (fajrHr == null) finalFajr = finalSunrise!! - halfNight
+                    if (ishaHr == null) finalIsha = finalSunset!! + halfNight
                 }
                 HighLatitudeRule.SEVENTH_OF_NIGHT -> {
                     val seventhNight = nightDuration / 7.0
-                    if (fajrHr == null) finalFajr = finalSunrise - seventhNight
-                    if (ishaHr == null) finalIsha = finalSunset + seventhNight
+                    if (fajrHr == null) finalFajr = finalSunrise!! - seventhNight
+                    if (ishaHr == null) finalIsha = finalSunset!! + seventhNight
                 }
                 HighLatitudeRule.TWILIGHT_ANGLE -> {
-                    val fajrProportion = method.params.fajrAngle / 60.0
-                    val ishaProportion = method.params.ishaAngle / 60.0
-                    if (fajrHr == null) finalFajr = finalSunrise - nightDuration * fajrProportion
-                    if (ishaHr == null) finalIsha = finalSunset + nightDuration * ishaProportion
+                    val fajrProportion = methodParams.fajrAngle / 60.0
+                    val ishaProportion = methodParams.ishaAngle / 60.0
+                    if (fajrHr == null) finalFajr = finalSunrise!! - nightDuration * fajrProportion
+                    if (ishaHr == null) finalIsha = finalSunset!! + nightDuration * ishaProportion
                 }
             }
         }
@@ -185,20 +200,20 @@ fun computePrayerTimes(
         isPolarNight = true
     }
 
-    val dhahwaKubraHr = (finalFajr + finalSunset) / 2.0
+    val dhahwaKubraHr: Double? = if (finalFajr != null && finalSunset != null) (finalFajr!! + finalSunset!!) / 2.0 else null
 
     // Times are calculated in UTC decimal hours. We convert to milliseconds since midnight UTC.
     val hoursToMs = 3600000.0
     return PrayerTimesResult(
-        fajr = (finalFajr * hoursToMs).toLong(),
-        sunrise = (finalSunrise * hoursToMs).toLong(),
-        dhahwaKubra = (dhahwaKubraHr * hoursToMs).toLong(),
-        dhuhr = (dhuhrHr * hoursToMs).toLong(),
-        asr = (finalAsr * hoursToMs).toLong(),
-        maghrib = (finalMaghrib * hoursToMs).toLong(),
-        isha = (finalIsha * hoursToMs).toLong(),
+        fajr = finalFajr?.let { (it * hoursToMs).toLong() },
+        sunrise = finalSunrise?.let { (it * hoursToMs).toLong() },
+        dhahwaKubra = dhahwaKubraHr?.let { (it * hoursToMs).toLong() },
+        dhuhr = dhuhrHr.let { (it * hoursToMs).toLong() },
+        asr = finalAsr?.let { (it * hoursToMs).toLong() },
+        maghrib = finalMaghrib?.let { (it * hoursToMs).toLong() },
+        isha = finalIsha?.let { (it * hoursToMs).toLong() },
         metadata = PrayerTimesMetadata(
-            method = method.name,
+            method = methodName,
             madhab = madhab.name,
             highLatitudeRule = highLatRule.name,
             isPolarDay = isPolarDay,
@@ -219,12 +234,12 @@ data class PrayerTimesISO(
 
 fun PrayerTimesResult.toISOTimes(): PrayerTimesISO {
     return PrayerTimesISO(
-        fajr = this.fajr.toISOTimeString(),
-        sunrise = this.sunrise.toISOTimeString(),
-        dhahwaKubra = this.dhahwaKubra.toISOTimeString(),
-        dhuhr = this.dhuhr.toISOTimeString(),
-        asr = this.asr.toISOTimeString(),
-        maghrib = this.maghrib.toISOTimeString(),
-        isha = this.isha.toISOTimeString()
+        fajr = this.fajr?.toISOTimeString() ?: "Invalid Date",
+        sunrise = this.sunrise?.toISOTimeString() ?: "Invalid Date",
+        dhahwaKubra = this.dhahwaKubra?.toISOTimeString() ?: "Invalid Date",
+        dhuhr = this.dhuhr?.toISOTimeString() ?: "Invalid Date",
+        asr = this.asr?.toISOTimeString() ?: "Invalid Date",
+        maghrib = this.maghrib?.toISOTimeString() ?: "Invalid Date",
+        isha = this.isha?.toISOTimeString() ?: "Invalid Date"
     )
 }

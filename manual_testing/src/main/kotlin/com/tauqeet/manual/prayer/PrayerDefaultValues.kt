@@ -34,12 +34,12 @@ fun main() {
         val times = tauqeet.computePrayerTimes(date, lat, lng, timeZone)
 
         println("\nResults:")
-        println("   fajr           : ${times.fajr.toTimeString()}")
-        println("   sunrise        : ${times.sunrise.toTimeString()}")
-        println("   dhuhr          : ${times.dhuhr.toTimeString()}")
-        println("   asr            : ${times.asr.toTimeString()}")
-        println("   maghrib        : ${times.maghrib.toTimeString()}")
-        println("   isha           : ${times.isha.toTimeString()}")
+        println("   fajr           : ${times.fajr?.toTimeString() ?: "N/A"}")
+        println("   sunrise        : ${times.sunrise?.toTimeString() ?: "N/A"}")
+        println("   dhuhr          : ${times.dhuhr?.toTimeString() ?: "N/A"}")
+        println("   asr            : ${times.asr?.toTimeString() ?: "N/A"}")
+        println("   maghrib        : ${times.maghrib?.toTimeString() ?: "N/A"}")
+        println("   isha           : ${times.isha?.toTimeString() ?: "N/A"}")
 
     } catch (e: Exception) {
         println("Calculation Failed: ${e.message}")

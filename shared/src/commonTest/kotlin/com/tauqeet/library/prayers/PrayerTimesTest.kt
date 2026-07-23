@@ -74,4 +74,32 @@ class PrayerTimesTest {
         assertTrue(timeRegex.matches(isoTimes.maghrib), "maghrib should match HH:mm:ss format")
         assertTrue(timeRegex.matches(isoTimes.isha), "isha should match HH:mm:ss format")
     }
+
+    @Test
+    fun testAlgeriaMethod() {
+        val lat = 36.7538
+        val lng = 3.0588 // Algiers
+        val jd = dateToJulianDay(2026, 7, 23.0)
+        
+        val result = computePrayerTimes(lat, lng, jd, CalculationMethod.ALGERIA, Madhab.MALIKI)
+        // Check metadata properly set
+        assertEquals("ALGERIA", result.metadata?.method)
+        assertEquals("MALIKI", result.metadata?.madhab)
+        assertTrue(result.fajr != null && result.fajr > 0)
+    }
+
+    @Test
+    fun testCustomMethod() {
+        val lat = 51.5072
+        val lng = -0.1276
+        val jd = dateToJulianDay(2026, 7, 23.0)
+        
+        val customParams = CalculationMethodParameters(fajrAngle = 13.5, ishaAngle = 13.5)
+        val result = computePrayerTimes(lat, lng, jd, customParams, "CUSTOM", Madhab.JAAFARI)
+        
+        assertEquals("CUSTOM", result.metadata?.method)
+        assertEquals("JAAFARI", result.metadata?.madhab)
+        assertTrue(result.fajr != null && result.fajr > 0)
+    }
 }
+

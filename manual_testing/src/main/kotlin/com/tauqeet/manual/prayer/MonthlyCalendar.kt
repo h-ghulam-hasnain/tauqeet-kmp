@@ -39,12 +39,12 @@ fun main() {
             
             println(
                 "  $dateStr  " +
-                "Fajr: ${times.fajr.toTimeString()}  " +
-                "Sunrise: ${times.sunrise.toTimeString()}  " +
-                "Dhuhr: ${times.dhuhr.toTimeString()}  " +
-                "Asr: ${times.asr.toTimeString()}  " +
-                "Maghrib: ${times.maghrib.toTimeString()}  " +
-                "Isha: ${times.isha.toTimeString()}"
+                "Fajr: ${times.fajr?.toTimeString() ?: "N/A"}  " +
+                "Sunrise: ${times.sunrise?.toTimeString() ?: "N/A"}  " +
+                "Dhuhr: ${times.dhuhr?.toTimeString() ?: "N/A"}  " +
+                "Asr: ${times.asr?.toTimeString() ?: "N/A"}  " +
+                "Maghrib: ${times.maghrib?.toTimeString() ?: "N/A"}  " +
+                "Isha: ${times.isha?.toTimeString() ?: "N/A"}"
             )
         }
     } catch (e: Exception) {
