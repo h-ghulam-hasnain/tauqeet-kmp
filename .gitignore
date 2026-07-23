@@ -18,8 +18,7 @@ local.properties
 
 # Build directories & Outputs
 build/
-/build/
-shared/build/
+*/build/
 /captures
 .externalNativeBuild
 .cxx

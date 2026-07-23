@@ -62,7 +62,6 @@ If using CocoaPods, include the shared framework in your Podfile (assuming integ
 
 ```kotlin
 import com.tauqeet.library.Tauqeet
-import com.tauqeet.library.qiblaDirection
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.Madhab
 import com.tauqeet.library.toTimeString
@@ -77,9 +76,9 @@ fun main() {
     // Compute for London, UK (UTC+1 in summer)
     // We explicitly enable `includeAdvancedMetadata` for astronomical logs
     val times = tauqeet.computePrayerTimes(
-        year = 2024, 
-        month = 6, 
-        day = 21, 
+        year = 2026, 
+        month = 7, 
+        day = 23, 
         lat = 51.5072, 
         lng = -0.1276, 
         timezoneOffset = 1.0,
@@ -110,7 +109,7 @@ fun main() {
     }
 
     // Qibla Direction (Bearing & Distance)
-    val qibla = qiblaDirection(51.5072, -0.1276)
+    val qibla = tauqeet.qiblaDirection(51.5072, -0.1276)
     println("\nQibla Bearing: ${qibla?.bearing} degrees")
     println("Distance to Mecca: ${qibla?.distanceKm} km")
 }

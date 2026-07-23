@@ -76,24 +76,23 @@ class Tauqeet(
     ): PrayerTimesResult {
         return computePrayerTimes(date.year, date.month, date.day, lat, lng, timezoneOffset, includeAdvancedMetadata)
     }
-}
+    /**
+     * Computes the Qibla bearing from a given location.
+     * @param lat Observer's latitude
+     * @param lng Observer's longitude
+     * @return The bearing in degrees from True North, or null if coincident to Mecca.
+     */
+    fun qiblaBearing(lat: Double, lng: Double): Double? {
+        return bearingToMecca(lat, lng)
+    }
 
-/**
- * Top-level public function to compute the Qibla bearing from a given location.
- * @param lat Observer's latitude
- * @param lng Observer's longitude
- * @return The bearing in degrees from True North, or null if coincident/antipodal to Mecca.
- */
-fun qiblaBearing(lat: Double, lng: Double): Double? {
-    return bearingToMecca(lat, lng)
-}
-
-/**
- * Top-level public function to compute the Qibla direction and distance.
- * @param lat Observer's latitude
- * @param lng Observer's longitude
- * @return A QiblaResult containing bearing and distance, or null if coincident to Mecca.
- */
-fun qiblaDirection(lat: Double, lng: Double): QiblaResult? {
-    return tauqeetQibla(lat, lng)
+    /**
+     * Computes the Qibla direction and distance.
+     * @param lat Observer's latitude
+     * @param lng Observer's longitude
+     * @return A QiblaResult containing bearing and distance, or null if coincident to Mecca.
+     */
+    fun qiblaDirection(lat: Double, lng: Double): QiblaResult? {
+        return tauqeetQibla(lat, lng)
+    }
 }
