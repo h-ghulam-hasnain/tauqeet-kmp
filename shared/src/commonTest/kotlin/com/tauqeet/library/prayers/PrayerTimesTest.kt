@@ -17,14 +17,21 @@ class PrayerTimesTest {
         val result = computePrayerTimes(lat, lng, jd, CalculationMethod.KARACHI)
         
         // Expected results in minutes since midnight UTC
-        // Karachi is UTC+5. 
-        // We just verify that times are sequentially ordered and not NaN
-        assertTrue(result.fajr > 0)
-        assertTrue(result.sunrise > result.fajr)
-        assertTrue(result.dhuhr > result.sunrise)
-        assertTrue(result.asr > result.dhuhr)
-        assertTrue(result.maghrib > result.asr)
-        assertTrue(result.isha > result.maghrib)
+        // Karachi is UTC+5. We convert to local time to verify chronological order.
+        val tzOffset = 5.0 * 60.0
+        val fajrLocal = (result.fajr + tzOffset + 1440) % 1440
+        val sunriseLocal = (result.sunrise + tzOffset + 1440) % 1440
+        val dhuhrLocal = (result.dhuhr + tzOffset + 1440) % 1440
+        val asrLocal = (result.asr + tzOffset + 1440) % 1440
+        val maghribLocal = (result.maghrib + tzOffset + 1440) % 1440
+        val ishaLocal = (result.isha + tzOffset + 1440) % 1440
+
+        assertTrue(fajrLocal > 0)
+        assertTrue(sunriseLocal > fajrLocal)
+        assertTrue(dhuhrLocal > sunriseLocal)
+        assertTrue(asrLocal > dhuhrLocal)
+        assertTrue(maghribLocal > asrLocal)
+        assertTrue(ishaLocal > maghribLocal)
     }
 
     @Test
