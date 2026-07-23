@@ -2,6 +2,7 @@ package com.tauqeet.library.prayers
 
 import com.tauqeet.library.time.dateToJulianDay
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PrayerTimesTest {
@@ -49,5 +50,28 @@ class PrayerTimesTest {
         // The engine should fallback gracefully instead of throwing or returning NaN
         assertTrue(true)
         assertTrue(true)
+    }
+
+    @Test
+    fun testISOTimeFormatting() {
+        val lat = 31.39965
+        val lng = 73.02003
+        
+        // Date: 2026-7-23 (Today)
+        val jd = dateToJulianDay(2026, 7, 23.0)
+        
+        val result = computePrayerTimes(lat, lng, jd, CalculationMethod.KARACHI, Madhab.HANAFI)
+        
+        // Use the newly added toISOTimes extension
+        val isoTimes = result.toISOTimes()
+        
+        // The regex ensures it's formatted exactly as "HH:mm:ss"
+        val timeRegex = Regex("^([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$")
+        assertTrue(timeRegex.matches(isoTimes.fajr), "fajr should match HH:mm:ss format")
+        assertTrue(timeRegex.matches(isoTimes.sunrise), "sunrise should match HH:mm:ss format")
+        assertTrue(timeRegex.matches(isoTimes.dhuhr), "dhuhr should match HH:mm:ss format")
+        assertTrue(timeRegex.matches(isoTimes.asr), "asr should match HH:mm:ss format")
+        assertTrue(timeRegex.matches(isoTimes.maghrib), "maghrib should match HH:mm:ss format")
+        assertTrue(timeRegex.matches(isoTimes.isha), "isha should match HH:mm:ss format")
     }
 }

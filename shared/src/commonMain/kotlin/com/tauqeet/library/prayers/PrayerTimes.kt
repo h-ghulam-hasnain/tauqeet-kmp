@@ -6,6 +6,7 @@ import com.tauqeet.library.internal.atand
 import com.tauqeet.library.internal.cosd
 import com.tauqeet.library.internal.sind
 import com.tauqeet.library.internal.tand
+import com.tauqeet.library.toISOTimeString
 import kotlin.math.abs
 
 data class PrayerTimesMetadata(
@@ -203,5 +204,27 @@ fun computePrayerTimes(
             isPolarDay = isPolarDay,
             isPolarNight = isPolarNight
         )
+    )
+}
+
+data class PrayerTimesISO(
+    val fajr: String,
+    val sunrise: String,
+    val dhahwaKubra: String,
+    val dhuhr: String,
+    val asr: String,
+    val maghrib: String,
+    val isha: String
+)
+
+fun PrayerTimesResult.toISOTimes(): PrayerTimesISO {
+    return PrayerTimesISO(
+        fajr = this.fajr.toISOTimeString(),
+        sunrise = this.sunrise.toISOTimeString(),
+        dhahwaKubra = this.dhahwaKubra.toISOTimeString(),
+        dhuhr = this.dhuhr.toISOTimeString(),
+        asr = this.asr.toISOTimeString(),
+        maghrib = this.maghrib.toISOTimeString(),
+        isha = this.isha.toISOTimeString()
     )
 }

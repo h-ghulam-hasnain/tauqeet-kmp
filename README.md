@@ -44,6 +44,7 @@ import com.tauqeet.library.qiblaBearing
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.Madhab
 import com.tauqeet.library.toTimeString
+import com.tauqeet.library.prayers.toISOTimes
 
 fun main() {
     val tauqeet = Tauqeet(
@@ -68,6 +69,13 @@ fun main() {
     println("Asr: ${times.asr.toTimeString()}")
     println("Maghrib: ${times.maghrib.toTimeString()}")
     println("Isha: ${times.isha.toTimeString()}")
+
+    // Alternatively, you can format the times as ISO 8601 strings (HH:mm:ss) to match the JS library output
+    val isoTimes = times.toISOTimes()
+    println("Fajr (ISO): ${isoTimes.fajr}")
+    
+    // The raw times are returned as Long (milliseconds since midnight) for custom formatting
+    println("Raw Sunrise ms: ${times.sunrise}")
 
     // Metadata details
     println("Method Used: ${times.metadata?.method}")
