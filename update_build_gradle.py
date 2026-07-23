@@ -1,67 +1,38 @@
-plugins {
-    kotlin("multiplatform") version "2.0.0"
-    id("com.android.library") version "8.2.2"
-    `maven-publish`
-    signing
-}
+import re
 
-group = "com.tauqeet"
-version = "0.1.0"
+with open('shared/build.gradle.kts', 'r') as f:
+    content = f.read()
 
-kotlin {
-    androidTarget {
-        publishLibraryVariants("release", "debug")
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
-    }
-    
-    jvm()
+# Add plugins
+content = re.sub(
+    r'id\("com\.android\.library"\) version "8\.2\.2"',
+    r'id("com.android.library") version "8.2.2"\n    `maven-publish`\n    signing',
+    content
+)
 
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+# Add group and version
+content = re.sub(
+    r'kotlin \{',
+    r'group = "com.tauqeet"\nversion = "0.1.0"\n\nkotlin {',
+    content
+)
 
-    js(IR) {
-        browser()
-        nodejs()
-        binaries.executable()
-        generateTypeScriptDefinitions()
-        compilations["main"].packageJson {
+# Add js package json
+js_config = """        compilations["main"].packageJson {
             customField("name", "tauqeet")
             customField("version", "0.1.0")
             customField("description", "A high-precision Islamic prayer times and Qibla calculation library.")
             customField("repository", mapOf("type" to "git", "url" to "https://github.com/tauqeet/tauqeet-kmp.git"))
             customField("license", "MIT")
-        }
-    }
+        }"""
+content = re.sub(
+    r'generateTypeScriptDefinitions\(\)\s*// produces \.d\.ts files',
+    r'generateTypeScriptDefinitions()\n' + js_config,
+    content
+)
 
-    sourceSets {
-        val commonMain by getting {
-            dependencies {
-                // Add common dependencies here
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
-        }
-    }
-}
-
-android {
-    namespace = "com.tauqeet.library"
-    compileSdk = 34
-    defaultConfig {
-        minSdk = 24
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
+# Add publishing block at the end
+publishing_block = """
 publishing {
     publications {
         withType<MavenPublication> {
@@ -109,3 +80,9 @@ signing {
         sign(publishing.publications)
     }
 }
+"""
+
+content += publishing_block
+
+with open('shared/build.gradle.kts', 'w') as f:
+    f.write(content)

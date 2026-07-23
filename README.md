@@ -9,6 +9,31 @@ Ported from the robust [tauqeet-js] library, maintaining 1:1 mathematical precis
 - **Customizable**: Multiple built-in Islamic methods and Madhab configurations.
 - **Extreme Latitudes**: Robust fallback strategies (e.g. Tromsø in midnight sun).
 
+## Installation
+
+### Kotlin Multiplatform / Android / JVM (Gradle)
+Add the Maven Central repository and the dependency to your `build.gradle.kts`:
+
+```kotlin
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation("com.tauqeet:tauqeet-kmp:0.1.0")
+}
+```
+
+### JS / Node.js (npm)
+Install the package via npm:
+
+```bash
+npm install tauqeet-kmp
+```
+
+### iOS (CocoaPods)
+If using CocoaPods, include the shared framework in your Podfile (assuming integration via KMP plugin).
+
 ## Usage Example
 
 ```kotlin
