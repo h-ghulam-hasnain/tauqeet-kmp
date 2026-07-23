@@ -1,6 +1,6 @@
 package com.tauqeet.library.prayers
 
-import com.tauqeet.library.time.JulianDate
+import com.tauqeet.library.time.dateToJulianDay
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -12,9 +12,9 @@ class PrayerTimesTest {
         val lng = 67.0011 // Karachi
         
         // Date: April 27, 2024 at 00:00 UTC -> JD ~ 2460427.5
-        val date = JulianDate.fromDate(2024, 4, 27, 0.0)
+        val jd = dateToJulianDay(2024, 4, 27.0)
         
-        val result = computePrayerTimes(lat, lng, date, CalculationMethod.KARACHI)
+        val result = computePrayerTimes(lat, lng, jd, CalculationMethod.KARACHI)
         
         // Expected results in minutes since midnight UTC
         // Karachi is UTC+5. 
@@ -34,9 +34,9 @@ class PrayerTimesTest {
         val lng = 18.9553
         
         // Date: June 21, 2024 at 00:00 UTC
-        val date = JulianDate.fromDate(2024, 6, 21, 0.0)
+        val jd = dateToJulianDay(2024, 6, 21.0)
         
-        val result = computePrayerTimes(lat, lng, date, CalculationMethod.MWL)
+        val result = computePrayerTimes(lat, lng, jd, CalculationMethod.MWL)
         
         // The engine should fallback gracefully instead of throwing or returning NaN
         assertTrue(!result.fajr.isNaN())

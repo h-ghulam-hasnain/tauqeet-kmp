@@ -1,0 +1,10 @@
+abi_version=1.8.0
+builtins_platform=JS
+compiler_version=2.0.0
+depends=tauqeet-kmp\:shared org.jetbrains.kotlin\:kotlin-dom-api-compat kotlin-test kotlin
+ir_signature_versions=1,2
+jsOutputName=tauqeet-kmp-shared-test
+metadata_version=1.4.1
+serializedIrFileFingerprints=21do8x8mpcb4o.1ylzn7b4noemk 1jkuif28vh9zl.103ehnvxwmy12
+serializedKlibFingerprint=2m3ggvwgn36vg.2tzkz5z5xdxts
+unique_name=tauqeet-kmp\:shared_test
