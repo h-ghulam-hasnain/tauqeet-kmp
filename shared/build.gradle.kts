@@ -1,7 +1,7 @@
 plugins {
     kotlin("multiplatform") version "2.0.0"
     id("com.android.library") version "8.2.2"
-    id("com.vanniktech.maven.publish")
+    id("com.vanniktech.maven.publish") version "0.28.0"
 }
 
 group = "com.tauqeet"
