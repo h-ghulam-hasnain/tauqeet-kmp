@@ -1,6 +1,6 @@
 package com.tauqeet.manual.qibla
 
-import com.tauqeet.library.tauqeetQibla
+import com.tauqeet.library.qibla.tauqeetQibla
 
 fun main() {
     println("\n=============================================================")
