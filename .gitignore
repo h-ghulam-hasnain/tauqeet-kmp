@@ -10,6 +10,7 @@
 /.idea/caches
 .DS_Store
 .vscode/
+user.txt
 
 # Gradle
 .gradle/

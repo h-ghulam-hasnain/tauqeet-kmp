@@ -1,8 +1,7 @@
 plugins {
     kotlin("multiplatform") version "2.0.0"
     id("com.android.library") version "8.2.2"
-    `maven-publish`
-    signing
+    id("com.vanniktech.maven.publish")
 }
 
 group = "com.tauqeet"
@@ -62,50 +61,37 @@ android {
     }
 }
 
-publishing {
-    publications {
-        withType<MavenPublication> {
-            pom {
-                name.set("Tauqeet KMP")
-                description.set("A high-precision Islamic prayer times and Qibla calculation library for Kotlin Multiplatform.")
-                url.set("https://github.com/tauqeet/tauqeet-kmp")
-                licenses {
-                    license {
-                        name.set("MIT")
-                        url.set("https://opensource.org/licenses/MIT")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("hasnain")
-                        name.set("Hasnain")
-                    }
-                }
-                scm {
-                    connection.set("scm:git:github.com/tauqeet/tauqeet-kmp.git")
-                    developerConnection.set("scm:git:ssh://github.com/tauqeet/tauqeet-kmp.git")
-                    url.set("https://github.com/tauqeet/tauqeet-kmp")
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            name = "OSSRH"
-            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-            credentials {
-                username = System.getenv("OSSRH_USERNAME")
-                password = System.getenv("OSSRH_PASSWORD")
-            }
-        }
-    }
-}
+mavenPublishing {
+    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
 
-signing {
-    val signingKey = System.getenv("GPG_SIGNING_KEY")
-    val signingPassword = System.getenv("GPG_SIGNING_PASSWORD")
-    if (signingKey != null && signingPassword != null) {
-        useInMemoryPgpKeys(signingKey, signingPassword)
-        sign(publishing.publications)
+    coordinates(
+        groupId = "com.tauqeet",
+        artifactId = "tauqeet-kmp",
+        version = "0.1.0"
+    )
+
+    pom {
+        name.set("tauqeet-kmp")
+        description.set("High-precision Islamic Prayer Times & WGS-84 Geodesic Qibla direction library for Kotlin Multiplatform.")
+        inceptionYear.set("2026")
+        url.set("https://github.com/tauqeet/tauqeet-kmp")
+        licenses {
+            license {
+                name.set("MIT License")
+                url.set("https://opensource.org/licenses/MIT")
+            }
+        }
+        developers {
+            developer {
+                id.set("hasnain")
+                name.set("Ghulam Hasnain")
+            }
+        }
+        scm {
+            url.set("https://github.com/tauqeet/tauqeet-kmp")
+            connection.set("scm:git:github.com/tauqeet/tauqeet-kmp.git")
+            developerConnection.set("scm:git:ssh://github.com/tauqeet/tauqeet-kmp.git")
+        }
     }
 }
