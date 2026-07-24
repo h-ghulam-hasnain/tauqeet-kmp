@@ -1,6 +1,6 @@
 package com.tauqeet.manual.qibla
 
-import com.tauqeet.library.qiblaDirection
+import com.tauqeet.library.tauqeetQibla
 
 fun main() {
     println("\n=============================================================")
@@ -12,7 +12,7 @@ fun main() {
     val lng = 73.0791
 
     try {
-        val qibla = qiblaDirection(lat, lng)
+        val qibla = tauqeetQibla(lat, lng)
 
         println("\nInputs:")
         println("  Latitude : $lat°")
