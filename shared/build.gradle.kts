@@ -9,7 +9,7 @@ version = "0.1.0"
 
 kotlin {
     androidTarget {
-        publishLibraryVariants("release", "debug")
+        publishLibraryVariants("release")
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
@@ -53,11 +53,17 @@ android {
     namespace = "com.tauqeet.library"
     compileSdk = 34
     defaultConfig {
-        minSdk = 24
+        minSdk = 21
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
     }
 }
 
