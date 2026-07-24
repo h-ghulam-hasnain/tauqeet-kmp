@@ -21,12 +21,12 @@ class PrayerTimesTest {
         // Karachi is UTC+5. We convert to local time to verify chronological order.
         val tzOffset = (5.0 * 3600000.0).toLong()
         val msPerDay = 86400000L
-        val fajrLocal = (result.fajr + tzOffset + msPerDay) % msPerDay
-        val sunriseLocal = (result.sunrise + tzOffset + msPerDay) % msPerDay
-        val dhuhrLocal = (result.dhuhr + tzOffset + msPerDay) % msPerDay
-        val asrLocal = (result.asr + tzOffset + msPerDay) % msPerDay
-        val maghribLocal = (result.maghrib + tzOffset + msPerDay) % msPerDay
-        val ishaLocal = (result.isha + tzOffset + msPerDay) % msPerDay
+        val fajrLocal = (result.fajr!! + tzOffset + msPerDay) % msPerDay
+        val sunriseLocal = (result.sunrise!! + tzOffset + msPerDay) % msPerDay
+        val dhuhrLocal = (result.dhuhr!! + tzOffset + msPerDay) % msPerDay
+        val asrLocal = (result.asr!! + tzOffset + msPerDay) % msPerDay
+        val maghribLocal = (result.maghrib!! + tzOffset + msPerDay) % msPerDay
+        val ishaLocal = (result.isha!! + tzOffset + msPerDay) % msPerDay
 
         assertTrue(fajrLocal > 0)
         assertTrue(sunriseLocal > fajrLocal)

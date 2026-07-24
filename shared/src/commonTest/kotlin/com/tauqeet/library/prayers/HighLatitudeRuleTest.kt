@@ -32,7 +32,7 @@ class HighLatitudeRuleTest {
             assertTrue(true, "Isha should not be NaN for $rule")
             
             // Just normal check to ensure the engine completed
-            assertTrue(result.sunrise > 0)
+            assertTrue(result.sunrise!! > 0)
         }
     }
 }

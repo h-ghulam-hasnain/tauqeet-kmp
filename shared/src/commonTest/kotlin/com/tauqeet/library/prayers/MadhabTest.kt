@@ -18,7 +18,7 @@ class MadhabTest {
         val hanafiTimes = computePrayerTimes(lat, lng, jd, CalculationMethod.MWL, Madhab.HANAFI)
         
         // Asr Hanafi must always be later than Asr Shafi
-        assertTrue(hanafiTimes.asr > shafiTimes.asr, "Hanafi Asr must be later than Shafi Asr")
+        assertTrue(hanafiTimes.asr!! > shafiTimes.asr!!, "Hanafi Asr must be later than Shafi Asr")
         
         // Other times should remain identical
         assertTrue(hanafiTimes.fajr == shafiTimes.fajr)

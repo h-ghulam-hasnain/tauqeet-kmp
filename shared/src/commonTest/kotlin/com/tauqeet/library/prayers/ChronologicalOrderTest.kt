@@ -27,13 +27,13 @@ class ChronologicalOrderTest {
                 
                 // Normalizing to local day
                 val msPerDay = 86400000L
-                val fajrLocal = (result.fajr + msPerDay) % msPerDay
-                val sunriseLocal = (result.sunrise + msPerDay) % msPerDay
-                val dhahwaKubraLocal = (result.dhahwaKubra + msPerDay) % msPerDay
-                val dhuhrLocal = (result.dhuhr + msPerDay) % msPerDay
-                val asrLocal = (result.asr + msPerDay) % msPerDay
-                val maghribLocal = (result.maghrib + msPerDay) % msPerDay
-                var ishaLocal = (result.isha + msPerDay) % msPerDay
+                val fajrLocal = (result.fajr!! + msPerDay) % msPerDay
+                val sunriseLocal = (result.sunrise!! + msPerDay) % msPerDay
+                val dhahwaKubraLocal = (result.dhahwaKubra!! + msPerDay) % msPerDay
+                val dhuhrLocal = (result.dhuhr!! + msPerDay) % msPerDay
+                val asrLocal = (result.asr!! + msPerDay) % msPerDay
+                val maghribLocal = (result.maghrib!! + msPerDay) % msPerDay
+                var ishaLocal = (result.isha!! + msPerDay) % msPerDay
                 
                 if (ishaLocal < maghribLocal) ishaLocal += msPerDay
                 

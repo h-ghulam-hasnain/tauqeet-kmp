@@ -13,19 +13,19 @@ class TauqeetTest {
         // Karachi April 27, 2024 (UTC+5)
         val result = tauqeet.computePrayerTimes(2024, 4, 27, 24.8607, 67.0011, 5.0)
         
-        val fajrStr = result.fajr.toTimeString()
-        val dhuhrStr = result.dhuhr.toTimeString()
+        val fajrStr = result.fajr?.toTimeString() ?: ""
+        val dhuhrStr = result.dhuhr?.toTimeString() ?: ""
         
         assertTrue(fajrStr.contains(":"))
         assertTrue(dhuhrStr.contains(":"))
         
         // Times should be sequential
-        assertTrue(result.sunrise > result.fajr)
-        assertTrue(result.dhuhr > result.sunrise)
-        assertTrue(result.asr > result.dhuhr)
+        assertTrue(result.sunrise!! > result.fajr!!)
+        assertTrue(result.dhuhr!! > result.sunrise!!)
+        assertTrue(result.asr!! > result.dhuhr!!)
         
         // Test Qibla
-        val qibla = qiblaBearing(24.8607, 67.0011)
+        val qibla = bearingToMecca(24.8607, 67.0011)
         assertNotNull(qibla)
         assertTrue(qibla > 250.0 && qibla < 270.0) // Karachi to Makkah is approx 261 degrees
     }
