@@ -4,7 +4,7 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.28.0"
 }
 
-group = "io.github.tauqeet"
+group = "io.github.h-ghulam-hasnain"
 version = "0.1.0"
 
 kotlin {
@@ -77,7 +77,7 @@ mavenPublishing {
     signAllPublications()
 
     coordinates(
-        groupId = "io.github.tauqeet",
+        groupId = "io.github.h-ghulam-hasnain",
         artifactId = "tauqeet-kmp",
         version = "0.1.0"
     )
