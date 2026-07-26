@@ -27,6 +27,6 @@ class ApiTest {
         
         val qibla = bearingToMecca(24.8607, 67.0011)
         assertNotNull(qibla)
-        assertTrue(qibla > 267.0 && qibla < 268.0)
+        assertTrue(qibla!! > 267.0 && qibla < 268.0)
     }
 }

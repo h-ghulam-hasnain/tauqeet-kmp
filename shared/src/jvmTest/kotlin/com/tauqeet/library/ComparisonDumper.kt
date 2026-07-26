@@ -25,12 +25,14 @@ class ComparisonDumper {
                     val times = tauqeet.computePrayerTimes(date, lat, lng, 0.0)
                     val qibla = bearingToMecca(lat, lng)
                     if (!first) sb.append(",\n")
-                    sb.append("""{"lat":$lat,"lng":$lng,"month":$month,"method":"${method.name}","fajr":${times.fajr!! / 60000.0},"sunrise":${times.sunrise!! / 60000.0},"dhuhr":${times.dhuhr!! / 60000.0},"asr":${times.asr!! / 60000.0},"maghrib":${times.maghrib!! / 60000.0},"isha":${times.isha!! / 60000.0},"qibla":$qibla}""")
+                    sb.append("""{"lat":$lat,"lng":$lng,"month":$month,"method":"${method.name}","fajr":${(times.fajr ?: -1L) / 60000.0},"sunrise":${(times.sunrise ?: -1L) / 60000.0},"dhuhr":${(times.dhuhr ?: -1L) / 60000.0},"asr":${(times.asr ?: -1L) / 60000.0},"maghrib":${(times.maghrib ?: -1L) / 60000.0},"isha":${(times.isha ?: -1L) / 60000.0},"qibla":$qibla}""")
                     first = false
                 }
             }
         }
         sb.append("\n]")
-        File("/home/hasnain/code/tauqeet/comparison-tests/kmp_results.json").writeText(sb.toString())
+        val outputFile = File(System.getProperty("user.dir"), "kmp_results.json")
+        outputFile.writeText(sb.toString())
     }
 }
+

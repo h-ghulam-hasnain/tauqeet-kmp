@@ -61,4 +61,4 @@ package-lock.json
 *.kotlin_module
 *.kotlin_metadata
 *.kotlin_builtins
-*.kotlin_source
+*.kotlin_sourceshared/kmp_results.json
