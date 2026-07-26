@@ -1,7 +1,9 @@
 # Tauqeet KMP
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.h-ghulam-hasnain/tauqeet-kmp.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.h-ghulam-hasnain/tauqeet-kmp)
+[![npm version](https://img.shields.io/npm/v/tauqeet-js.svg)](https://www.npmjs.com/package/tauqeet-js)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/tauqeet/tauqeet-kmp/actions/workflows/build.yml/badge.svg)](https://github.com/tauqeet/tauqeet-kmp/actions/workflows/build.yml)
-
 A high-precision Islamic prayer times and Qibla calculation library for Kotlin Multiplatform (Android, iOS, JVM, JS).
 Ported from the robust [tauqeet-js](https://github.com/tauqeet/tauqeet-js) library, maintaining 1:1 mathematical precision based on VSOP87 algorithms.
 
@@ -35,7 +37,7 @@ The library exposes metadata in two tiers to support both simple UIs and deep as
 
 ## Installation
 
-### Kotlin Multiplatform / Android / JVM (Gradle)
+### Kotlin Multiplatform / Android / JVM / iOS (Gradle)
 Add the Maven Central repository and the dependency to your `build.gradle.kts`:
 
 ```kotlin
@@ -44,15 +46,15 @@ repositories {
 }
 
 dependencies {
-    implementation("com.tauqeet:tauqeet-kmp:0.1.0")
+    implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.1.0")
 }
 ```
 
-### JS / Node.js (npm)
+### JavaScript / Node.js / Web (npm)
 Install the package via npm:
 
 ```bash
-npm install tauqeet-kmp
+npm install tauqeet-js
 ```
 
 ### iOS (CocoaPods)
