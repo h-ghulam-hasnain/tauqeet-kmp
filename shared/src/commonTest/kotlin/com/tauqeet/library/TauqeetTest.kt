@@ -1,6 +1,7 @@
 package com.tauqeet.library
 
 import com.tauqeet.library.prayers.CalculationMethod
+import com.tauqeet.library.qibla.bearingToMecca
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
@@ -27,6 +28,6 @@ class TauqeetTest {
         // Test Qibla
         val qibla = bearingToMecca(24.8607, 67.0011)
         assertNotNull(qibla)
-        assertTrue(qibla > 250.0 && qibla < 270.0) // Karachi to Makkah is approx 261 degrees
+        assertTrue(qibla!! > 250.0 && qibla < 270.0) // Karachi to Makkah is approx 261 degrees
     }
 }
