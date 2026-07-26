@@ -68,6 +68,11 @@ android {
 }
 
 mavenPublishing {
+    configure(com.vanniktech.maven.publish.KotlinMultiplatform(
+        javadocJar = com.vanniktech.maven.publish.JavadocJar.Empty(),
+        sourcesJar = true
+    ))
+    
     publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL)
     signAllPublications()
 
@@ -92,6 +97,8 @@ mavenPublishing {
             developer {
                 id.set("hasnain")
                 name.set("Ghulam Hasnain")
+                email.set("tauqeet@example.com")
+                url.set("https://github.com/tauqeet")
             }
         }
         scm {
