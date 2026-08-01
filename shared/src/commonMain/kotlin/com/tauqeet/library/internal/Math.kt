@@ -28,8 +28,9 @@ fun haversineDistance(
     val deltaLambda = degreesToRadians(lon2 - lon1)
 
     val a = sin(deltaPhi / 2.0).pow(2) + cos(phi1) * cos(phi2) * sin(deltaLambda / 2.0).pow(2)
+    val clampedA = a.coerceIn(0.0, 1.0)
 
-    return radiusKm * 2.0 * atan2(sqrt(a), sqrt(1.0 - a))
+    return radiusKm * 2.0 * atan2(sqrt(clampedA), sqrt(1.0 - clampedA))
 }
 
 /**

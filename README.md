@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.1.0")
+    implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.2.0")
 }
 ```
 

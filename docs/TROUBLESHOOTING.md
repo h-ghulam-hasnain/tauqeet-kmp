@@ -116,5 +116,5 @@ import com.tauqeet.library.toISOTimeStringWithMillis
 **Fix:** Ensure you have `mavenCentral()` in your repositories block and are using the correct group ID:
 ```kotlin
 repositories { mavenCentral() }
-dependencies { implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.1.0") }
+dependencies { implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.2.0") }
 ```

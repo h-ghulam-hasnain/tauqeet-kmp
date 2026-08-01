@@ -29,7 +29,7 @@ repositories {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.tauqeet:tauqeet-kmp:0.2.0")
+            implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.2.0")
         }
     }
 }

@@ -1,15 +1,15 @@
-# Release v0.1.0 (Initial Launch)
+# Release v0.2.0 (Stability & API Refinement)
 
-We are incredibly proud to announce the first stable launch of the **Tauqeet Kotlin Multiplatform (KMP)** library! 
+We are pleased to announce the `0.2.0` release of **Tauqeet Kotlin Multiplatform (KMP)**.
 
-`tauqeet-kmp` brings rigorous, highly precise Islamic computational astronomy to Kotlin. By porting the robust TypeScript `tauqeet-js` core to KMP, developers can now deploy mathematically exact solar phase calculations and WGS-84 geodesic operations natively across all platforms.
+This update focuses on a cleaner public API, stronger mathematical validation, better solver routing transparency, and broader release-readiness for Maven Central publishing.
 
 ## 🚀 Key Features
 
 * **High-Precision Prayer Times**: Mathematical parity with VSOP87 solar mechanics, ensuring exact hour-angle derivations rather than approximate averages.
 * **Geodesic Qibla Engine**: Includes exact WGS-84 coordinate mapping for distance and precise bearings to Makkah, complete with robust antipodal (Spherical Law of Cosines) fallbacks.
 * **True Cross-Platform Support**: Natively compiles to:
-  * **Android & JVM** (via `io.github.h-ghulam-hasnain:tauqeet-kmp:0.1.0`)
+  * **Android & JVM** (via `io.github.h-ghulam-hasnain:tauqeet-kmp:0.2.0`)
   * **iOS** (Arm64, X64, and Simulator architectures)
   * **JavaScript / Node.js** (via npm package `tauqeet-js`)
 * **Extreme Latitude Grace**: Clean handling of Midnight Sun / Polar Night conditions without invalid hardcoded UI fallbacks.
@@ -19,7 +19,7 @@ We are incredibly proud to announce the first stable launch of the **Tauqeet Kot
 
 **Gradle (Kotlin Multiplatform, Android, JVM, iOS)**
 ```kotlin
-implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.1.0")
+implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.2.0")
 ```
 
 **npm (JavaScript, Node.js, Web)**

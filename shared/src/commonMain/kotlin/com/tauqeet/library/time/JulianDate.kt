@@ -30,13 +30,20 @@ class TimeParts(
 fun dateToJulianDay(year: Int, month: Int, day: Double): Double {
     var y = year
     var m = month
-    if (m == 1 || m == 2) {
+    if (m <= 2) {
         y -= 1
         m += 12
     }
 
     val a = truncate(y / 100.0)
-    val b = 2.0 - a + truncate(a / 4.0)
+    // Julian vs Gregorian transition logic: Gregorian calendar started Oct 15, 1582.
+    val isGregorian = year > 1582 || (year == 1582 && (month > 10 || (month == 10 && day >= 15.0)))
+    val b = if (isGregorian) {
+        2.0 - a + truncate(a / 4.0)
+    } else {
+        0.0
+    }
+    
     return truncate(365.25 * (y + 4716.0)) + truncate(30.6001 * (m + 1.0)) + day + b - 1524.5
 }
 
@@ -80,7 +87,7 @@ fun normalizeTime(j: Double, ut: Double): Pair<Double, Double> {
         resultJ -= 1.0
         resultUt += 24.0
     }
-    while (resultUt > 24.0) {
+    while (resultUt >= 24.0) {
         resultJ += 1.0
         resultUt -= 24.0
     }
@@ -91,21 +98,32 @@ fun normalizeTime(j: Double, ut: Double): Pair<Double, Double> {
  * Normalizes an angle representing a meridian or longitude to the range [-180, 180].
  */
 fun normalizeMeridianAngle(angle: Double): Double {
-    if (angle > 180.0) {
-        return angle - 360.0
+    val normalized = angle % 360.0
+    if (normalized > 180.0) {
+        return normalized - 360.0
     }
-    if (angle <= -180.0) {
-        return angle + 360.0
+    if (normalized <= -180.0) {
+        return normalized + 360.0
     }
-    return angle
+    return normalized
 }
 
 /**
  * Splits a fractional time value into its integer components.
  */
 fun asTimeParts(value: Double): TimeParts {
-    val hour = truncate(value).toInt()
-    val minute = truncate(60.0 * (value - hour)).toInt()
-    val second = round(3600.0 * (value - hour - minute / 60.0)).toInt()
+    var hour = truncate(value).toInt()
+    var minute = truncate(60.0 * (value - hour)).toInt()
+    var second = round(3600.0 * (value - hour - minute / 60.0)).toInt()
+    
+    if (second >= 60) {
+        minute += second / 60
+        second %= 60
+    }
+    if (minute >= 60) {
+        hour += minute / 60
+        minute %= 60
+    }
+    
     return TimeParts(hour, minute, second)
 }

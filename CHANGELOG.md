@@ -20,6 +20,12 @@ All notable changes to this project will be documented in this file.
 - **Prayer Time API**: `Tauqeet.computePrayerTimes` now supports a cleaner request-object overload while preserving the existing convenience overloads for backward compatibility.
 
 ### Fixed
+- **Haversine NaN Hardening**: Clamped the intermediate `a` value in `haversineDistance()` to `[0.0, 1.0]` so antipodal / floating-point edge cases no longer produce `NaN` in spherical distance calculations.
+- **Qibla Antipodal Fallback Stability**: Ensured the fallback Qibla path now receives a finite haversine distance, allowing the spherical-law fallback to return a stable bearing and distance instead of degenerating at exact antipode conditions.
+- **Time Parts Rollover Repair**: Updated `asTimeParts()` to carry seconds into minutes and minutes into hours cleanly, preventing invalid `60`-second rollover states during timestamp decomposition.
+- **Meridian Angle Normalization**: Replaced the previous one-sided threshold logic with robust modulo-based normalization in `normalizeMeridianAngle()` for reliable angle wrapping outside the `[-180, 180]` range.
+- **UTC Boundary Roll-Over**: Corrected `normalizeTime()` to roll any exact `24.0` UTC interval into the next day with the inclusive `>= 24.0` check.
+- **Historical Calendar Compatibility**: Added explicit Gregorian-transition handling in `dateToJulianDay()` so historical dates before the Gregorian adoption boundary are resolved correctly.
 - **Solver Routing Metadata**: Wired the real `resolveSolver(...)` branch selection into the final `PrayerTimesResult`, so `resolutionInfo` and the `flags` bitmask now correctly reflect `NORMAL`, `HIGH_LATITUDE`, `POLAR_DAY`, and `POLAR_NIGHT` outcomes.
 - **Polar Edge Regression Coverage**: Expanded `UnifiedApiTest.kt` to exercise polar-day, polar-night, and high-latitude fallback scenarios through the unified `PrayerRequest` DSL path.
 - **Publishing Pipeline**: Removed conflicting GitHub Actions and added a missing Node.js step to ensure Kotlin/JS multiplatform publishing targets complete successfully.

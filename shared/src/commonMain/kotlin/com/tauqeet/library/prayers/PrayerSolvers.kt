@@ -46,7 +46,10 @@ internal class IterativeSolver(val jd: Double, val lat: Double, val lng: Double)
             if (side == 0) {
                 currentHours = transit
             } else {
-                val hDeg = solveHourAngle(tz, lat, sp.declination) ?: return null
+                val hDeg = solveHourAngle(tz, lat, sp.declination)
+                if (hDeg == null) {
+                    return null
+                }
                 val hHours = hDeg / 15.0
                 currentHours = if (side < 0) transit - hHours else transit + hHours
             }

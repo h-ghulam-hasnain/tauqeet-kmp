@@ -70,7 +70,7 @@ Each call to `Tauqeet.computePrayerTimes()` executes a bounded iterative root-fi
 | Platform Target | Artifact Type | Measured / Estimated Artifact Size | Optimization Status |
 | :--- | :--- | :--- | :--- |
 | **Android (AAR)** | `shared-release.aar` | **111 KB** | Highly compact; fits easily within standard app size budgets. |
-| **JVM (JAR)** | `shared-jvm-0.1.0.jar` | **118 KB** | Standalone Java archive containing compiled bytecode & VSOP87 tables. |
+| **JVM (JAR)** | `shared-jvm-0.2.0.jar` | **118 KB** | Standalone Java archive containing compiled bytecode & VSOP87 tables. |
 | **JavaScript (NPM / Bundle)** | `shared.js` (Compiled IR) | **~200 KB** (unminified)<br>**~45–60 KB** (minified + gzipped) | Tree-shakable Kotlin/JS IR output. |
 | **iOS (Framework)** | `Tauqeet.framework` | **~250 – 400 KB** (Release binary) | LLVM compiled dylib/static framework. |
 
