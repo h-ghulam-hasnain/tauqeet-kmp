@@ -45,7 +45,7 @@ class TauqeetTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `timezone defaults to UTC when omitted`() {
+    fun timezoneDefaultsToUtcWhenOmitted() {
         val tauqeet = Tauqeet(method = CalculationMethod.KARACHI)
 
         // Call WITHOUT a timezoneOffset — should return UTC times
@@ -59,7 +59,7 @@ class TauqeetTest {
     }
 
     @Test
-    fun `timezone offset shifts times by the correct milliseconds`() {
+    fun timezoneOffsetShiftsTimesByTheCorrectMilliseconds() {
         val tauqeet = Tauqeet(method = CalculationMethod.KARACHI)
 
         val utcResult = tauqeet.computePrayerTimes(2026, 8, 1, 24.8607, 67.0011, 0.0)
@@ -76,7 +76,7 @@ class TauqeetTest {
     }
 
     @Test
-    fun `DateComponents overload uses same timezone default`() {
+    fun DateComponentsOverloadUsesSameTimezoneDefault() {
         val tauqeet = Tauqeet(method = CalculationMethod.KARACHI)
         val date = DateComponents(2026, 8, 1)
 
@@ -92,7 +92,7 @@ class TauqeetTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `latitude exactly at -90 and 90 is valid`() {
+    fun latitudeExactlyAt90And90IsValid() {
         val tauqeet = Tauqeet()
         // Should NOT throw
         tauqeet.computePrayerTimes(2026, 6, 1, -90.0, 0.0)
@@ -100,7 +100,7 @@ class TauqeetTest {
     }
 
     @Test
-    fun `latitude below -90 throws TauqeetException`() {
+    fun latitudeBelow90ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
             tauqeet.computePrayerTimes(2026, 1, 1, -90.001, 0.0)
@@ -108,7 +108,7 @@ class TauqeetTest {
     }
 
     @Test
-    fun `latitude above 90 throws TauqeetException`() {
+    fun latitudeAbove90ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
             tauqeet.computePrayerTimes(2026, 1, 1, 91.0, 0.0)
@@ -120,14 +120,14 @@ class TauqeetTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `longitude exactly at -180 and 180 is valid`() {
+    fun longitudeExactlyAt180And180IsValid() {
         val tauqeet = Tauqeet()
         tauqeet.computePrayerTimes(2026, 6, 1, 0.0, -180.0)
         tauqeet.computePrayerTimes(2026, 6, 1, 0.0,  180.0)
     }
 
     @Test
-    fun `longitude below -180 throws TauqeetException`() {
+    fun longitudeBelow180ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
             tauqeet.computePrayerTimes(2026, 1, 1, 0.0, -181.0)
@@ -135,7 +135,7 @@ class TauqeetTest {
     }
 
     @Test
-    fun `longitude above 180 throws TauqeetException`() {
+    fun longitudeAbove180ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
             tauqeet.computePrayerTimes(2026, 1, 1, 0.0, 181.0)
@@ -147,14 +147,14 @@ class TauqeetTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `extreme valid timezone offsets -12 and +14 are accepted`() {
+    fun extremeValidTimezoneOffsets12And14AreAccepted() {
         val tauqeet = Tauqeet()
         tauqeet.computePrayerTimes(2026, 6, 1, 0.0, 0.0, -12.0)
         tauqeet.computePrayerTimes(2026, 6, 1, 0.0, 0.0,  14.0)
     }
 
     @Test
-    fun `timezone offset below -12 throws TauqeetException`() {
+    fun timezoneOffsetBelow12ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
             tauqeet.computePrayerTimes(2026, 1, 1, 0.0, 0.0, -13.0)
@@ -162,7 +162,7 @@ class TauqeetTest {
     }
 
     @Test
-    fun `timezone offset above 14 throws TauqeetException`() {
+    fun timezoneOffsetAbove14ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
             tauqeet.computePrayerTimes(2026, 1, 1, 0.0, 0.0, 15.0)
@@ -174,7 +174,7 @@ class TauqeetTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `invalid month throws TauqeetException`() {
+    fun invalidMonthThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
             tauqeet.computePrayerTimes(2026, 13, 1, 0.0, 0.0)
@@ -185,7 +185,7 @@ class TauqeetTest {
     }
 
     @Test
-    fun `day 29 in February 2025 (non-leap) throws TauqeetException`() {
+    fun day29InFebruary2025nonleapThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
             tauqeet.computePrayerTimes(2025, 2, 29, 0.0, 0.0) // 2025 is not a leap year
@@ -193,14 +193,14 @@ class TauqeetTest {
     }
 
     @Test
-    fun `day 29 in February 2024 (leap year) is valid`() {
+    fun day29InFebruary2024leapYearIsValid() {
         val tauqeet = Tauqeet()
         // Should NOT throw
         tauqeet.computePrayerTimes(2024, 2, 29, 0.0, 0.0)
     }
 
     @Test
-    fun `day 31 in a 30-day month throws TauqeetException`() {
+    fun day31InA30dayMonthThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
             tauqeet.computePrayerTimes(2026, 4, 31, 0.0, 0.0) // April has 30 days
@@ -212,35 +212,35 @@ class TauqeetTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `negative elevation beyond -500 throws TauqeetException`() {
+    fun negativeElevationBeyond500ThrowsTauqeetexception() {
         assertFailsWith<TauqeetException> {
             Tauqeet(elevationMeters = -600.0)
         }
     }
 
     @Test
-    fun `elevation above 9000 throws TauqeetException`() {
+    fun elevationAbove9000ThrowsTauqeetexception() {
         assertFailsWith<TauqeetException> {
             Tauqeet(elevationMeters = 9001.0)
         }
     }
 
     @Test
-    fun `temperature below -90 throws TauqeetException`() {
+    fun temperatureBelow90ThrowsTauqeetexception() {
         assertFailsWith<TauqeetException> {
             Tauqeet(temperatureC = -91.0)
         }
     }
 
     @Test
-    fun `pressure below 100 mbar throws TauqeetException`() {
+    fun pressureBelow100MbarThrowsTauqeetexception() {
         assertFailsWith<TauqeetException> {
             Tauqeet(pressureMbar = 50.0)
         }
     }
 
     @Test
-    fun `pressure above 1100 mbar throws TauqeetException`() {
+    fun pressureAbove1100MbarThrowsTauqeetexception() {
         assertFailsWith<TauqeetException> {
             Tauqeet(pressureMbar = 1200.0)
         }
@@ -251,7 +251,7 @@ class TauqeetTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    fun `qiblaDirection throws TauqeetException for invalid latitude`() {
+    fun qiblaDirectionThrowsTauqeetexceptionForInvalidLatitude() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
             tauqeet.qiblaDirection(95.0, 0.0)
@@ -259,14 +259,14 @@ class TauqeetTest {
     }
 
     @Test
-    fun `qiblaDirection returns null at Kaaba coordinates`() {
+    fun qiblaDirectionReturnsNullAtKaabaCoordinates() {
         val tauqeet = Tauqeet()
         val result = tauqeet.qiblaDirection(21.422487, 39.826206)
         assertNull(result, "At the Kaaba, qiblaDirection must return null")
     }
 
     @Test
-    fun `qiblaBearing throws TauqeetException for invalid longitude`() {
+    fun qiblaBearingThrowsTauqeetexceptionForInvalidLongitude() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
             tauqeet.qiblaBearing(0.0, 200.0)

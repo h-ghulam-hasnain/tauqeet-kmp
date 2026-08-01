@@ -26,6 +26,7 @@ All notable changes to this project will be documented in this file.
 - **Meridian Angle Normalization**: Replaced the previous one-sided threshold logic with robust modulo-based normalization in `normalizeMeridianAngle()` for reliable angle wrapping outside the `[-180, 180]` range.
 - **UTC Boundary Roll-Over**: Corrected `normalizeTime()` to roll any exact `24.0` UTC interval into the next day with the inclusive `>= 24.0` check.
 - **Historical Calendar Compatibility**: Added explicit Gregorian-transition handling in `dateToJulianDay()` so historical dates before the Gregorian adoption boundary are resolved correctly.
+- **Per-Prayer Solver Isolation**: Ensured that a single unresolved twilight angle for one prayer only affects that prayer’s slot, while Dhuhr/Asr/Sunset and the rest of the day continue resolving normally in high-latitude and polar-edge scenarios.
 - **Solver Routing Metadata**: Wired the real `resolveSolver(...)` branch selection into the final `PrayerTimesResult`, so `resolutionInfo` and the `flags` bitmask now correctly reflect `NORMAL`, `HIGH_LATITUDE`, `POLAR_DAY`, and `POLAR_NIGHT` outcomes.
 - **Polar Edge Regression Coverage**: Expanded `UnifiedApiTest.kt` to exercise polar-day, polar-night, and high-latitude fallback scenarios through the unified `PrayerRequest` DSL path.
 - **Publishing Pipeline**: Removed conflicting GitHub Actions and added a missing Node.js step to ensure Kotlin/JS multiplatform publishing targets complete successfully.

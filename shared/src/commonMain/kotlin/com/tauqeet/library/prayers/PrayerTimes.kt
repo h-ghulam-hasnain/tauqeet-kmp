@@ -175,7 +175,7 @@ fun computePrayerTimes(
     
     val initialDhuhr = 12.0 - lng / 15.0
     val dhuhrRes = solver.solve(0, initialDhuhr) { 0.0 }
-    val dhuhrHr = dhuhrRes?.hours ?: initialDhuhr
+    val dhuhrHr = if (dhuhrRes?.error == true) initialDhuhr else (dhuhrRes?.hours ?: initialDhuhr)
 
     // Get SP at transit for Asr calculations
     val dhuhrJd = jd + dhuhrHr / 24.0
@@ -187,24 +187,24 @@ fun computePrayerTimes(
 
     val srSsSolver = SunriseSunsetSolver(solver, elevationMeters, temperatureC, pressureMbar)
     val sunriseRes = srSsSolver.solveSunrise(dhuhrHr)
-    val sunriseHr = sunriseRes?.hours
+    val sunriseHr = if (sunriseRes?.error == true) null else sunriseRes?.hours
 
     val sunsetRes = srSsSolver.solveSunset(dhuhrHr)
-    val sunsetHr = sunsetRes?.hours
+    val sunsetHr = if (sunsetRes?.error == true) null else sunsetRes?.hours
 
     val fajrRes = solver.solve(-1, dhuhrHr - 8.0) { 90.0 + methodParams.fajrAngle }
-    val fajrHr = fajrRes?.hours
+    val fajrHr = if (fajrRes?.error == true) null else fajrRes?.hours
 
     val ishaRes = if (methodParams.ishaInterval > 0 && sunsetHr != null) null else solver.solve(1, dhuhrHr + 8.0) { 90.0 + methodParams.ishaAngle }
     val ishaHr = if (methodParams.ishaInterval > 0 && sunsetHr != null) {
         sunsetHr + methodParams.ishaInterval / 60.0
     } else {
-        ishaRes?.hours
+        if (ishaRes?.error == true) null else ishaRes?.hours
     }
 
     val asrSolver = AsrSolver(solver, lat, madhab, temperatureC, pressureMbar, transitSp)
     val asrRes = asrSolver.solve(dhuhrHr)
-    val asrHr = asrRes?.hours
+    val asrHr = if (asrRes?.error == true) null else asrRes?.hours
 
     val maghribRes = if (methodParams.maghribInterval > 0 && sunsetHr != null) {
         null
@@ -217,7 +217,7 @@ fun computePrayerTimes(
     val maghribHr = if (methodParams.maghribInterval > 0 && sunsetHr != null) {
         sunsetHr + methodParams.maghribInterval / 60.0
     } else if (methodParams.maghribAngle > 0.0) {
-        maghribRes?.hours
+        if (maghribRes?.error == true) null else maghribRes?.hours
     } else {
         sunsetHr
     }
@@ -263,8 +263,8 @@ fun computePrayerTimes(
     val astroMeta = if (includeAdvancedMetadata) {
         fun getStatus(res: SolverResult?, isInterval: Boolean = false): PrayerStatus {
             if (isPolarNight) return PrayerStatus.POLAR_NIGHT
-            if (isPolarDay && res == null && !isInterval) return PrayerStatus.POLAR_DAY
-            if (res == null && !isInterval) return PrayerStatus.CONTINUOUS_TWILIGHT
+            if (isPolarDay && (res == null || res.error) && !isInterval) return PrayerStatus.POLAR_DAY
+            if ((res == null || res.error) && !isInterval) return PrayerStatus.CONTINUOUS_TWILIGHT
             return PrayerStatus.SUCCESS
         }
 

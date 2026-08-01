@@ -18,7 +18,7 @@ internal fun solveHourAngle(targetZenith: Double, lat: Double, dec: Double): Dou
     return acosd(cosH)
 }
 
-internal class SolverResult(val hours: Double, val sp: SolarPositionResult, val iterations: Int, val targetZenith: Double)
+internal class SolverResult(val hours: Double, val sp: SolarPositionResult, val iterations: Int, val targetZenith: Double, val error: Boolean = false)
 
 internal class IterativeSolver(val jd: Double, val lat: Double, val lng: Double) {
     fun solve(side: Int, initialHour: Double, targetZenith: (SolarPositionResult) -> Double): SolverResult? {
@@ -48,7 +48,7 @@ internal class IterativeSolver(val jd: Double, val lat: Double, val lng: Double)
             } else {
                 val hDeg = solveHourAngle(tz, lat, sp.declination)
                 if (hDeg == null) {
-                    return null
+                    return SolverResult(currentHours, sp, iter, tz, error = true)
                 }
                 val hHours = hDeg / 15.0
                 currentHours = if (side < 0) transit - hHours else transit + hHours

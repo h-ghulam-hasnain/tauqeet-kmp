@@ -112,6 +112,22 @@ class UnifiedApiTest {
     }
 
     @Test
+    fun testHighLatitudePartialResolutionKeepsDhuhrIntact() {
+        val tauqeet = Tauqeet()
+        val result = tauqeet.computePrayerTimes(
+            prayerRequest {
+                latitude = 69.6492
+                longitude = 18.9553
+                date = DateComponents(2026, 6, 21)
+                timeZoneOffset = 1.0
+            }
+        )
+
+        assertNotNull(result.dhuhr, "Dhuhr should still resolve even when Fajr/Isha are limited by polar-day geometry")
+        assertTrue(result.flags and PrayerTimesResult.FLAG_HIGH_LATITUDE_FALLBACK != 0 || result.isPolarDay)
+    }
+
+    @Test
     @Suppress("DEPRECATION")
     fun testDeprecatedFlatOverloadsStillWork() {
         val tauqeet = Tauqeet()
