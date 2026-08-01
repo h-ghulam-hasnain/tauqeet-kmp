@@ -30,7 +30,7 @@ kotlin {
             customField("name", "tauqeet")
             customField("version", "0.1.0")
             customField("description", "A high-precision Islamic prayer times and Qibla calculation library.")
-            customField("repository", mapOf("type" to "git", "url" to "https://github.com/tauqeet/tauqeet-kmp.git"))
+            customField("repository", mapOf("type" to "git", "url" to "https://github.com/h-ghulam-hasnain/tauqeet-kmp.git"))
             customField("license", "MIT")
         }
     }
@@ -86,7 +86,7 @@ mavenPublishing {
         name.set("tauqeet-kmp")
         description.set("High-precision Islamic Prayer Times & WGS-84 Geodesic Qibla direction library for Kotlin Multiplatform.")
         inceptionYear.set("2026")
-        url.set("https://github.com/tauqeet/tauqeet-kmp")
+        url.set("https://github.com/h-ghulam-hasnain/tauqeet-kmp")
         licenses {
             license {
                 name.set("MIT License")
@@ -97,12 +97,12 @@ mavenPublishing {
             developer {
                 id.set("hasnain")
                 name.set("Ghulam Hasnain")
-                email.set("tauqeet@example.com")
-                url.set("https://github.com/tauqeet")
+                email.set("ghulamhasnain.pro@gmail.com")
+                url.set("https://github.com/h-ghulam-hasnain")
             }
         }
         scm {
-            url.set("https://github.com/tauqeet/tauqeet-kmp")
+            url.set("https://github.com/h-ghulam-hasnain/tauqeet-kmp")
             connection.set("scm:git:github.com/tauqeet/tauqeet-kmp.git")
             developerConnection.set("scm:git:ssh://github.com/tauqeet/tauqeet-kmp.git")
         }

@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish:
-    name: Publish and Release
+    name: Publish and Release to Maven Central
     runs-on: macos-latest
 
     steps:
@@ -21,8 +21,13 @@ jobs:
           distribution: 'zulu'
           cache: 'gradle'
 
+      - name: Set up Node.js (required for Kotlin/JS target)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Publish to Maven Central
-        run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
+        run: ./gradlew publishAndReleaseToMavenCentral --no-daemon --no-configuration-cache --stacktrace
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}

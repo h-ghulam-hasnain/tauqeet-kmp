@@ -6,6 +6,15 @@ Welcome to `tauqeet-kmp`! This library provides mobile and desktop developers wi
 
 Under the hood, it utilizes the WGS-84 Vincenty Inverse equations to calculate the direction to the Kaaba with millimeter-level geodetic accuracy, while driving prayer times using robust VSOP87 solar mechanics. 
 
+### Deep Dive Documentation
+- [🕋 Qibla Calculation Deep Dive](QIBLA.md)
+- [🕌 Prayer Times Calculation Engine](PRAYER_TIMES.md)
+- [🏗️ Architecture & Design Philosophy](ARCHITECTURE.md)
+- [📊 I/O Data Types & Error States](DATA_TYPES.md)
+- [🚀 Complete API Examples](EXAMPLES.md)
+- [🗺️ Calculation Methods Reference](CALCULATION_METHODS.md)
+- [❓ Troubleshooting & FAQ](TROUBLESHOOTING.md)
+
 ---
 
 ## 2. Installation & Dependencies
