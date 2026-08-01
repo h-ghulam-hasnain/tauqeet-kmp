@@ -154,6 +154,45 @@ class Tauqeet(
         lat, lng, timezoneOffset, includeAdvancedMetadata
     )
 
+    /**
+     * Modern overload that encapsulates all inputs into a clean [com.tauqeet.library.prayers.PrayerRequest].
+     * Avoids parameter-ordering errors and makes the call site much cleaner.
+     *
+     * @throws TauqeetException if any input parameter inside the request is outside its valid range.
+     */
+    fun computePrayerTimes(request: com.tauqeet.library.prayers.PrayerRequest): PrayerTimesResult {
+        validateDate(request.date.year, request.date.month, request.date.day)
+        validateLatitude(request.latitude)
+        validateLongitude(request.longitude)
+        validateTimezoneOffset(request.timeZoneOffset)
+
+        val jd = dateToJulianDay(request.date.year, request.date.month, request.date.day.toDouble())
+        val paramsToUse = request.calculationParameters.customMethodParams ?: request.calculationParameters.method.params
+        val methodName = if (request.calculationParameters.customMethodParams != null) "CUSTOM" else request.calculationParameters.method.name
+
+        val rawResult = internalComputePrayerTimes(
+            request.latitude, request.longitude, jd, paramsToUse, methodName,
+            request.calculationParameters.madhab, request.calculationParameters.highLatitudeRule,
+            request.calculationParameters.elevationMeters, request.calculationParameters.temperatureC, request.calculationParameters.pressureMbar,
+            request.includeAdvancedMetadata
+        )
+
+        val tzOffsetMs = (request.timeZoneOffset * 3600000.0).toLong()
+        val msPerDay   = 86400000L
+
+        return PrayerTimesResult(
+            fajr         = rawResult.fajr?.let        { (it + tzOffsetMs + msPerDay) % msPerDay },
+            sunrise      = rawResult.sunrise?.let     { (it + tzOffsetMs + msPerDay) % msPerDay },
+            dhahwaKubra  = rawResult.dhahwaKubra?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            dhuhr        = rawResult.dhuhr?.let       { (it + tzOffsetMs + msPerDay) % msPerDay },
+            asr          = rawResult.asr?.let         { (it + tzOffsetMs + msPerDay) % msPerDay },
+            maghrib      = rawResult.maghrib?.let     { (it + tzOffsetMs + msPerDay) % msPerDay },
+            isha         = rawResult.isha?.let        { (it + tzOffsetMs + msPerDay) % msPerDay },
+            metadata              = rawResult.metadata,
+            astronomicalMetadata  = rawResult.astronomicalMetadata
+        )
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Qibla
     // ─────────────────────────────────────────────────────────────────────────

@@ -1,11 +1,6 @@
 package com.tauqeet.library.prayers
 
 import com.tauqeet.library.astronomy.computeSolarPosition
-import com.tauqeet.library.internal.acosd
-import com.tauqeet.library.internal.atand
-import com.tauqeet.library.internal.cosd
-import com.tauqeet.library.internal.sind
-import com.tauqeet.library.internal.tand
 import com.tauqeet.library.toISOTimeString
 import kotlin.math.abs
 
@@ -93,15 +88,6 @@ data class PrayerTimesResult(
 )
 
 /**
- * Calculates the hour angle (in degrees) for a target zenith.
- */
-private fun solveHourAngle(targetZenith: Double, lat: Double, dec: Double): Double? {
-    val cosH = (cosd(targetZenith) - sind(lat) * sind(dec)) / (cosd(lat) * cosd(dec))
-    if (cosH < -1.0 || cosH > 1.0) return null
-    return acosd(cosH)
-}
-
-/**
  * Computes the exact prayer times for a given date, location, and method.
  * Uses a standard iterative convergence over the day's changing solar position.
  * Returns the times in UTC hours since midnight (0.0 to 24.0).
@@ -135,46 +121,10 @@ fun computePrayerTimes(
     pressureMbar: Double = 1010.0,
     includeAdvancedMetadata: Boolean = false
 ): PrayerTimesResult {
-    class SolverResult(val hours: Double, val sp: com.tauqeet.library.astronomy.SolarPositionResult, val iterations: Int, val targetZenith: Double)
-
-    fun solveIteratively(side: Int, targetZenith: (com.tauqeet.library.astronomy.SolarPositionResult) -> Double, initialHour: Double): SolverResult? {
-        var currentHours = initialHour
-        var prevHours = currentHours
-        var lastSp: com.tauqeet.library.astronomy.SolarPositionResult? = null
-        var lastZenith = 0.0
-        var iter = 0
-
-        for (i in 0 until 15) {
-            iter++
-            val probeJd = jd + currentHours / 24.0
-            val approxYear = 2000.0 + (probeJd - 2451545.0) / 365.25
-            val deltaT = com.tauqeet.library.time.calculateDeltaT(approxYear)
-            
-            val j0 = kotlin.math.floor(probeJd - 0.5) + 0.5
-            val ut = (probeJd - j0) * 24.0
-            val sp = computeSolarPosition(j0, ut, deltaT)
-            lastSp = sp
-            
-            val tz = targetZenith(sp)
-            lastZenith = tz
-            val transit = 12.0 - lng / 15.0 - sp.equationOfTime / 60.0
-
-            if (side == 0) {
-                currentHours = transit
-            } else {
-                val hDeg = solveHourAngle(tz, lat, sp.declination) ?: return null
-                val hHours = hDeg / 15.0
-                currentHours = if (side < 0) transit - hHours else transit + hHours
-            }
-
-            if (abs(currentHours - prevHours) * 3600 < 0.1) break
-            prevHours = currentHours
-        }
-        return lastSp?.let { SolverResult(currentHours, it, iter, lastZenith) }
-    }
-
+    val solver = IterativeSolver(jd, lat, lng)
+    
     val initialDhuhr = 12.0 - lng / 15.0
-    val dhuhrRes = solveIteratively(0, { 0.0 }, initialDhuhr)
+    val dhuhrRes = solver.solve(0, initialDhuhr) { 0.0 }
     val dhuhrHr = dhuhrRes?.hours ?: initialDhuhr
 
     // Get SP at transit for Asr calculations
@@ -185,47 +135,31 @@ fun computePrayerTimes(
     val dhuhrUt = (dhuhrJd - dhuhrJ0) * 24.0
     val transitSp = computeSolarPosition(dhuhrJ0, dhuhrUt, dhuhrDeltaT)
 
-    val dip = computeDipAngle(elevationMeters)
-    val refraction0 = getRefractionDegrees(0.0, temperatureC, pressureMbar)
-    
-    val sunriseSunsetZenithFn: (com.tauqeet.library.astronomy.SolarPositionResult) -> Double = { sp ->
-        90.0 + refraction0 + sp.semidiameter / 60.0 - sp.horizontalParallax / 60.0 + dip
-    }
-
-    val sunriseRes = solveIteratively(-1, sunriseSunsetZenithFn, dhuhrHr - 6.0)
+    val srSsSolver = SunriseSunsetSolver(solver, elevationMeters, temperatureC, pressureMbar)
+    val sunriseRes = srSsSolver.solveSunrise(dhuhrHr)
     val sunriseHr = sunriseRes?.hours
 
-    val sunsetRes = solveIteratively(1, sunriseSunsetZenithFn, dhuhrHr + 6.0)
+    val sunsetRes = srSsSolver.solveSunset(dhuhrHr)
     val sunsetHr = sunsetRes?.hours
 
-    val fajrRes = solveIteratively(-1, { 90.0 + methodParams.fajrAngle }, dhuhrHr - 8.0)
+    val fajrRes = solver.solve(-1, dhuhrHr - 8.0) { 90.0 + methodParams.fajrAngle }
     val fajrHr = fajrRes?.hours
 
-    val ishaRes = if (methodParams.ishaInterval > 0 && sunsetHr != null) null else solveIteratively(1, { 90.0 + methodParams.ishaAngle }, dhuhrHr + 8.0)
+    val ishaRes = if (methodParams.ishaInterval > 0 && sunsetHr != null) null else solver.solve(1, dhuhrHr + 8.0) { 90.0 + methodParams.ishaAngle }
     val ishaHr = if (methodParams.ishaInterval > 0 && sunsetHr != null) {
         sunsetHr + methodParams.ishaInterval / 60.0
     } else {
         ishaRes?.hours
     }
 
-    val asrRes = solveIteratively(1, { sp ->
-        val zZuhr = abs(lat - transitSp.declination)
-        val sdZuhr = transitSp.semidiameter / 60.0
-        val refrZuhr = getRefractionDegrees(90.0 - zZuhr, temperatureC, pressureMbar)
-        val zZuhrVisual = zZuhr - refrZuhr - sdZuhr
-        
-        val zAsrVisual = atand(tand(zZuhrVisual) + madhab.shadowFactor)
-        val refrAsr = getRefractionDegrees(90.0 - zAsrVisual, temperatureC, pressureMbar)
-        val sdAsr = sp.semidiameter / 60.0
-        
-        zAsrVisual + refrAsr + sdAsr
-    }, dhuhrHr + 4.0)
+    val asrSolver = AsrSolver(solver, lat, madhab, temperatureC, pressureMbar, transitSp)
+    val asrRes = asrSolver.solve(dhuhrHr)
     val asrHr = asrRes?.hours
 
     val maghribRes = if (methodParams.maghribInterval > 0 && sunsetHr != null) {
         null
     } else if (methodParams.maghribAngle > 0.0) {
-        solveIteratively(1, { 90.0 + methodParams.maghribAngle }, dhuhrHr + 6.5)
+        solver.solve(1, dhuhrHr + 6.5) { 90.0 + methodParams.maghribAngle }
     } else {
         null
     }
@@ -238,57 +172,19 @@ fun computePrayerTimes(
         sunsetHr
     }
 
+    val highLatitudeResolver = HighLatitudeResolver(highLatRule, methodParams)
+    val hlResult = highLatitudeResolver.resolve(fajrHr, sunriseHr, sunsetHr, ishaHr, dhuhrHr)
 
+    val finalFajr = hlResult.fajr
+    val finalSunrise = hlResult.sunrise
+    val finalSunset = hlResult.sunset
+    val finalIsha = hlResult.isha
+    val isPolarDay = hlResult.isPolarDay
+    val isPolarNight = hlResult.isPolarNight
+    val finalMaghrib = maghribHr ?: finalSunset
+    val finalAsr = asrHr
 
-    // High latitude fallback logic
-    var finalFajr: Double? = fajrHr ?: (dhuhrHr - 8.0)
-    var finalSunrise: Double? = sunriseHr ?: (dhuhrHr - 6.0)
-    var finalSunset: Double? = sunsetHr ?: (dhuhrHr + 6.0)
-    var finalMaghrib: Double? = maghribHr ?: finalSunset
-    var finalIsha: Double? = ishaHr ?: (dhuhrHr + 8.0)
-    var finalAsr: Double? = asrHr
-    
-    var isPolarDay = false
-    var isPolarNight = false
-
-    if (finalSunrise != null && finalSunset != null && sunriseHr != null && sunsetHr != null) {
-        var nightDuration = if (finalSunrise!! < finalSunset!!) {
-            24.0 - (finalSunset!! - finalSunrise!!)
-        } else {
-            (finalSunrise!! - finalSunset!!) // shouldn't usually happen with valid data
-        }
-        
-        // Prevent division by zero or NaN issues at polar boundaries
-        if (nightDuration < 0.001) {
-            nightDuration = 0.001
-        }
-
-        if (fajrHr == null || ishaHr == null) {
-            isPolarDay = true
-            when (highLatRule) {
-                HighLatitudeRule.MIDDLE_OF_NIGHT -> {
-                    val halfNight = nightDuration / 2.0
-                    if (fajrHr == null) finalFajr = finalSunrise!! - halfNight
-                    if (ishaHr == null) finalIsha = finalSunset!! + halfNight
-                }
-                HighLatitudeRule.SEVENTH_OF_NIGHT -> {
-                    val seventhNight = nightDuration / 7.0
-                    if (fajrHr == null) finalFajr = finalSunrise!! - seventhNight
-                    if (ishaHr == null) finalIsha = finalSunset!! + seventhNight
-                }
-                HighLatitudeRule.TWILIGHT_ANGLE -> {
-                    val fajrProportion = methodParams.fajrAngle / 60.0
-                    val ishaProportion = methodParams.ishaAngle / 60.0
-                    if (fajrHr == null) finalFajr = finalSunrise!! - nightDuration * fajrProportion
-                    if (ishaHr == null) finalIsha = finalSunset!! + nightDuration * ishaProportion
-                }
-            }
-        }
-    } else {
-        isPolarNight = true
-    }
-
-    val dhahwaKubraHr: Double? = if (finalFajr != null && finalSunset != null) (finalFajr!! + finalSunset!!) / 2.0 else null
+    val dhahwaKubraHr: Double? = if (finalFajr != null && finalSunset != null) (finalFajr + finalSunset) / 2.0 else null
 
     // Times are calculated in UTC decimal hours. We convert to milliseconds since midnight UTC.
     val hoursToMs = 3600000.0
