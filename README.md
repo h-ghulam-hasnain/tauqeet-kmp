@@ -60,6 +60,34 @@ npm install tauqeet-js
 ### iOS (CocoaPods)
 If using CocoaPods, include the shared framework in your Podfile (assuming integration via KMP plugin).
 
+## Unified API – PrayerRequest DSL
+
+For cleaner call sites and safer request construction, use the unified DSL request object:
+
+```kotlin
+import com.tauqeet.library.Tauqeet
+import com.tauqeet.library.prayers.prayerRequest
+import com.tauqeet.library.prayers.CalculationMethod
+
+val tauqeet = Tauqeet(method = CalculationMethod.MWL)
+
+val times = tauqeet.computePrayerTimes(
+    prayerRequest {
+        latitude = 51.5072
+        longitude = -0.1276
+        date = com.tauqeet.library.DateComponents(2026, 7, 23)
+        timeZoneOffset = 1.0
+        includeAdvancedMetadata = true
+        calculation {
+            method = CalculationMethod.MWL
+            highLatitudeRule = com.tauqeet.library.prayers.HighLatitudeRule.MIDDLE_OF_NIGHT
+        }
+    }
+)
+```
+
+The older flat overloads are still supported, but the request DSL is the preferred public entry point.
+
 ## Usage Example
 
 ```kotlin

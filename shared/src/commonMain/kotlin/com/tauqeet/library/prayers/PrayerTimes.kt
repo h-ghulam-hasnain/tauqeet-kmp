@@ -84,8 +84,58 @@ data class PrayerTimesResult(
     val maghrib: Long?,
     val isha: Long?,
     val metadata: PrayerTimesMetadata? = null,
-    val astronomicalMetadata: AstronomicalMetadata? = null
+    val astronomicalMetadata: AstronomicalMetadata? = null,
+    val flags: Int = 0,
+    val resolutionInfo: ResolutionInfo? = null
+) {
+    companion object {
+        const val FLAG_POLAR_DAY = 1 shl 0
+        const val FLAG_POLAR_NIGHT = 1 shl 1
+        const val FLAG_HIGH_LATITUDE_FALLBACK = 1 shl 2
+    }
+
+    val isPolarDay: Boolean
+        get() = (flags and FLAG_POLAR_DAY) != 0
+
+    val isPolarNight: Boolean
+        get() = (flags and FLAG_POLAR_NIGHT) != 0
+
+    val isHighLatitudeFallback: Boolean
+        get() = (flags and FLAG_HIGH_LATITUDE_FALLBACK) != 0
+}
+
+enum class SolverKind { NORMAL, HIGH_LATITUDE, POLAR_DAY, POLAR_NIGHT }
+
+data class ResolutionInfo(
+    val solver: SolverKind,
+    val ruleApplied: HighLatitudeRule? = null
 )
+
+private fun resolveSolver(
+    lat: Double,
+    solarDeclination: Double,
+    sunriseHr: Double?,
+    sunsetHr: Double?,
+    fajrHr: Double?,
+    ishaHr: Double?,
+    highLatRule: HighLatitudeRule
+): ResolutionInfo {
+    val absLat = abs(lat)
+    val absDeclination = abs(solarDeclination)
+    val polarBoundary = absLat + absDeclination >= 90.0
+    val polarDay = polarBoundary && ((lat > 0.0 && solarDeclination > 0.0) || (lat < 0.0 && solarDeclination < 0.0)) && (fajrHr == null || ishaHr == null)
+    val polarNight = polarBoundary && ((lat > 0.0 && solarDeclination < 0.0) || (lat < 0.0 && solarDeclination > 0.0)) && (sunriseHr == null || sunsetHr == null)
+    val fallbackApplied = sunriseHr == null || sunsetHr == null || fajrHr == null || ishaHr == null
+
+    val solver = when {
+        polarDay -> SolverKind.POLAR_DAY
+        polarNight -> SolverKind.POLAR_NIGHT
+        fallbackApplied -> SolverKind.HIGH_LATITUDE
+        else -> SolverKind.NORMAL
+    }
+
+    return ResolutionInfo(solver = solver, ruleApplied = highLatRule)
+}
 
 /**
  * Computes the exact prayer times for a given date, location, and method.
@@ -181,8 +231,30 @@ fun computePrayerTimes(
     val finalIsha = hlResult.isha
     val isPolarDay = hlResult.isPolarDay
     val isPolarNight = hlResult.isPolarNight
+    val fallbackApplied = finalFajr == null || finalIsha == null || finalSunrise == null || finalSunset == null
     val finalMaghrib = maghribHr ?: finalSunset
     val finalAsr = asrHr
+    val solarDeclination = transitSp.declination
+    val resolutionInfo = resolveSolver(
+        lat = lat,
+        solarDeclination = solarDeclination,
+        sunriseHr = sunriseHr,
+        sunsetHr = sunsetHr,
+        fajrHr = fajrHr,
+        ishaHr = ishaHr,
+        highLatRule = highLatRule
+    )
+
+    var flags = 0
+    if (isPolarDay || resolutionInfo.solver == SolverKind.POLAR_DAY) {
+        flags = flags or PrayerTimesResult.FLAG_POLAR_DAY
+    }
+    if (isPolarNight || resolutionInfo.solver == SolverKind.POLAR_NIGHT) {
+        flags = flags or PrayerTimesResult.FLAG_POLAR_NIGHT
+    }
+    if (fallbackApplied || resolutionInfo.solver == SolverKind.HIGH_LATITUDE || resolutionInfo.solver == SolverKind.POLAR_DAY || resolutionInfo.solver == SolverKind.POLAR_NIGHT) {
+        flags = flags or PrayerTimesResult.FLAG_HIGH_LATITUDE_FALLBACK
+    }
 
     val dhahwaKubraHr: Double? = if (finalFajr != null && finalSunset != null) (finalFajr + finalSunset) / 2.0 else null
 
@@ -295,7 +367,9 @@ fun computePrayerTimes(
             isPolarDay = isPolarDay,
             isPolarNight = isPolarNight
         ),
-        astronomicalMetadata = astroMeta
+        astronomicalMetadata = astroMeta,
+        flags = flags,
+        resolutionInfo = resolutionInfo
     )
 }
 

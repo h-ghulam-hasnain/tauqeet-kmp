@@ -3,8 +3,12 @@ package com.tauqeet.library
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.HighLatitudeRule
 import com.tauqeet.library.prayers.Madhab
+import com.tauqeet.library.prayers.PrayerRequest
 import com.tauqeet.library.prayers.PrayerTimesResult
+import com.tauqeet.library.prayers.ResolutionInfo
+import com.tauqeet.library.prayers.SolverKind
 import com.tauqeet.library.prayers.computePrayerTimes as internalComputePrayerTimes
+import com.tauqeet.library.prayers.prayerRequest
 import com.tauqeet.library.qibla.bearingToMecca
 import com.tauqeet.library.qibla.tauqeetQibla
 import com.tauqeet.library.qibla.QiblaResult
@@ -91,6 +95,12 @@ class Tauqeet(
      *
      * @throws TauqeetException if any input parameter is outside its valid range.
      */
+    @Deprecated(
+        message = "Use the unified DSL prayerRequest { ... } overload instead.",
+        replaceWith = ReplaceWith(
+            "computePrayerTimes(prayerRequest { latitude = lat; longitude = lng; date = DateComponents(year, month, day); timeZoneOffset = timezoneOffset; includeAdvancedMetadata = includeAdvancedMetadata })"
+        )
+    )
     fun computePrayerTimes(
         year: Int,
         month: Int,
@@ -99,42 +109,15 @@ class Tauqeet(
         lng: Double,
         timezoneOffset: Double = 0.0,
         includeAdvancedMetadata: Boolean = false
-    ): PrayerTimesResult {
-        // ── Validate all inputs at the public API boundary ──────────────────
-        validateDate(year, month, day)
-        validateLatitude(lat)
-        validateLongitude(lng)
-        validateTimezoneOffset(timezoneOffset)
-        // ────────────────────────────────────────────────────────────────────
-
-        val jd = dateToJulianDay(year, month, day.toDouble())
-        val paramsToUse = customMethodParams ?: method.params
-        val methodName = if (customMethodParams != null) "CUSTOM" else method.name
-
-        val rawResult = internalComputePrayerTimes(
-            lat, lng, jd, paramsToUse, methodName,
-            madhab, highLatitudeRule,
-            elevationMeters, temperatureC, pressureMbar,
-            includeAdvancedMetadata
-        )
-
-        // The internal engine returns times as UTC milliseconds since midnight.
-        // Apply the timezone offset (which is 0 when UTC is requested).
-        val tzOffsetMs = (timezoneOffset * 3600000.0).toLong()
-        val msPerDay   = 86400000L
-
-        return PrayerTimesResult(
-            fajr         = rawResult.fajr?.let        { (it + tzOffsetMs + msPerDay) % msPerDay },
-            sunrise      = rawResult.sunrise?.let     { (it + tzOffsetMs + msPerDay) % msPerDay },
-            dhahwaKubra  = rawResult.dhahwaKubra?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
-            dhuhr        = rawResult.dhuhr?.let       { (it + tzOffsetMs + msPerDay) % msPerDay },
-            asr          = rawResult.asr?.let         { (it + tzOffsetMs + msPerDay) % msPerDay },
-            maghrib      = rawResult.maghrib?.let     { (it + tzOffsetMs + msPerDay) % msPerDay },
-            isha         = rawResult.isha?.let        { (it + tzOffsetMs + msPerDay) % msPerDay },
-            metadata              = rawResult.metadata,
-            astronomicalMetadata  = rawResult.astronomicalMetadata
-        )
-    }
+    ): PrayerTimesResult = computePrayerTimes(
+        prayerRequest {
+            this.latitude = lat
+            this.longitude = lng
+            this.date = DateComponents(year, month, day)
+            this.timeZoneOffset = timezoneOffset
+            this.includeAdvancedMetadata = includeAdvancedMetadata
+        }
+    )
 
     /**
      * Convenience overload that accepts a [DateComponents] object instead of three integers.
@@ -143,6 +126,12 @@ class Tauqeet(
      *
      * @throws TauqeetException if any input parameter is outside its valid range.
      */
+    @Deprecated(
+        message = "Use the unified DSL prayerRequest { ... } overload instead.",
+        replaceWith = ReplaceWith(
+            "computePrayerTimes(prayerRequest { latitude = lat; longitude = lng; date = date; timeZoneOffset = timezoneOffset; includeAdvancedMetadata = includeAdvancedMetadata })"
+        )
+    )
     fun computePrayerTimes(
         date: DateComponents,
         lat: Double,
@@ -150,8 +139,13 @@ class Tauqeet(
         timezoneOffset: Double = 0.0,
         includeAdvancedMetadata: Boolean = false
     ): PrayerTimesResult = computePrayerTimes(
-        date.year, date.month, date.day,
-        lat, lng, timezoneOffset, includeAdvancedMetadata
+        prayerRequest {
+            this.latitude = lat
+            this.longitude = lng
+            this.date = date
+            this.timeZoneOffset = timezoneOffset
+            this.includeAdvancedMetadata = includeAdvancedMetadata
+        }
     )
 
     /**
@@ -160,12 +154,7 @@ class Tauqeet(
      *
      * @throws TauqeetException if any input parameter inside the request is outside its valid range.
      */
-    fun computePrayerTimes(request: com.tauqeet.library.prayers.PrayerRequest): PrayerTimesResult {
-        validateDate(request.date.year, request.date.month, request.date.day)
-        validateLatitude(request.latitude)
-        validateLongitude(request.longitude)
-        validateTimezoneOffset(request.timeZoneOffset)
-
+    fun computePrayerTimes(request: PrayerRequest): PrayerTimesResult {
         val jd = dateToJulianDay(request.date.year, request.date.month, request.date.day.toDouble())
         val paramsToUse = request.calculationParameters.customMethodParams ?: request.calculationParameters.method.params
         val methodName = if (request.calculationParameters.customMethodParams != null) "CUSTOM" else request.calculationParameters.method.name
@@ -178,20 +167,25 @@ class Tauqeet(
         )
 
         val tzOffsetMs = (request.timeZoneOffset * 3600000.0).toLong()
-        val msPerDay   = 86400000L
+        val msPerDay = 86400000L
 
         return PrayerTimesResult(
-            fajr         = rawResult.fajr?.let        { (it + tzOffsetMs + msPerDay) % msPerDay },
-            sunrise      = rawResult.sunrise?.let     { (it + tzOffsetMs + msPerDay) % msPerDay },
-            dhahwaKubra  = rawResult.dhahwaKubra?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
-            dhuhr        = rawResult.dhuhr?.let       { (it + tzOffsetMs + msPerDay) % msPerDay },
-            asr          = rawResult.asr?.let         { (it + tzOffsetMs + msPerDay) % msPerDay },
-            maghrib      = rawResult.maghrib?.let     { (it + tzOffsetMs + msPerDay) % msPerDay },
-            isha         = rawResult.isha?.let        { (it + tzOffsetMs + msPerDay) % msPerDay },
-            metadata              = rawResult.metadata,
-            astronomicalMetadata  = rawResult.astronomicalMetadata
+            fajr = rawResult.fajr?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            sunrise = rawResult.sunrise?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            dhahwaKubra = rawResult.dhahwaKubra?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            dhuhr = rawResult.dhuhr?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            asr = rawResult.asr?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            maghrib = rawResult.maghrib?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            isha = rawResult.isha?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            metadata = rawResult.metadata,
+            astronomicalMetadata = rawResult.astronomicalMetadata,
+            flags = rawResult.flags,
+            resolutionInfo = rawResult.resolutionInfo ?: resolveResolutionInfo(request)
         )
     }
+
+    private fun resolveResolutionInfo(request: PrayerRequest): ResolutionInfo =
+        ResolutionInfo(solver = SolverKind.NORMAL, ruleApplied = request.calculationParameters.highLatitudeRule)
 
     // ─────────────────────────────────────────────────────────────────────────
     // Qibla

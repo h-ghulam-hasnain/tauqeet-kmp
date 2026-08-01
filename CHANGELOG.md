@@ -20,6 +20,8 @@ All notable changes to this project will be documented in this file.
 - **Prayer Time API**: `Tauqeet.computePrayerTimes` now supports a cleaner request-object overload while preserving the existing convenience overloads for backward compatibility.
 
 ### Fixed
+- **Solver Routing Metadata**: Wired the real `resolveSolver(...)` branch selection into the final `PrayerTimesResult`, so `resolutionInfo` and the `flags` bitmask now correctly reflect `NORMAL`, `HIGH_LATITUDE`, `POLAR_DAY`, and `POLAR_NIGHT` outcomes.
+- **Polar Edge Regression Coverage**: Expanded `UnifiedApiTest.kt` to exercise polar-day, polar-night, and high-latitude fallback scenarios through the unified `PrayerRequest` DSL path.
 - **Publishing Pipeline**: Removed conflicting GitHub Actions and added a missing Node.js step to ensure Kotlin/JS multiplatform publishing targets complete successfully.
 - **Gradle JVM Args**: Removed deprecated `-XX:+NewRatio=3` from `gradle.properties` that caused Gradle Daemon crashes on JDK 21.
 

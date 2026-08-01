@@ -21,18 +21,17 @@ All parameters here are **OPTIONAL** with sensible defaults.
 | `pressureMbar` | `Double` | `1010.0` | Atmospheric pressure in millibars. Affects refraction. |
 | `customMethodParams` | `CalculationMethodParameters?` | `null` | Provide custom angles if overriding a preset `method`. |
 
-### B. Computation Inputs (`computePrayerTimes` function)
-When requesting the actual prayer times, you must provide the exact geographical and temporal coordinates.
+### B. Computation Inputs (`PrayerRequest` / unified API)
+The preferred entry point is `computePrayerTimes(request: PrayerRequest)`. The older flat overloads still exist for compatibility, but they are now deprecated.
 
-| Parameter | Type | Required? | Default | Description |
+| Input | Type | Required? | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `year` | `Int` | **Yes** | - | The Gregorian year (e.g. `2026`). |
-| `month` | `Int` | **Yes** | - | The Gregorian month (1-12). |
-| `day` | `Int` | **Yes** | - | The day of the month (1-31). |
-| `lat` | `Double` | **Yes** | - | Observer's latitude (-90.0 to 90.0). |
-| `lng` | `Double` | **Yes** | - | Observer's longitude (-180.0 to 180.0). |
-| `timezoneOffset` | `Double` | No | `0.0` | Hours from UTC (e.g., `5.0` for UTC+5). |
+| `latitude` | `Double` | **Yes** | - | Observer's latitude (-90.0 to 90.0). |
+| `longitude` | `Double` | **Yes** | - | Observer's longitude (-180.0 to 180.0). |
+| `date` | `DateComponents` | **Yes** | - | Gregorian date to calculate for. |
+| `timeZoneOffset` | `Double` | No | `0.0` | Hours from UTC (e.g., `5.0` for UTC+5). |
 | `includeAdvancedMetadata` | `Boolean` | No | `false` | Set to true to receive granular VSOP87 metadata. |
+| `calculationParameters` | `PrayerCalculationParameters` | No | defaults from `Tauqeet` | Encapsulates `method`, `madhab`, `highLatitudeRule`, environmental values, and custom method overrides. |
 
 ---
 

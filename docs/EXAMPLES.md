@@ -19,15 +19,13 @@ val tauqeet = Tauqeet(
 )
 
 val times = tauqeet.computePrayerTimes(
-    // --- REQUIRED (Computation) ---
-    year  = 2026,       // Int
-    month = 8,          // Int (1-12)
-    day   = 1,          // Int (1-31)
-    lat   = 24.8607,    // Double (-90.0 to 90.0)
-    lng   = 67.0011,    // Double (-180.0 to 180.0)
-    // --- OPTIONAL (Computation) ---
-    timezoneOffset        = 5.0,  // Double, Default: 0.0 (UTC)
-    includeAdvancedMetadata = false // Boolean, Default: false
+    prayerRequest {
+        latitude = 24.8607
+        longitude = 67.0011
+        date = DateComponents(2026, 8, 1)
+        timeZoneOffset = 5.0
+        includeAdvancedMetadata = false
+    }
 )
 ```
 
@@ -38,9 +36,11 @@ val times = tauqeet.computePrayerTimes(
 This is the most common case. The sun rises and sets fully, and all twilight angles (for Fajr and Isha) are reached before midnight. All seven time fields are populated as valid `Long` values.
 
 ```kotlin
+import com.tauqeet.library.DateComponents
 import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.Madhab
+import com.tauqeet.library.prayers.prayerRequest
 import com.tauqeet.library.toTimeString
 import com.tauqeet.library.toTimeStringShort
 
@@ -51,9 +51,12 @@ fun prayerTimesNormalDay() {
     )
 
     val times = tauqeet.computePrayerTimes(
-        year = 2026, month = 8, day = 1,
-        lat = 24.8607, lng = 67.0011,
-        timezoneOffset = 5.0 // Pakistan Standard Time (UTC+5)
+        prayerRequest {
+            latitude = 24.8607
+            longitude = 67.0011
+            date = DateComponents(2026, 8, 1)
+            timeZoneOffset = 5.0 // Pakistan Standard Time (UTC+5)
+        }
     )
 
     // On a normal day, all of these are safe to use without null checks.
@@ -92,11 +95,13 @@ Isha:         21:01
 In the UK during summer, the sun *does* set, but it never dips below 18° below the horizon. This means true astronomical Fajr and Isha do not occur. The engine detects this (`CONTINUOUS_TWILIGHT` status) and applies your chosen `highLatitudeRule` to gracefully estimate them. You can verify this via `astronomicalMetadata`.
 
 ```kotlin
+import com.tauqeet.library.DateComponents
 import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.Madhab
 import com.tauqeet.library.prayers.HighLatitudeRule
 import com.tauqeet.library.prayers.PrayerStatus
+import com.tauqeet.library.prayers.prayerRequest
 import com.tauqeet.library.toTimeStringShort
 
 fun prayerTimesContinuousTwilight() {
@@ -108,10 +113,13 @@ fun prayerTimesContinuousTwilight() {
 
     // London in late July — sun sets but never reaches full darkness
     val times = tauqeet.computePrayerTimes(
-        year = 2026, month = 7, day = 25,
-        lat = 51.5072, lng = -0.1276,
-        timezoneOffset = 1.0, // British Summer Time (UTC+1)
-        includeAdvancedMetadata = true // Enable to see CONTINUOUS_TWILIGHT status
+        prayerRequest {
+            latitude = 51.5072
+            longitude = -0.1276
+            date = DateComponents(2026, 7, 25)
+            timeZoneOffset = 1.0 // British Summer Time (UTC+1)
+            includeAdvancedMetadata = true // Enable to see CONTINUOUS_TWILIGHT status
+        }
     )
 
     // Fajr and Isha are ESTIMATED values, not exact astronomical ones.
@@ -152,9 +160,12 @@ fun prayerTimesPolarDay() {
 
     // Tromsø, Norway — Summer Solstice (The sun never sets)
     val times = tauqeet.computePrayerTimes(
-        year = 2026, month = 6, day = 21,
-        lat = 69.6492, lng = 18.9553,
-        timezoneOffset = 2.0 // Central European Summer Time (UTC+2)
+        prayerRequest {
+            latitude = 69.6492
+            longitude = 18.9553
+            date = DateComponents(2026, 6, 21)
+            timeZoneOffset = 2.0 // Central European Summer Time (UTC+2)
+        }
     )
 
     // ALWAYS check isPolarDay before rendering times.
@@ -195,9 +206,12 @@ fun prayerTimesPolarNight() {
 
     // Tromsø, Norway — Winter (The sun does not rise)
     val times = tauqeet.computePrayerTimes(
-        year = 2026, month = 12, day = 21,
-        lat = 69.6492, lng = 18.9553,
-        timezoneOffset = 1.0 // CET (UTC+1)
+        prayerRequest {
+            latitude = 69.6492
+            longitude = 18.9553
+            date = DateComponents(2026, 12, 21)
+            timeZoneOffset = 1.0 // CET (UTC+1)
+        }
     )
 
     // ALWAYS check isPolarNight before rendering
@@ -233,8 +247,10 @@ fun showFallbackBanner(message: String) {
 At high altitudes, the geometric "dip" of the horizon means the sun rises earlier and sets later than at sea level. Cold, low-pressure air also changes the refraction of sunlight. Supply real environmental data to calculate the most accurate possible times.
 
 ```kotlin
+import com.tauqeet.library.DateComponents
 import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.prayers.CalculationMethod
+import com.tauqeet.library.prayers.prayerRequest
 import com.tauqeet.library.toTimeStringShort
 
 fun prayerTimesHighAltitude() {
@@ -246,9 +262,12 @@ fun prayerTimesHighAltitude() {
     )
 
     val times = tauqeet.computePrayerTimes(
-        year = 2026, month = 4, day = 15,
-        lat = 27.9881, lng = 86.9250,
-        timezoneOffset = 5.75 // Nepal Standard Time (UTC+5:45)
+        prayerRequest {
+            latitude = 27.9881
+            longitude = 86.9250
+            date = DateComponents(2026, 4, 15)
+            timeZoneOffset = 5.75 // Nepal Standard Time (UTC+5:45)
+        }
     )
 
     // Sunrise will be several minutes EARLIER than sea-level Kathmandu
@@ -258,8 +277,12 @@ fun prayerTimesHighAltitude() {
     // Compare to a sea-level observer at the same coordinates
     val seaLevel = Tauqeet(method = CalculationMethod.MAKKAH)
     val seaTimes = seaLevel.computePrayerTimes(
-        year = 2026, month = 4, day = 15,
-        lat = 27.9881, lng = 86.9250, timezoneOffset = 5.75
+        prayerRequest {
+            latitude = 27.9881
+            longitude = 86.9250
+            date = DateComponents(2026, 4, 15)
+            timeZoneOffset = 5.75
+        }
     )
     println("Sea-level Sunrise: ${seaTimes.sunrise?.toTimeStringShort()}")
 }
@@ -275,9 +298,12 @@ The `timezoneOffset` parameter is a `Double`, supporting half- and quarter-hour 
 fun prayerTimesIndia() {
     val tauqeet = Tauqeet(method = CalculationMethod.KARACHI, madhab = Madhab.HANAFI)
     val times = tauqeet.computePrayerTimes(
-        year = 2026, month = 8, day = 1,
-        lat = 28.6139, lng = 77.2090,   // New Delhi
-        timezoneOffset = 5.5            // IST = UTC+5:30 = 5.5 hours
+        prayerRequest {
+            latitude = 28.6139
+            longitude = 77.2090
+            date = DateComponents(2026, 8, 1)
+            timeZoneOffset = 5.5 // IST = UTC+5:30 = 5.5 hours
+        }
     )
     println("Delhi Fajr: ${times.fajr?.toTimeStringShort()}")
 }
@@ -285,9 +311,12 @@ fun prayerTimesIndia() {
 fun prayerTimesNepal() {
     val tauqeet = Tauqeet(method = CalculationMethod.KARACHI, madhab = Madhab.HANAFI)
     val times = tauqeet.computePrayerTimes(
-        year = 2026, month = 8, day = 1,
-        lat = 27.7172, lng = 85.3240,   // Kathmandu
-        timezoneOffset = 5.75           // NPT = UTC+5:45 = 5.75 hours
+        prayerRequest {
+            latitude = 27.7172
+            longitude = 85.3240
+            date = DateComponents(2026, 8, 1)
+            timeZoneOffset = 5.75 // NPT = UTC+5:45 = 5.75 hours
+        }
     )
     println("Kathmandu Fajr: ${times.fajr?.toTimeStringShort()}")
 }
@@ -300,9 +329,11 @@ fun prayerTimesNepal() {
 If your app needs a method not in the built-in list (e.g., a regional religious authority with unique angles), you can define fully custom `fajrAngle`, `ishaAngle`, and `ishaInterval` values.
 
 ```kotlin
+import com.tauqeet.library.DateComponents
 import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.CalculationMethodParameters
+import com.tauqeet.library.prayers.prayerRequest
 
 fun prayerTimesCustomMethod() {
     val customParams = CalculationMethodParameters(
@@ -318,8 +349,12 @@ fun prayerTimesCustomMethod() {
     )
 
     val times = tauqeet.computePrayerTimes(
-        year = 2026, month = 8, day = 1,
-        lat = 24.8607, lng = 67.0011, timezoneOffset = 5.0
+        prayerRequest {
+            latitude = 24.8607
+            longitude = 67.0011
+            date = DateComponents(2026, 8, 1)
+            timeZoneOffset = 5.0
+        }
     )
     println("Custom Fajr: ${times.fajr?.toTimeStringShort()}")
 }
@@ -332,18 +367,23 @@ fun prayerTimesCustomMethod() {
 Set `includeAdvancedMetadata = true` to get the raw internal VSOP87 solar variables at the exact moment of every prayer event. Designed for astronomy apps, scientific logging, or high-latitude debugging.
 
 ```kotlin
+import com.tauqeet.library.DateComponents
 import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.PrayerStatus
+import com.tauqeet.library.prayers.prayerRequest
 
 fun prayerTimesWithMetadata() {
     val tauqeet = Tauqeet(method = CalculationMethod.MWL)
 
     val times = tauqeet.computePrayerTimes(
-        year = 2024, month = 3, day = 20, // Spring Equinox
-        lat = 40.7128, lng = -74.0060,    // New York City
-        timezoneOffset = -4.0,            // EDT (UTC-4)
-        includeAdvancedMetadata = true
+        prayerRequest {
+            latitude = 40.7128
+            longitude = -74.0060
+            date = DateComponents(2024, 3, 20) // Spring Equinox
+            timeZoneOffset = -4.0 // EDT (UTC-4)
+            includeAdvancedMetadata = true
+        }
     )
 
     // --- Fajr Metadata (TwilightMetadata) ---
@@ -383,22 +423,26 @@ fun prayerTimesWithMetadata() {
 
 ---
 
-## Scenario 9: Using the `DateComponents` Overload
+## Scenario 9: Using the `DateComponents` Request Path
 
-If your app has a date-picking UI and stores dates as an object rather than three separate integers, use the `DateComponents` convenience overload.
+If your app already stores a date object, the unified request path keeps that object in the same request model and avoids any positional overload ambiguity.
 
 ```kotlin
-import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.DateComponents
+import com.tauqeet.library.Tauqeet
+import com.tauqeet.library.prayers.prayerRequest
 
 fun prayerTimesWithDateComponents() {
     val tauqeet = Tauqeet()
     val today = DateComponents(year = 2026, month = 8, day = 1)
 
     val times = tauqeet.computePrayerTimes(
-        date = today,
-        lat = 24.8607, lng = 67.0011,
-        timezoneOffset = 5.0
+        prayerRequest {
+            latitude = 24.8607
+            longitude = 67.0011
+            date = today
+            timeZoneOffset = 5.0
+        }
     )
     println("Fajr: ${times.fajr?.toTimeStringShort()}")
 }
@@ -442,8 +486,12 @@ fun renderPrayerTimesUI(lat: Double, lng: Double, tz: Double) {
     )
 
     val times = tauqeet.computePrayerTimes(
-        year = 2026, month = 8, day = 1,
-        lat = lat, lng = lng, timezoneOffset = tz
+        prayerRequest {
+            latitude = lat
+            longitude = lng
+            date = DateComponents(2026, 8, 1)
+            timeZoneOffset = tz
+        }
     )
 
     val meta = times.metadata

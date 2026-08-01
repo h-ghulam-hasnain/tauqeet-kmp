@@ -29,7 +29,7 @@ repositories {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.tauqeet:tauqeet-kmp:0.1.0")
+            implementation("com.tauqeet:tauqeet-kmp:0.2.0")
         }
     }
 }
@@ -88,39 +88,65 @@ You don't need to write any error-handling loops; the library manages edge cases
 
 The prayer time engine is robust yet simple to instantiate. 
 
-### **Basic Calculation**
-Here is a quick snippet to calculate today's prayer times for any city:
+### **Preferred Request Style (Unified API)**
+The recommended public entry point is the unified `PrayerRequest` DSL, which keeps date, location, timezone, and calculation settings together in a single clean request object.
 
 ```kotlin
+import com.tauqeet.library.DateComponents
 import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.prayers.CalculationMethod
-import com.tauqeet.library.prayers.Madhab
+import com.tauqeet.library.prayers.HighLatitudeRule
+import com.tauqeet.library.prayers.prayerRequest
 
-// 1. Configure your settings
 val tauqeet = Tauqeet(
     method = CalculationMethod.KARACHI,
-    madhab = Madhab.HANAFI
+    highLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT
 )
 
-// 2. Compute the times
 val times = tauqeet.computePrayerTimes(
-    year = 2026, month = 7, day = 23, 
-    lat = 24.8607, lng = 67.0011, 
-    timezoneOffset = 5.0 // UTC+5 for Pakistan
+    prayerRequest {
+        latitude = 24.8607
+        longitude = 67.0011
+        date = DateComponents(2026, 7, 23)
+        timeZoneOffset = 5.0
+        includeAdvancedMetadata = true
+    }
 )
 
-// 3. Print the results!
 println("Fajr: ${times.fajr?.toTimeString()}")
 println("Dhuhr: ${times.dhuhr?.toTimeString()}")
+println("Resolver: ${times.resolutionInfo?.solver}")
+```
+
+> The older flat overloads remain available for compatibility, but they are now deprecated in favor of the request DSL.
+
+### **Resolution Metadata and Solver Routing**
+The result now carries structured routing metadata so you can inspect how the engine resolved the day:
+
+```kotlin
+val solver = times.resolutionInfo?.solver
+val flags = times.flags
+
+println("Solver: $solver")
+println("Polar day: ${times.isPolarDay}")
+println("Polar night: ${times.isPolarNight}")
+println("High-latitude fallback: ${times.isHighLatitudeFallback}")
 ```
 
 ### **The Metadata Flag (`includeAdvancedMetadata`)**
-By default, the engine runs completely zero-allocation, returning only standard UI flags (`isPolarDay`, `method`). However, if you are building an advanced dashboard or debugging high-latitude anomalies (like Midnight Sun in Norway), you can opt-in to scientific metadata:
+By default, the engine remains lightweight and returns the core UI result plus resolution metadata. If you need deeper astronomical details for debugging, dashboards, or high-latitude analysis, you can enable `includeAdvancedMetadata = true`:
 
 ```kotlin
-val times = tauqeet.computePrayerTimes(..., includeAdvancedMetadata = true)
+val times = tauqeet.computePrayerTimes(
+    prayerRequest {
+        latitude = 24.8607
+        longitude = 67.0011
+        date = DateComponents(2026, 7, 23)
+        timeZoneOffset = 5.0
+        includeAdvancedMetadata = true
+    }
+)
 
-// Access granular scientific variables directly:
 val fajrDeclination = times.astronomicalMetadata?.fajr?.DEC_deg
 ```
 

@@ -30,16 +30,19 @@ data class PrayerTimesResult(
     val maghrib: Long?,
     val isha: Long?,
     val metadata: PrayerTimesMetadata? = null,
-    val astronomicalMetadata: AstronomicalMetadata? = null
+    val astronomicalMetadata: AstronomicalMetadata? = null,
+    val flags: Int = 0,
+    val resolutionInfo: ResolutionInfo? = null
 )
 ```
 *Note: All time values (`Long`) are returned as milliseconds since midnight local time.*
 
 ### Possible Outcomes (Prayer Times)
-- **Normal Usage**: All time properties (`fajr` to `isha`) return a `Long` value representing milliseconds since midnight. 
-- **High Latitude / Polar Day/Night**: In places where the sun never sets or doesn't reach the twilight angle:
-  - If a specific prayer time cannot occur astronomically, its value will be mathematically derived using the chosen `HighLatitudeRule`. It will never throw an exception.
-  - If it's a completely impossible calculation (such as trying to use an interval in polar day), a time field *could* theoretically evaluate to `null`. 
+- **Normal Usage**: All time properties (`fajr` to `isha`) return a `Long` value representing milliseconds since midnight.
+- **High Latitude / Polar Day / Polar Night**: In places where the sun never sets or doesn't reach the twilight angle:
+  - The engine now classifies the route through `resolutionInfo.solver` as `NORMAL`, `HIGH_LATITUDE`, `POLAR_DAY`, or `POLAR_NIGHT`.
+  - The companion `flags` bitmask exposes the same branch information without requiring the caller to infer it from `null`s alone.
+  - If a specific prayer time cannot occur astronomically, the chosen `HighLatitudeRule` is applied to produce a stable result when possible.
 - **Recommendation**: Always use safe-calls (`?.`) and handle nulls in your UI (e.g. `times.fajr?.toTimeString() ?: "--:--"`).
 
 ### Formatter Extensions
@@ -58,6 +61,18 @@ data class PrayerTimesMetadata(
     val highLatitudeRule: String,
     val isPolarDay: Boolean,     // True if the sun does not set
     val isPolarNight: Boolean    // True if the sun does not rise
+)
+```
+
+## `ResolutionInfo`
+The solver-routing outcome is exposed separately so the caller can inspect the branch taken by the engine.
+
+```kotlin
+enum class SolverKind { NORMAL, HIGH_LATITUDE, POLAR_DAY, POLAR_NIGHT }
+
+data class ResolutionInfo(
+    val solver: SolverKind,
+    val ruleApplied: HighLatitudeRule? = null
 )
 ```
 
