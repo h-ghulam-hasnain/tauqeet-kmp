@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2026-08-01
+
+### Added
+- **Input Validation Layer**: Implemented strict mathematical boundary validations (via `TauqeetException`) for latitude, longitude, and environmental inputs at the public API boundary.
+- **Robust Date Validation**: Integrated chronological checks with full leap-year awareness to prevent invalid date processing.
+- **Documentation Overhaul**: Created comprehensive deep-dive guides (`ARCHITECTURE.md`, `CALCULATION_METHODS.md`, `DATA_TYPES.md`, `EXAMPLES.md`, `PRAYER_TIMES.md`, `QIBLA.md`, `TROUBLESHOOTING.md`) covering all inputs, outputs, edge cases, and integration troubleshooting.
+
+### Changed
+- **Timezone API**: `timezoneOffset` is now fully optional. If omitted, the engine correctly defaults to pure UTC output (0.0). Timezone shifting now perfectly scales and module-wraps via `3,600,000` ms increments.
+
+### Fixed
+- **Publishing Pipeline**: Removed conflicting GitHub Actions and added a missing Node.js step to ensure Kotlin/JS multiplatform publishing targets complete successfully.
+- **Gradle JVM Args**: Removed deprecated `-XX:+NewRatio=3` from `gradle.properties` that caused Gradle Daemon crashes on JDK 21.
+
 ## [0.1.0] - 2026-07-23
 
 ### Added
