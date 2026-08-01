@@ -22,11 +22,11 @@ fun tand(x: Double): Double {
 }
 
 fun asind(x: Double): Double {
-    return radiansToDegrees(asin(x))
+    return radiansToDegrees(asin(x.coerceIn(-1.0, 1.0)))
 }
 
 fun acosd(x: Double): Double {
-    return radiansToDegrees(acos(x))
+    return radiansToDegrees(acos(x.coerceIn(-1.0, 1.0)))
 }
 
 fun atand(x: Double): Double {
@@ -38,5 +38,5 @@ fun atand2(x: Double, y: Double): Double {
 }
 
 fun ahavd(x: Double): Double {
-    return radiansToDegrees(2.0 * asin(sqrt(x)))
+    return radiansToDegrees(2.0 * asin(sqrt(x.coerceIn(0.0, 1.0))))
 }

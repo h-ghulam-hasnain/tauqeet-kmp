@@ -27,169 +27,77 @@ class SolarEphemeris(
     val ut: Double,
     val deltaT: Double
 ) {
-    private var _timeArguments: TimeArgument? = null
-    private var _earthState: EarthHeliocentricState? = null
-    private var _nutation: NutationResult? = null
-    private var _aberration: Double = Double.NaN
-    private var _LSun: Double = Double.NaN
-    private var _BetaSun: Double = Double.NaN
-    private var _LPrime: Double = Double.NaN
-    private var _DeltaL: Double = Double.NaN
-    private var _DeltaB: Double = Double.NaN
-    private var _LCorr: Double = Double.NaN
-    private var _BCorr: Double = Double.NaN
-    private var _apparentLongitude: Double = Double.NaN
-    private var _Dec: Double = Double.NaN
-    private var _equationOfTime: Double = Double.NaN
-    private var _semidiameter: Double = Double.NaN
-    private var _horizontalParallax: Double = Double.NaN
+    val timeArgs: TimeArgument by lazy(LazyThreadSafetyMode.NONE) { timeArguments(j, ut, deltaT) }
+    val earthState: EarthHeliocentricState by lazy(LazyThreadSafetyMode.NONE) { computeEarthHeliocentricState(timeArgs.tau) }
+    val nutation: NutationResult by lazy(LazyThreadSafetyMode.NONE) { computeNutation(timeArgs.jd, ut, deltaT) }
+    val aberration: Double by lazy(LazyThreadSafetyMode.NONE) { computeSolarAberration(earthState.radius) }
+    
+    val LSun: Double by lazy(LazyThreadSafetyMode.NONE) {
+        val ldd = radiansToDegrees(earthState.longitude)
+        normalizeDegrees(ldd + 180.0)
+    }
 
-    val timeArgs: TimeArgument
-        get() {
-            if (_timeArguments == null) {
-                _timeArguments = timeArguments(j, ut, deltaT)
-            }
-            return _timeArguments!!
-        }
+    val BetaSun: Double by lazy(LazyThreadSafetyMode.NONE) {
+        -radiansToDegrees(earthState.latitude)
+    }
 
-    val earthState: EarthHeliocentricState
-        get() {
-            if (_earthState == null) {
-                _earthState = computeEarthHeliocentricState(timeArgs.tau)
-            }
-            return _earthState!!
-        }
+    val LPrime: Double by lazy(LazyThreadSafetyMode.NONE) {
+        normalizeDegrees(LSun - timeArgs.te * (1.397 + 0.00031 * timeArgs.te))
+    }
 
-    val nutation: NutationResult
-        get() {
-            if (_nutation == null) {
-                _nutation = computeNutation(timeArgs.jd, ut, deltaT)
-            }
-            return _nutation!!
-        }
+    val DeltaB: Double by lazy(LazyThreadSafetyMode.NONE) {
+        (0.03916 * (cosd(LPrime) - sind(LPrime))) / 3600.0
+    }
 
-    val aberration: Double
-        get() {
-            if (_aberration.isNaN()) {
-                _aberration = computeSolarAberration(earthState.radius)
-            }
-            return _aberration
-        }
+    val BCorr: Double by lazy(LazyThreadSafetyMode.NONE) {
+        BetaSun + DeltaB
+    }
 
-    val LSun: Double
-        get() {
-            if (_LSun.isNaN()) {
-                val ldd = radiansToDegrees(earthState.longitude)
-                _LSun = normalizeDegrees(ldd + 180.0)
-            }
-            return _LSun
-        }
+    val DeltaL: Double by lazy(LazyThreadSafetyMode.NONE) {
+        (-0.09033 + 0.03916 * (cosd(LPrime) + sind(LPrime)) * tand(BCorr)) / 3600.0
+    }
 
-    val BetaSun: Double
-        get() {
-            if (_BetaSun.isNaN()) {
-                _BetaSun = -radiansToDegrees(earthState.latitude)
-            }
-            return _BetaSun
-        }
+    val LCorr: Double by lazy(LazyThreadSafetyMode.NONE) {
+        LSun + DeltaL
+    }
 
-    val LPrime: Double
-        get() {
-            if (_LPrime.isNaN()) {
-                _LPrime = normalizeDegrees(LSun - timeArgs.te * (1.397 + 0.00031 * timeArgs.te))
-            }
-            return _LPrime
-        }
+    val apparentLongitude: Double by lazy(LazyThreadSafetyMode.NONE) {
+        LCorr + nutation.deltaPsi + aberration
+    }
 
-    val DeltaL: Double
-        get() {
-            if (_DeltaL.isNaN()) {
-                _DeltaL = (-0.09033 + 0.03916 * (cosd(LPrime) + sind(LPrime)) * tand(BCorr)) / 3600.0
-            }
-            return _DeltaL
-        }
+    val declination: Double by lazy(LazyThreadSafetyMode.NONE) {
+        asind(
+            sind(BCorr) * cosd(nutation.eps) +
+                    cosd(BCorr) * sind(nutation.eps) * sind(apparentLongitude)
+        )
+    }
 
-    val DeltaB: Double
-        get() {
-            if (_DeltaB.isNaN()) {
-                _DeltaB = (0.03916 * (cosd(LPrime) - sind(LPrime))) / 3600.0
-            }
-            return _DeltaB
-        }
+    val equationOfTime: Double by lazy(LazyThreadSafetyMode.NONE) {
+        val t = timeArgs.t
+        val L0 = ((280.46646 + 36000.76983 * t) % 360.0 + 360.0) % 360.0
 
-    val LCorr: Double
-        get() {
-            if (_LCorr.isNaN()) {
-                _LCorr = LSun + DeltaL
-            }
-            return _LCorr
-        }
+        val rightAscension = normalizeDegrees(
+            atand2(
+                sind(apparentLongitude) * cosd(nutation.eps) -
+                        tand(BCorr) * sind(nutation.eps),
+                cosd(apparentLongitude)
+            )
+        )
 
-    val BCorr: Double
-        get() {
-            if (_BCorr.isNaN()) {
-                _BCorr = BetaSun + DeltaB
-            }
-            return _BCorr
-        }
+        var eotDeg = L0 - rightAscension
+        if (eotDeg > 180.0) eotDeg -= 360.0
+        if (eotDeg < -180.0) eotDeg += 360.0
 
-    val apparentLongitude: Double
-        get() {
-            if (_apparentLongitude.isNaN()) {
-                _apparentLongitude = LCorr + nutation.deltaPsi + aberration
-            }
-            return _apparentLongitude
-        }
+        eotDeg * 4.0
+    }
 
-    val declination: Double
-        get() {
-            if (_Dec.isNaN()) {
-                _Dec = asind(
-                    sind(BCorr) * cosd(nutation.eps) +
-                            cosd(BCorr) * sind(nutation.eps) * sind(apparentLongitude)
-                )
-            }
-            return _Dec
-        }
+    val semidiameter: Double by lazy(LazyThreadSafetyMode.NONE) {
+        SOLAR_SEMIDIAMETER_SECONDS / earthState.radius / 60.0
+    }
 
-    val equationOfTime: Double
-        get() {
-            if (_equationOfTime.isNaN()) {
-                val t = timeArgs.t
-                val L0 = ((280.46646 + 36000.76983 * t) % 360.0 + 360.0) % 360.0
-
-                val rightAscension = normalizeDegrees(
-                    atand2(
-                        sind(apparentLongitude) * cosd(nutation.eps) -
-                                tand(BCorr) * sind(nutation.eps),
-                        cosd(apparentLongitude)
-                    )
-                )
-
-                var eotDeg = L0 - rightAscension
-                if (eotDeg > 180.0) eotDeg -= 360.0
-                if (eotDeg < -180.0) eotDeg += 360.0
-
-                _equationOfTime = eotDeg * 4.0
-            }
-            return _equationOfTime
-        }
-
-    val semidiameter: Double
-        get() {
-            if (_semidiameter.isNaN()) {
-                _semidiameter = SOLAR_SEMIDIAMETER_SECONDS / earthState.radius / 60.0
-            }
-            return _semidiameter
-        }
-
-    val horizontalParallax: Double
-        get() {
-            if (_horizontalParallax.isNaN()) {
-                _horizontalParallax = 8.794 / earthState.radius / 60.0
-            }
-            return _horizontalParallax
-        }
+    val horizontalParallax: Double by lazy(LazyThreadSafetyMode.NONE) {
+        8.794 / earthState.radius / 60.0
+    }
 }
 
 fun computeSolarPosition(j: Double, ut: Double, deltaT: Double): SolarPositionResult {

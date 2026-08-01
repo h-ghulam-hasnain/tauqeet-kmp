@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 - **Robust Date Validation**: Integrated chronological checks with full leap-year awareness to prevent invalid date processing.
 - **API Ergonomics Upgrade**: Introduced `PrayerRequest` and `PrayerCalculationParameters` to encapsulate date, location, timezone, and prayer settings into a single clean request object.
 - **Solver Decomposition**: Split the prayer engine into smaller internal units (`IterativeSolver`, `SunriseSunsetSolver`, `AsrSolver`, and `HighLatitudeResolver`) to improve maintainability and testability.
+- **Robustness & Safety Audit**: Added clamping for inverse trig domain guards, replaced unsafe nullable unwrapping in `SolarEphemeris` with `lazy` properties, and hardened all double-validation paths to reject `NaN`/`Infinity` cleanly.
+- **Benchmark Guardrails**: Added lightweight KMP-friendly benchmark coverage using `kotlin.time.measureTime` for the core prayer calculation loop, VSOP87 solar coordinate evaluations, and WGS-84 Qibla geodesics.
+- **CI Parity Hardening**: Added reference-city and polar-edge regression coverage for Mecca, London, Tokyo, Oslo, New York, and Svalbard to strengthen cross-platform parity and edge-case resilience without introducing third-party timezone dependencies.
+- **Robustness Test Suite**: Added `RobustnessAndSafetyTest.kt` to exercise invalid coordinate inputs, date boundaries, timezone edge cases, and 10,000-iteration stress/fuzz scenarios without crashes.
 - **Documentation Overhaul**: Created comprehensive deep-dive guides (`ARCHITECTURE.md`, `CALCULATION_METHODS.md`, `DATA_TYPES.md`, `EXAMPLES.md`, `PRAYER_TIMES.md`, `QIBLA.md`, `TROUBLESHOOTING.md`) covering all inputs, outputs, edge cases, and integration troubleshooting.
 
 ### Changed

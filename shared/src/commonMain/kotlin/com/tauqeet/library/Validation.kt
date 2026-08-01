@@ -16,7 +16,7 @@ class TauqeetException(message: String) : IllegalArgumentException(message)
 // ─────────────────────────────────────────────────────────────────────────────
 
 internal fun validateLatitude(lat: Double) {
-    if (lat < -90.0 || lat > 90.0) {
+    if (lat.isNaN() || lat < -90.0 || lat > 90.0) {
         throw TauqeetException(
             "Invalid latitude: $lat. Must be in the range [-90.0, 90.0]."
         )
@@ -24,7 +24,7 @@ internal fun validateLatitude(lat: Double) {
 }
 
 internal fun validateLongitude(lng: Double) {
-    if (lng < -180.0 || lng > 180.0) {
+    if (lng.isNaN() || lng < -180.0 || lng > 180.0) {
         throw TauqeetException(
             "Invalid longitude: $lng. Must be in the range [-180.0, 180.0]."
         )
@@ -33,7 +33,7 @@ internal fun validateLongitude(lng: Double) {
 
 internal fun validateTimezoneOffset(offset: Double) {
     // UTC offsets in practice range from -12:00 to +14:00
-    if (offset < -12.0 || offset > 14.0) {
+    if (offset.isNaN() || offset < -12.0 || offset > 14.0) {
         throw TauqeetException(
             "Invalid timezoneOffset: $offset. Must be in the range [-12.0, 14.0] hours from UTC."
         )
@@ -57,7 +57,7 @@ internal fun validateDate(year: Int, month: Int, day: Int) {
 
 internal fun validateElevation(meters: Double) {
     // Dead Sea is ~-430m; Mount Everest is ~8848m. We allow a generous range.
-    if (meters < -500.0 || meters > 9000.0) {
+    if (meters.isNaN() || meters < -500.0 || meters > 9000.0) {
         throw TauqeetException(
             "Invalid elevationMeters: $meters. Must be in the range [-500.0, 9000.0] meters."
         )
@@ -66,7 +66,7 @@ internal fun validateElevation(meters: Double) {
 
 internal fun validateTemperature(tempC: Double) {
     // Absolute zero is -273.15°C. Hottest recorded surface temp ~80°C.
-    if (tempC < -90.0 || tempC > 80.0) {
+    if (tempC.isNaN() || tempC < -90.0 || tempC > 80.0) {
         throw TauqeetException(
             "Invalid temperatureC: $tempC. Must be in the range [-90.0, 80.0] °C."
         )
@@ -75,7 +75,7 @@ internal fun validateTemperature(tempC: Double) {
 
 internal fun validatePressure(mbar: Double) {
     // Everest summit ~300 mbar; standard sea level ~1013 mbar; max recorded ~1085 mbar.
-    if (mbar < 100.0 || mbar > 1100.0) {
+    if (mbar.isNaN() || mbar < 100.0 || mbar > 1100.0) {
         throw TauqeetException(
             "Invalid pressureMbar: $mbar. Must be in the range [100.0, 1100.0] mbar."
         )
