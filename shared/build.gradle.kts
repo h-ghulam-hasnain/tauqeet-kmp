@@ -22,8 +22,20 @@ kotlin {
     iosSimulatorArm64()
 
     js(IR) {
-        browser()
-        nodejs()
+        browser {
+            testTask {
+                useMocha {
+                    timeout = "30s"
+                }
+            }
+        }
+        nodejs {
+            testTask {
+                useMocha {
+                    timeout = "30s"
+                }
+            }
+        }
         binaries.executable()
         generateTypeScriptDefinitions()
         compilations["main"].packageJson {
