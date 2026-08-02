@@ -41,8 +41,8 @@ internal fun validateTimezoneOffset(offset: Double) {
 }
 
 internal fun validateDate(year: Int, month: Int, day: Int) {
-    if (year < 1) {
-        throw TauqeetException("Invalid year: $year. Must be >= 1.")
+    if (year < 1 || year > 3000) {
+        throw TauqeetException("Invalid year: $year. Must be in the range [1, 3000] due to astronomical limits.")
     }
     if (month < 1 || month > 12) {
         throw TauqeetException("Invalid month: $month. Must be in the range [1, 12].")
@@ -86,8 +86,14 @@ internal fun validatePressure(mbar: Double) {
 // Calendar helper — leap-year-aware days-in-month
 // ─────────────────────────────────────────────────────────────────────────────
 
-private fun isLeapYear(year: Int): Boolean =
-    (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
+private fun isLeapYear(year: Int): Boolean {
+    val isGregorian = year > 1582
+    return if (isGregorian) {
+        (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
+    } else {
+        year % 4 == 0
+    }
+}
 
 private fun daysInMonth(year: Int, month: Int): Int = when (month) {
     1, 3, 5, 7, 8, 10, 12 -> 31

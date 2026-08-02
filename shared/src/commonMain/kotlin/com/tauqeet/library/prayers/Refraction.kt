@@ -3,6 +3,7 @@ package com.tauqeet.library.prayers
 import kotlin.math.PI
 import kotlin.math.tan
 import kotlin.math.sqrt
+import kotlin.math.abs
 
 /**
  * Calculates the astronomical atmospheric refraction correction using Bennett's Formula (1982).
@@ -13,14 +14,16 @@ fun getRefractionDegrees(
     temperatureC: Double = 10.0,
     pressureMbar: Double = 1010.0
 ): Double {
-    if (apparentAltitudeDeg < -1.0 || apparentAltitudeDeg > 89.9) {
-        return 0.0
-    }
-
-    val interiorAngleDeg = apparentAltitudeDeg + 7.31 / (apparentAltitudeDeg + 4.4)
+    // Clamp the apparent altitude to avoid instability in Bennett's formula at extreme negatives
+    val clampedAltitude = apparentAltitudeDeg.coerceIn(-2.0, 89.9)
+    
+    val interiorAngleDeg = clampedAltitude + 7.31 / (clampedAltitude + 4.4)
     val interiorAngleRad = interiorAngleDeg * (PI / 180.0)
 
-    val baseRefractionArcminutes = 1.0 / tan(interiorAngleRad)
+    val tanVal = tan(interiorAngleRad)
+    if (abs(tanVal) < 1e-6) return 0.0
+
+    val baseRefractionArcminutes = 1.0 / tanVal
 
     val pressureFactor = pressureMbar / 1010.0
     val temperatureFactor = 283.15 / (temperatureC + 273.15)

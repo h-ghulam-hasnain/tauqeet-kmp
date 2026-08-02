@@ -18,7 +18,7 @@ internal fun solveHourAngle(targetZenith: Double, lat: Double, dec: Double): Dou
     return acosd(cosH)
 }
 
-internal class SolverResult(val hours: Double, val sp: SolarPositionResult, val iterations: Int, val targetZenith: Double, val error: Boolean = false)
+internal class SolverResult(val hours: Double?, val sp: SolarPositionResult, val iterations: Int, val targetZenith: Double, val error: Boolean = false)
 
 internal class IterativeSolver(val jd: Double, val lat: Double, val lng: Double) {
     fun solve(side: Int, initialHour: Double, targetZenith: (SolarPositionResult) -> Double): SolverResult? {
@@ -48,7 +48,7 @@ internal class IterativeSolver(val jd: Double, val lat: Double, val lng: Double)
             } else {
                 val hDeg = solveHourAngle(tz, lat, sp.declination)
                 if (hDeg == null) {
-                    return SolverResult(currentHours, sp, iter, tz, error = true)
+                    return SolverResult(null, sp, iter, tz, error = true)
                 }
                 val hHours = hDeg / 15.0
                 currentHours = if (side < 0) transit - hHours else transit + hHours
@@ -111,7 +111,7 @@ internal class HighLatitudeResolver(
     private val methodParams: CalculationMethodParameters
 ) {
     fun resolve(
-        fajrHr: Double?, sunriseHr: Double?, sunsetHr: Double?, ishaHr: Double?, dhuhrHr: Double
+        fajrHr: Double?, sunriseHr: Double?, sunsetHr: Double?, ishaHr: Double?, dhuhrHr: Double, lat: Double, solarDeclination: Double
     ): HighLatitudeResult {
         var finalFajr: Double? = fajrHr ?: (dhuhrHr - 8.0)
         var finalSunrise: Double? = sunriseHr ?: (dhuhrHr - 6.0)
@@ -120,7 +120,9 @@ internal class HighLatitudeResolver(
         var isPolarDay = false
         var isPolarNight = false
 
-        if (finalSunrise != null && finalSunset != null && sunriseHr != null && sunsetHr != null) {
+        val sameHemisphere = (lat >= 0.0 && solarDeclination >= 0.0) || (lat < 0.0 && solarDeclination < 0.0)
+
+        if (sunriseHr != null && sunsetHr != null) {
             var nightDuration = if (finalSunrise < finalSunset) {
                 24.0 - (finalSunset - finalSunrise)
             } else {
@@ -150,7 +152,11 @@ internal class HighLatitudeResolver(
                 }
             }
         } else {
-            isPolarNight = true
+            if (sameHemisphere) {
+                isPolarDay = true
+            } else {
+                isPolarNight = true
+            }
         }
         
         return HighLatitudeResult(finalFajr, finalSunrise, finalSunset, finalIsha, isPolarDay, isPolarNight)

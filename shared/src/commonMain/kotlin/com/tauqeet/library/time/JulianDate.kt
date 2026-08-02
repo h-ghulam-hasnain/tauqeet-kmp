@@ -53,8 +53,12 @@ fun dateToJulianDay(year: Int, month: Int, day: Double): Double {
 fun julianDayToDate(jd: Double): JulianDateComponents {
     val z = truncate(jd + 0.5)
     val f = jd + 0.5 - z
-    val alpha = truncate((z - 1867216.25) / 36524.25)
-    val a = z + 1.0 + alpha - truncate(alpha / 4.0)
+    val a = if (z < 2299161.0) {
+        z
+    } else {
+        val alpha = truncate((z - 1867216.25) / 36524.25)
+        z + 1.0 + alpha - truncate(alpha / 4.0)
+    }
     val b = a + 1524.0
     val c = truncate((b - 122.1) / 365.25)
     val d = truncate(365.25 * c)

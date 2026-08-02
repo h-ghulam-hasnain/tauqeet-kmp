@@ -3,6 +3,7 @@ package com.tauqeet.library.prayers
 import com.tauqeet.library.astronomy.computeSolarPosition
 import com.tauqeet.library.toISOTimeString
 import kotlin.math.abs
+import kotlin.math.roundToLong
 
 data class PrayerTimesMetadata(
     val method: String,
@@ -223,7 +224,7 @@ fun computePrayerTimes(
     }
 
     val highLatitudeResolver = HighLatitudeResolver(highLatRule, methodParams)
-    val hlResult = highLatitudeResolver.resolve(fajrHr, sunriseHr, sunsetHr, ishaHr, dhuhrHr)
+    val hlResult = highLatitudeResolver.resolve(fajrHr, sunriseHr, sunsetHr, ishaHr, dhuhrHr, lat, transitSp.declination)
 
     val finalFajr = hlResult.fajr
     val finalSunrise = hlResult.sunrise
@@ -231,8 +232,15 @@ fun computePrayerTimes(
     val finalIsha = hlResult.isha
     val isPolarDay = hlResult.isPolarDay
     val isPolarNight = hlResult.isPolarNight
-    val fallbackApplied = finalFajr == null || finalIsha == null || finalSunrise == null || finalSunset == null
-    val finalMaghrib = maghribHr ?: finalSunset
+    val fallbackApplied = fajrHr == null || ishaHr == null || sunriseHr == null || sunsetHr == null || maghribHr == null
+    
+    val finalMaghrib = if (maghribHr != null) {
+        maghribHr
+    } else if (methodParams.maghribInterval > 0) {
+        finalSunset?.plus(methodParams.maghribInterval / 60.0)
+    } else {
+        finalSunset
+    }
     val finalAsr = asrHr
     val solarDeclination = transitSp.declination
     val resolutionInfo = resolveSolver(
@@ -353,13 +361,13 @@ fun computePrayerTimes(
     } else null
 
     return PrayerTimesResult(
-        fajr = finalFajr?.let { (it * hoursToMs).toLong() },
-        sunrise = finalSunrise?.let { (it * hoursToMs).toLong() },
-        dhahwaKubra = dhahwaKubraHr?.let { (it * hoursToMs).toLong() },
-        dhuhr = dhuhrHr.let { (it * hoursToMs).toLong() },
-        asr = finalAsr?.let { (it * hoursToMs).toLong() },
-        maghrib = finalMaghrib?.let { (it * hoursToMs).toLong() },
-        isha = finalIsha?.let { (it * hoursToMs).toLong() },
+        fajr = finalFajr?.let { (it * hoursToMs).roundToLong() },
+        sunrise = finalSunrise?.let { (it * hoursToMs).roundToLong() },
+        dhahwaKubra = dhahwaKubraHr?.let { (it * hoursToMs).roundToLong() },
+        dhuhr = dhuhrHr.let { (it * hoursToMs).roundToLong() },
+        asr = finalAsr?.let { (it * hoursToMs).roundToLong() },
+        maghrib = finalMaghrib?.let { (it * hoursToMs).roundToLong() },
+        isha = finalIsha?.let { (it * hoursToMs).roundToLong() },
         metadata = PrayerTimesMetadata(
             method = methodName,
             madhab = madhab.name,

@@ -13,6 +13,7 @@ import com.tauqeet.library.qibla.bearingToMecca
 import com.tauqeet.library.qibla.tauqeetQibla
 import com.tauqeet.library.qibla.QiblaResult
 import com.tauqeet.library.time.dateToJulianDay
+import kotlin.math.roundToLong
 
 data class DateComponents(val year: Int, val month: Int, val day: Int)
 
@@ -116,6 +117,15 @@ class Tauqeet(
             this.date = DateComponents(year, month, day)
             this.timeZoneOffset = timezoneOffset
             this.includeAdvancedMetadata = includeAdvancedMetadata
+            calculation {
+                method = this@Tauqeet.method
+                madhab = this@Tauqeet.madhab
+                highLatitudeRule = this@Tauqeet.highLatitudeRule
+                elevationMeters = this@Tauqeet.elevationMeters
+                temperatureC = this@Tauqeet.temperatureC
+                pressureMbar = this@Tauqeet.pressureMbar
+                customMethodParams = this@Tauqeet.customMethodParams
+            }
         }
     )
 
@@ -145,6 +155,15 @@ class Tauqeet(
             this.date = date
             this.timeZoneOffset = timezoneOffset
             this.includeAdvancedMetadata = includeAdvancedMetadata
+            calculation {
+                method = this@Tauqeet.method
+                madhab = this@Tauqeet.madhab
+                highLatitudeRule = this@Tauqeet.highLatitudeRule
+                elevationMeters = this@Tauqeet.elevationMeters
+                temperatureC = this@Tauqeet.temperatureC
+                pressureMbar = this@Tauqeet.pressureMbar
+                customMethodParams = this@Tauqeet.customMethodParams
+            }
         }
     )
 
@@ -166,17 +185,17 @@ class Tauqeet(
             request.includeAdvancedMetadata
         )
 
-        val tzOffsetMs = (request.timeZoneOffset * 3600000.0).toLong()
+        val tzOffsetMs = (request.timeZoneOffset * 3600000.0).roundToLong()
         val msPerDay = 86400000L
 
         return PrayerTimesResult(
-            fajr = rawResult.fajr?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
-            sunrise = rawResult.sunrise?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
-            dhahwaKubra = rawResult.dhahwaKubra?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
-            dhuhr = rawResult.dhuhr?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
-            asr = rawResult.asr?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
-            maghrib = rawResult.maghrib?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
-            isha = rawResult.isha?.let { (it + tzOffsetMs + msPerDay) % msPerDay },
+            fajr = rawResult.fajr?.let { (((it + tzOffsetMs) % msPerDay) + msPerDay) % msPerDay },
+            sunrise = rawResult.sunrise?.let { (((it + tzOffsetMs) % msPerDay) + msPerDay) % msPerDay },
+            dhahwaKubra = rawResult.dhahwaKubra?.let { (((it + tzOffsetMs) % msPerDay) + msPerDay) % msPerDay },
+            dhuhr = rawResult.dhuhr?.let { (((it + tzOffsetMs) % msPerDay) + msPerDay) % msPerDay },
+            asr = rawResult.asr?.let { (((it + tzOffsetMs) % msPerDay) + msPerDay) % msPerDay },
+            maghrib = rawResult.maghrib?.let { (((it + tzOffsetMs) % msPerDay) + msPerDay) % msPerDay },
+            isha = rawResult.isha?.let { (((it + tzOffsetMs) % msPerDay) + msPerDay) % msPerDay },
             metadata = rawResult.metadata,
             astronomicalMetadata = rawResult.astronomicalMetadata,
             flags = rawResult.flags,
