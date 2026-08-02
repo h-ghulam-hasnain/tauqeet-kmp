@@ -19,7 +19,6 @@ The project is structured as a standard KMP library:
     - `qibla`: Contains the geodetic WGS-84 Vincenty Inverse and Haversine distance utilities.
     - `time`: Time manipulation and conversion utilities.
     - `internal`: Internal helpers not exposed in the public API.
-- **`manual_testing`**: A playground module for testing library output in real-time.
 
 ## The VSOP87 Engine
 

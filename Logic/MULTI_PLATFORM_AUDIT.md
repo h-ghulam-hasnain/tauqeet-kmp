@@ -139,7 +139,6 @@ tauqeet-kmp/
 │       │   └── time/                      # Julian date, DeltaT
 │       ├── commonTest/                    # Cross-platform unit tests
 │       └── jvmTest/                       # JVM comparison dumper
-├── manual_testing/                        # Sample consumer verification app
 ├── BIG_O_ANALYSIS.md                      # Static complexity documentation
 └── PUBLISHING.md                          # Release workflow documentation
 ```
