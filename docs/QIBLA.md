@@ -16,12 +16,14 @@ If you are standing near the antipodal point of the Kaaba, the iterative Vincent
 
 ## API Reference
 
-### `tauqeetQibla(lat: Double, lng: Double): QiblaResult?`
-Returns both the bearing (in degrees from true north) and the distance (in kilometers).
-If the provided coordinates are extremely close to the Kaaba (distance < 1 meter), the function returns `null` because all directions face the Kaaba.
+### `Tauqeet.qiblaDirection(lat: Double, lng: Double): QiblaResult?`
+This is the preferred public API. It returns both the bearing (in degrees from true north) and the distance (in kilometers). If the provided coordinates are extremely close to the Kaaba (distance < 1 meter), the function returns `null` because all directions face the Kaaba.
 
-### `bearingToMecca(lat: Double, lng: Double): Double?`
-A legacy-compatible function that returns just the bearing. Internally, it calls `tauqeetQibla` and discards the distance component.
+### `Tauqeet.qiblaBearing(lat: Double, lng: Double): Double?`
+A backward-compatible convenience method that returns just the bearing. Internally, it delegates to the same underlying geodetic calculation and discards the distance component.
+
+### `tauqeetQibla(lat: Double, lng: Double): QiblaResult?`
+A lower-level free function that exposes the same calculation logic for advanced callers and internal use.
 
 ## Best Practices
 - Remember that the bearing returned is relative to **True North**, not Magnetic North. If you are building a compass app, you must account for magnetic declination based on the user's location to point the hardware compass correctly.

@@ -68,12 +68,25 @@ val tauqeet = Tauqeet(madhab = Madhab.SHAFI) // or HANAFI
 
 **Cause:** You did not pass `timezoneOffset`.
 
-**Fix:** Pass the correct offset in decimal hours:
+**Fix:** Pass the correct offset in decimal hours using the request-based API:
 ```kotlin
-tauqeet.computePrayerTimes(year, month, day, lat, lng, timezoneOffset = 5.0)  // UTC+5
-tauqeet.computePrayerTimes(year, month, day, lat, lng, timezoneOffset = -4.0) // UTC-4
-tauqeet.computePrayerTimes(year, month, day, lat, lng, timezoneOffset = 5.5)  // UTC+5:30 (India)
-tauqeet.computePrayerTimes(year, month, day, lat, lng, timezoneOffset = 5.75) // UTC+5:45 (Nepal)
+tauqeet.computePrayerTimes(
+    prayerRequest {
+        latitude = lat
+        longitude = lng
+        date = DateComponents(year, month, day)
+        timeZoneOffset = 5.0 // UTC+5
+    }
+)
+
+tauqeet.computePrayerTimes(
+    prayerRequest {
+        latitude = lat
+        longitude = lng
+        date = DateComponents(year, month, day)
+        timeZoneOffset = -4.0 // UTC-4
+    }
+)
 ```
 
 ---

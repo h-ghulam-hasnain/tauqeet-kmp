@@ -22,7 +22,7 @@ All parameters here are **OPTIONAL** with sensible defaults.
 | `customMethodParams` | `CalculationMethodParameters?` | `null` | Provide custom angles if overriding a preset `method`. |
 
 ### B. Computation Inputs (`PrayerRequest` / unified API)
-The preferred entry point is `computePrayerTimes(request: PrayerRequest)`. The older flat overloads still exist for compatibility, but they are now deprecated.
+The preferred entry point is `computePrayerTimes(request: PrayerRequest)`. The older flat overloads still exist for compatibility, but they are now deprecated. For a single request, place any per-request overrides inside the nested `calculation { ... }` block so they do not affect the shared `Tauqeet` defaults.
 
 | Input | Type | Required? | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |

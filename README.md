@@ -106,13 +106,13 @@ fun main() {
     // Compute for London, UK (UTC+1 in summer)
     // We explicitly enable `includeAdvancedMetadata` for astronomical logs
     val times = tauqeet.computePrayerTimes(
-        year = 2026, 
-        month = 7, 
-        day = 23, 
-        lat = 51.5072, 
-        lng = -0.1276, 
-        timezoneOffset = 1.0,
-        includeAdvancedMetadata = true
+        prayerRequest {
+            latitude = 51.5072
+            longitude = -0.1276
+            date = com.tauqeet.library.DateComponents(2026, 7, 23)
+            timeZoneOffset = 1.0
+            includeAdvancedMetadata = true
+        }
     )
 
     println("Fajr: ${times.fajr?.toTimeString() ?: "N/A"}")

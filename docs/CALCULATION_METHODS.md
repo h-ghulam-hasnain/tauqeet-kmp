@@ -34,12 +34,16 @@ Each method encodes the solar depression angles used by a specific Islamic autho
 - **Isha Interval**: Some methods (Makkah, Gulf, Qatar) define Isha as a fixed number of minutes after Sunset, rather than using an angle. When `ishaInterval > 0`, the angle is ignored.
 - **Maghrib Angle**: Some methods (Tehran, Jafari) define Maghrib as a depression angle after sunset, rather than exactly at sunset.
 
-### Using `CUSTOM`
+### Using `CUSTOM` with the Request DSL
+
+The recommended way to apply these values is through the request-based API. Constructor settings act as defaults, while a per-request `calculation { ... }` block can override them for a single computation.
 
 ```kotlin
+import com.tauqeet.library.DateComponents
 import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.CalculationMethodParameters
+import com.tauqeet.library.prayers.prayerRequest
 
 val myCustomMethod = CalculationMethodParameters(
     fajrAngle    = 15.5,  // degrees
@@ -49,9 +53,19 @@ val myCustomMethod = CalculationMethodParameters(
     maghribInterval = 0   // minutes after sunset (0 = use maghribAngle)
 )
 
-val tauqeet = Tauqeet(
-    method = CalculationMethod.CUSTOM,
-    customMethodParams = myCustomMethod
+val tauqeet = Tauqeet(method = CalculationMethod.KARACHI)
+
+val times = tauqeet.computePrayerTimes(
+    prayerRequest {
+        latitude = 24.8607
+        longitude = 67.0011
+        date = DateComponents(2026, 8, 1)
+        timeZoneOffset = 5.0
+        calculation {
+            method = CalculationMethod.CUSTOM
+            customMethodParams = myCustomMethod
+        }
+    }
 )
 ```
 
