@@ -10,7 +10,10 @@
 /.idea/caches
 .DS_Store
 .vscode/
+
+# Local files
 user.txt
+GitHub-CI-Error.md
 
 # Gradle
 .gradle/

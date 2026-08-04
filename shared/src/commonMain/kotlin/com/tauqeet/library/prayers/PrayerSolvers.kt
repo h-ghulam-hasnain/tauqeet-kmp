@@ -18,6 +18,13 @@ internal fun solveHourAngle(targetZenith: Double, lat: Double, dec: Double): Dou
     return acosd(cosH)
 }
 
+/** Helper extension to allow safe comparison of nullable Doubles. */
+private operator fun Double?.compareTo(other: Double): Int = when {
+    this == null && other == 0.0 -> 0
+    this == null -> -1
+    else -> this.compareTo(other)
+}
+
 internal class SolverResult(val hours: Double?, val sp: SolarPositionResult, val iterations: Int, val targetZenith: Double, val error: Boolean = false)
 
 internal class IterativeSolver(val jd: Double, val lat: Double, val lng: Double) {
@@ -65,6 +72,102 @@ internal class SunriseSunsetSolver(
     private val solver: IterativeSolver, 
     elevationMeters: Double,
     temperatureC: Double,
+    pressureMbar: Double
+) {
+    private val dip = computeDipAngle(elevationMeters)
+    private val refraction0 = getRefractionDegrees(0.0, temperatureC, pressureMbar)
+    
+    val zenithFn: (SolarPositionResult) -> Double = { sp ->
+        90.0 + refraction0 + sp.semidiameter / 60.0 - sp.horizontalParallax / 60.0 + dip
+    }
+    
+    fun solveSunrise(dhuhrHr: Double) = solver.solve(-1, dhuhrHr - 6.0, zenithFn)
+    fun solveSunset(dhuhrHr: Double) = solver.solve(1, dhuhrHr + 6.0, zenithFn)
+}
+
+internal class AsrSolver(
+    private val solver: IterativeSolver,
+    private val lat: Double,
+    private val madhab: Madhab,
+    private val temperatureC: Double,
+    private val pressureMbar: Double,
+    private val transitSp: SolarPositionResult
+) {
+    fun solve(dhuhrHr: Double): SolverResult? {
+        return solver.solve(1, dhuhrHr + 4.0) { sp ->
+            val zZuhr = abs(lat - transitSp.declination)
+            val sdZuhr = transitSp.semidiameter / 60.0
+            val refrZuhr = getRefractionDegrees(90.0 - zZuhr, temperatureC, pressureMbar)
+            val zZuhrVisual = zZuhr - refrZuhr - sdZuhr
+            
+            val zAsrVisual = atand(tand(zZuhrVisual) + madhab.shadowFactor)
+            val refrAsr = getRefractionDegrees(90.0 - zAsrVisual, temperatureC, pressureMbar)
+            val sdAsr = sp.semidiameter / 60.0
+            
+            zAsrVisual + refrAsr + sdAsr
+        }
+    }
+}
+
+internal class HighLatitudeResult(
+    val fajr: Double?, val sunrise: Double?, val sunset: Double?, val isha: Double?, val isPolarDay: Boolean, val isPolarNight: Boolean
+)
+
+internal class HighLatitudeResolver(
+    private val highLatRule: HighLatitudeRule,
+    private val methodParams: CalculationMethodParameters
+) {
+    fun resolve(
+        fajrHr: Double?, sunriseHr: Double?, sunsetHr: Double?, ishaHr: Double?, dhuhrHr: Double, lat: Double, solarDeclination: Double
+    ): HighLatitudeResult {
+        var finalFajr: Double? = fajrHr ?: (dhuhrHr - 8.0)
+        var finalSunrise: Double? = sunriseHr ?: (dhuhrHr - 6.0)
+        var finalSunset: Double? = sunsetHr ?: (dhuhrHr + 6.0)
+        var finalIsha: Double? = ishaHr ?: (dhuhrHr + 8.0)
+        var isPolarDay = false
+        var isPolarNight = false
+
+        val sameHemisphere = (lat >= 0.0 && solarDeclination >= 0.0) || (lat < 0.0 && solarDeclination < 0.0)
+
+        if (sunriseHr != null && sunsetHr != null) {
+            // Night duration calculation – finalSunrise and finalSunset are guaranteed non‑null here
+            val nightDuration = if (finalSunrise!! < finalSunset!!){
+                24.0 - (finalSunset!! - finalSunrise!!)
+            } else {
+                finalSunrise!! - finalSunset!!
+            }.let { if (it < 0.001) 0.001 else it }
+
+            if (fajrHr == null || ishaHr == null) {
+                isPolarDay = true
+                when (highLatRule) {
+                    HighLatitudeRule.MIDDLE_OF_NIGHT -> {
+                        val halfNight = nightDuration / 2.0
+                        if (fajrHr == null) finalFajr = finalSunrise!! - halfNight
+                        if (ishaHr == null) finalIsha = finalSunset!! + halfNight
+                    }
+                    HighLatitudeRule.SEVENTH_OF_NIGHT -> {
+                        val seventhNight = nightDuration / 7.0
+                        if (fajrHr == null) finalFajr = finalSunrise!! - seventhNight
+                        if (ishaHr == null) finalIsha = finalSunset!! + seventhNight
+                    }
+                    HighLatitudeRule.TWILIGHT_ANGLE -> {
+                        val fajrProportion = methodParams.fajrAngle / 60.0
+                        val ishaProportion = methodParams.ishaAngle / 60.0
+                        if (fajrHr == null) finalFajr = finalSunrise!! - nightDuration * fajrProportion
+                        if (ishaHr == null) finalIsha = finalSunset!! + nightDuration * ishaProportion
+                    }
+                }
+            }
+        } else {
+            if (sameHemisphere) {
+                isPolarDay = true
+            } else {
+                isPolarNight = true
+            }
+        }
+        
+        return HighLatitudeResult(finalFajr, finalSunrise, finalSunset, finalIsha, isPolarDay, isPolarNight)
+    }
     pressureMbar: Double
 ) {
     private val dip = computeDipAngle(elevationMeters)
