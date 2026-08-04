@@ -87,7 +87,7 @@ internal fun validatePressure(mbar: Double) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 private fun isLeapYear(year: Int): Boolean {
-    val isGregorian = year > 1582
+    val isGregorian = year >= 1582
     return if (isGregorian) {
         (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
     } else {
