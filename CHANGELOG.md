@@ -1,8 +1,13 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project are documented in this file.
 
 ## [0.2.0] - Unreleased
+
+### Highlights
+- This release prioritizes correctness, robustness, and API clarity across the prayer-time engine.
+- Major focus areas include validation, calendar accuracy, timezone stability, high-latitude handling, and CI/parity reliability.
+- The updates strengthen both the public API experience and the underlying astronomical logic without changing the overall library intent.
 
 ### Added
 - **Input Validation Layer**: Implemented strict mathematical boundary validations (via `TauqeetException`) for latitude, longitude, and environmental inputs at the public API boundary.
@@ -52,6 +57,10 @@ All notable changes to this project will be documented in this file.
 ### Result
 - Verified the code changes across all modified files: `Tauqeet.kt`, `Validation.kt`, `PrayerSolvers.kt`, `PrayerTimes.kt`, `Refraction.kt`, and `JulianDate.kt`.
 - Confirmed the intended fixes are present in the source.
+
+### Verification
+- Verified locally with `./gradlew :shared:jvmTest`.
+- Result: `BUILD SUCCESSFUL`.
 
 ## [0.1.0] - 2026-07-23
 
