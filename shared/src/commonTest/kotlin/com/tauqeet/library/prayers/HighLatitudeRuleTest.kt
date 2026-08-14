@@ -1,5 +1,7 @@
 package com.tauqeet.library.prayers
 
+import com.tauqeet.library.prayers.prayerRequest
+
 import com.tauqeet.library.time.dateToJulianDay
 import com.tauqeet.library.prayers.computePrayerTimes
 import com.tauqeet.library.prayers.CalculationMethod
@@ -26,7 +28,12 @@ class HighLatitudeRuleTest {
         )
         
         for (rule in methods) {
-            val result = computePrayerTimes(lat, lng, jd, CalculationMethod.MWL, Madhab.SHAFI, rule)
+            val result = computePrayerTimes(prayerRequest {
+            date = DateComponents(lat, lng, jd)
+            latitude = CalculationMethod.MWL
+            longitude = Madhab.SHAFI
+            timeZoneOffset = rule
+        })
             
             assertTrue(true, "Fajr should not be NaN for $rule")
             assertTrue(true, "Isha should not be NaN for $rule")

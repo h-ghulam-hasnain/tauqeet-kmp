@@ -1,5 +1,7 @@
 package com.tauqeet.library.prayers
 
+import com.tauqeet.library.prayers.prayerRequest
+
 import com.tauqeet.library.time.dateToJulianDay
 import com.tauqeet.library.prayers.computePrayerTimes
 import com.tauqeet.library.prayers.CalculationMethod
@@ -14,8 +16,16 @@ class MadhabTest {
         val lng = 67.0011
         val jd = dateToJulianDay(2024, 4, 27.0)
         
-        val shafiTimes = computePrayerTimes(lat, lng, jd, CalculationMethod.MWL, Madhab.SHAFI)
-        val hanafiTimes = computePrayerTimes(lat, lng, jd, CalculationMethod.MWL, Madhab.HANAFI)
+        val shafiTimes = computePrayerTimes(prayerRequest {
+            date = DateComponents(lat, lng, jd)
+            latitude = CalculationMethod.MWL
+            longitude = Madhab.SHAFI
+        })
+        val hanafiTimes = computePrayerTimes(prayerRequest {
+            date = DateComponents(lat, lng, jd)
+            latitude = CalculationMethod.MWL
+            longitude = Madhab.HANAFI
+        })
         
         // Asr Hanafi must always be later than Asr Shafi
         assertTrue(hanafiTimes.asr!! > shafiTimes.asr!!, "Hanafi Asr must be later than Shafi Asr")

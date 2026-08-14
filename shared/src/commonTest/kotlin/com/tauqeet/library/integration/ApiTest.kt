@@ -1,5 +1,7 @@
 package com.tauqeet.library.integration
 
+import com.tauqeet.library.prayers.prayerRequest
+
 import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.DateComponents
 import com.tauqeet.library.toTimeString
@@ -15,7 +17,12 @@ class ApiTest {
         val tauqeet = Tauqeet(method = CalculationMethod.KARACHI)
         
         val date = DateComponents(2024, 4, 27)
-        val result = tauqeet.computePrayerTimes(date, 24.8607, 67.0011, 5.0)
+        val result = tauqeet.computePrayerTimes(prayerRequest {
+            date = date
+            latitude = 24.8607
+            longitude = 67.0011
+            timeZoneOffset = 5.0
+        })
         
         // Asserting string conversions properly map
         val fajrStr = result.fajr?.toTimeString() ?: ""

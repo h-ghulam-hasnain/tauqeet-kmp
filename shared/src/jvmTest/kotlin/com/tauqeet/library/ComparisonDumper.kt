@@ -1,5 +1,7 @@
 package com.tauqeet.library
 
+import com.tauqeet.library.prayers.prayerRequest
+
 import com.tauqeet.library.prayers.CalculationMethod
 import org.junit.Test
 import java.io.File
@@ -22,7 +24,12 @@ class ComparisonDumper {
                 val tauqeet = Tauqeet(method = method)
                 for (month in 1..12 step 3) {
                     val date = DateComponents(2024, month, 15)
-                    val times = tauqeet.computePrayerTimes(date, lat, lng, 0.0)
+                    val times = tauqeet.computePrayerTimes(prayerRequest {
+            date = date
+            latitude = lat
+            longitude = lng
+            timeZoneOffset = 0.0
+        })
                     val qibla = bearingToMecca(lat, lng)
                     if (!first) sb.append(",\n")
                     sb.append("""{"lat":$lat,"lng":$lng,"month":$month,"method":"${method.name}","fajr":${(times.fajr ?: -1L) / 60000.0},"sunrise":${(times.sunrise ?: -1L) / 60000.0},"dhuhr":${(times.dhuhr ?: -1L) / 60000.0},"asr":${(times.asr ?: -1L) / 60000.0},"maghrib":${(times.maghrib ?: -1L) / 60000.0},"isha":${(times.isha ?: -1L) / 60000.0},"qibla":$qibla}""")

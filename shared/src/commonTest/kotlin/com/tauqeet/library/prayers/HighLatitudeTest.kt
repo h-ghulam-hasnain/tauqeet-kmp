@@ -1,8 +1,8 @@
 package com.tauqeet.library.prayers
 
+import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.DateComponents
-import kotlin.test.Test
-import kotlin.test.assertTrue
+import com.tauqeet.library.prayers.prayerRequest
 
 class HighLatitudeTest {
     @Test
@@ -14,12 +14,8 @@ class HighLatitudeTest {
             timeZoneOffset = 2.0
         }
 
-        val result = computePrayerTimes(
-            lat = request.latitude,
-            lng = request.longitude,
-            jd = com.tauqeet.library.time.dateToJulianDay(request.date.year, request.date.month, request.date.day.toDouble()) - request.timeZoneOffset / 24.0,
-            methodParams = request.calculationParameters.customMethodParams ?: request.calculationParameters.method.params
-        )
+        val tauqeet = Tauqeet()
+        val result = tauqeet.computePrayerTimes(request)
 
         assertTrue(result.dhuhr != null, "Dhuhr should be calculated")
         assertTrue(result.isHighLatitudeFallback, "Metadata flag should record high-latitude fallback")

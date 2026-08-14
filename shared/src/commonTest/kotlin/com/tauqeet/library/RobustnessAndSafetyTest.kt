@@ -1,5 +1,7 @@
 package com.tauqeet.library
 
+import com.tauqeet.library.prayers.prayerRequest
+
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
@@ -14,16 +16,32 @@ class RobustnessAndSafetyTest {
 
         // NaN and Infinity bounds should throw TauqeetException
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, Double.NaN, 0.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = Double.NaN
+            longitude = 0.0
+        })
         }
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, 0.0, Double.NaN)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = 0.0
+            longitude = Double.NaN
+        })
         }
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, Double.POSITIVE_INFINITY, 0.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = Double.POSITIVE_INFINITY
+            longitude = 0.0
+        })
         }
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, 0.0, Double.NEGATIVE_INFINITY)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = 0.0
+            longitude = Double.NEGATIVE_INFINITY
+        })
         }
     }
 
@@ -33,19 +51,43 @@ class RobustnessAndSafetyTest {
 
         // Year 0 or Negative throws TauqeetException cleanly
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(0, 1, 1, 21.0, 39.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(0, 1, 1)
+            latitude = 21.0
+            longitude = 39.0
+        })
         }
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(-500, 1, 1, 21.0, 39.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(-500, 1, 1)
+            latitude = 21.0
+            longitude = 39.0
+        })
         }
 
         // Century boundaries (Should be valid and compute successfully)
-        assertNotNull(tauqeet.computePrayerTimes(2000, 1, 1, 21.0, 39.0))
-        assertNotNull(tauqeet.computePrayerTimes(2100, 1, 1, 21.0, 39.0))
+        assertNotNull(tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2000, 1, 1)
+            latitude = 21.0
+            longitude = 39.0
+        }))
+        assertNotNull(tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2100, 1, 1)
+            latitude = 21.0
+            longitude = 39.0
+        }))
         
         // Far future/past valid years
-        assertNotNull(tauqeet.computePrayerTimes(1000, 1, 1, 21.0, 39.0))
-        assertNotNull(tauqeet.computePrayerTimes(3000, 1, 1, 21.0, 39.0))
+        assertNotNull(tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(1000, 1, 1)
+            latitude = 21.0
+            longitude = 39.0
+        }))
+        assertNotNull(tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(3000, 1, 1)
+            latitude = 21.0
+            longitude = 39.0
+        }))
     }
 
     @Test
@@ -54,15 +96,35 @@ class RobustnessAndSafetyTest {
 
         // NaN or Infinity should throw
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, 21.0, 39.0, Double.NaN)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = 21.0
+            longitude = 39.0
+            timeZoneOffset = Double.NaN
+        })
         }
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, 21.0, 39.0, Double.POSITIVE_INFINITY)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = 21.0
+            longitude = 39.0
+            timeZoneOffset = Double.POSITIVE_INFINITY
+        })
         }
         
         // Fractional Half-hour timezone is perfectly valid
-        assertNotNull(tauqeet.computePrayerTimes(2026, 1, 1, 21.0, 39.0, 5.5))
-        assertNotNull(tauqeet.computePrayerTimes(2026, 1, 1, 21.0, 39.0, 5.75))
+        assertNotNull(tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = 21.0
+            longitude = 39.0
+            timeZoneOffset = 5.5
+        }))
+        assertNotNull(tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = 21.0
+            longitude = 39.0
+            timeZoneOffset = 5.75
+        }))
     }
 
     @Test
@@ -83,7 +145,12 @@ class RobustnessAndSafetyTest {
             val tz = random.nextDouble(-12.0, 14.0)
             
             try {
-                val res = tauqeet.computePrayerTimes(year, month, day, lat, lng, tz)
+                val res = tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(year, month, day)
+            latitude = lat
+            longitude = lng
+            timeZoneOffset = tz
+        })
                 if (res.dhuhr == null) {
                     dhuhrNulls++
                 }

@@ -1,5 +1,7 @@
 package com.tauqeet.library
 
+import com.tauqeet.library.prayers.prayerRequest
+
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.Madhab
 import com.tauqeet.library.qibla.bearingToMecca
@@ -21,7 +23,12 @@ class TauqeetTest {
         val tauqeet = Tauqeet(method = CalculationMethod.KARACHI)
 
         // Karachi April 27, 2024 (UTC+5)
-        val result = tauqeet.computePrayerTimes(2024, 4, 27, 24.8607, 67.0011, 5.0)
+        val result = tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2024, 4, 27)
+            latitude = 24.8607
+            longitude = 67.0011
+            timeZoneOffset = 5.0
+        })
 
         val fajrStr  = result.fajr?.toTimeString()  ?: ""
         val dhuhrStr = result.dhuhr?.toTimeString() ?: ""
@@ -49,9 +56,18 @@ class TauqeetTest {
         val tauqeet = Tauqeet(method = CalculationMethod.KARACHI)
 
         // Call WITHOUT a timezoneOffset — should return UTC times
-        val utcResult  = tauqeet.computePrayerTimes(2026, 8, 1, 24.8607, 67.0011)
+        val utcResult  = tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 8, 1)
+            latitude = 24.8607
+            longitude = 67.0011
+        })
         // Call WITH explicit 0.0 — should be identical
-        val zeroResult = tauqeet.computePrayerTimes(2026, 8, 1, 24.8607, 67.0011, 0.0)
+        val zeroResult = tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 8, 1)
+            latitude = 24.8607
+            longitude = 67.0011
+            timeZoneOffset = 0.0
+        })
 
         assertEquals(utcResult.fajr,    zeroResult.fajr,    "UTC default must equal explicit 0.0 offset")
         assertEquals(utcResult.dhuhr,   zeroResult.dhuhr,   "UTC default must equal explicit 0.0 offset")
@@ -62,8 +78,18 @@ class TauqeetTest {
     fun timezoneOffsetShiftsTimesByTheCorrectMilliseconds() {
         val tauqeet = Tauqeet(method = CalculationMethod.KARACHI)
 
-        val utcResult = tauqeet.computePrayerTimes(2026, 8, 1, 24.8607, 67.0011, 0.0)
-        val pktResult = tauqeet.computePrayerTimes(2026, 8, 1, 24.8607, 67.0011, 5.0)
+        val utcResult = tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 8, 1)
+            latitude = 24.8607
+            longitude = 67.0011
+            timeZoneOffset = 0.0
+        })
+        val pktResult = tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 8, 1)
+            latitude = 24.8607
+            longitude = 67.0011
+            timeZoneOffset = 5.0
+        })
 
         // PKT is UTC+5 = 5 * 3_600_000 ms shift
         val shiftMs = 5 * 3_600_000L
@@ -80,8 +106,16 @@ class TauqeetTest {
         val tauqeet = Tauqeet(method = CalculationMethod.KARACHI)
         val date = DateComponents(2026, 8, 1)
 
-        val fromInts   = tauqeet.computePrayerTimes(2026, 8, 1, 24.8607, 67.0011)
-        val fromComponents = tauqeet.computePrayerTimes(date, 24.8607, 67.0011)
+        val fromInts   = tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 8, 1)
+            latitude = 24.8607
+            longitude = 67.0011
+        })
+        val fromComponents = tauqeet.computePrayerTimes(prayerRequest {
+            date = date
+            latitude = 24.8607
+            longitude = 67.0011
+        })
 
         assertEquals(fromInts.fajr,  fromComponents.fajr,  "DateComponents overload must match int overload")
         assertEquals(fromInts.dhuhr, fromComponents.dhuhr, "DateComponents overload must match int overload")
@@ -95,15 +129,27 @@ class TauqeetTest {
     fun latitudeExactlyAt90And90IsValid() {
         val tauqeet = Tauqeet()
         // Should NOT throw
-        tauqeet.computePrayerTimes(2026, 6, 1, -90.0, 0.0)
-        tauqeet.computePrayerTimes(2026, 6, 1,  90.0, 0.0)
+        tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 6, 1)
+            latitude = -90.0
+            longitude = 0.0
+        })
+        tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 6, 1)
+            latitude = 90.0
+            longitude = 0.0
+        })
     }
 
     @Test
     fun latitudeBelow90ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, -90.001, 0.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = -90.001
+            longitude = 0.0
+        })
         }
     }
 
@@ -111,7 +157,11 @@ class TauqeetTest {
     fun latitudeAbove90ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, 91.0, 0.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = 91.0
+            longitude = 0.0
+        })
         }
     }
 
@@ -122,15 +172,27 @@ class TauqeetTest {
     @Test
     fun longitudeExactlyAt180And180IsValid() {
         val tauqeet = Tauqeet()
-        tauqeet.computePrayerTimes(2026, 6, 1, 0.0, -180.0)
-        tauqeet.computePrayerTimes(2026, 6, 1, 0.0,  180.0)
+        tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 6, 1)
+            latitude = 0.0
+            longitude = -180.0
+        })
+        tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 6, 1)
+            latitude = 0.0
+            longitude = 180.0
+        })
     }
 
     @Test
     fun longitudeBelow180ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, 0.0, -181.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = 0.0
+            longitude = -181.0
+        })
         }
     }
 
@@ -138,7 +200,11 @@ class TauqeetTest {
     fun longitudeAbove180ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, 0.0, 181.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = 0.0
+            longitude = 181.0
+        })
         }
     }
 
@@ -149,15 +215,30 @@ class TauqeetTest {
     @Test
     fun extremeValidTimezoneOffsets12And14AreAccepted() {
         val tauqeet = Tauqeet()
-        tauqeet.computePrayerTimes(2026, 6, 1, 0.0, 0.0, -12.0)
-        tauqeet.computePrayerTimes(2026, 6, 1, 0.0, 0.0,  14.0)
+        tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 6, 1)
+            latitude = 0.0
+            longitude = 0.0
+            timeZoneOffset = -12.0
+        })
+        tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 6, 1)
+            latitude = 0.0
+            longitude = 0.0
+            timeZoneOffset = 14.0
+        })
     }
 
     @Test
     fun timezoneOffsetBelow12ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, 0.0, 0.0, -13.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = 0.0
+            longitude = 0.0
+            timeZoneOffset = -13.0
+        })
         }
     }
 
@@ -165,7 +246,12 @@ class TauqeetTest {
     fun timezoneOffsetAbove14ThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 1, 1, 0.0, 0.0, 15.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 1, 1)
+            latitude = 0.0
+            longitude = 0.0
+            timeZoneOffset = 15.0
+        })
         }
     }
 
@@ -177,10 +263,18 @@ class TauqeetTest {
     fun invalidMonthThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 13, 1, 0.0, 0.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 13, 1)
+            latitude = 0.0
+            longitude = 0.0
+        })
         }
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 0, 1, 0.0, 0.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 0, 1)
+            latitude = 0.0
+            longitude = 0.0
+        })
         }
     }
 
@@ -188,7 +282,11 @@ class TauqeetTest {
     fun day29InFebruary2025nonleapThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2025, 2, 29, 0.0, 0.0) // 2025 is not a leap year
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2025, 2, 29)
+            latitude = 0.0
+            longitude = 0.0
+        }) // 2025 is not a leap year
         }
     }
 
@@ -196,14 +294,22 @@ class TauqeetTest {
     fun day29InFebruary2024leapYearIsValid() {
         val tauqeet = Tauqeet()
         // Should NOT throw
-        tauqeet.computePrayerTimes(2024, 2, 29, 0.0, 0.0)
+        tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2024, 2, 29)
+            latitude = 0.0
+            longitude = 0.0
+        })
     }
 
     @Test
     fun day31InA30dayMonthThrowsTauqeetexception() {
         val tauqeet = Tauqeet()
         assertFailsWith<TauqeetException> {
-            tauqeet.computePrayerTimes(2026, 4, 31, 0.0, 0.0) // April has 30 days
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 4, 31)
+            latitude = 0.0
+            longitude = 0.0
+        }) // April has 30 days
         }
     }
 

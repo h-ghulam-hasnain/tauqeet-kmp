@@ -1,5 +1,7 @@
 package com.tauqeet.library
 
+import com.tauqeet.library.prayers.prayerRequest
+
 import com.tauqeet.library.astronomy.computeEarthHeliocentricState
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -13,13 +15,23 @@ class TauqeetBenchmarkTest {
         
         // Warmup
         for (i in 0..10) {
-            tauqeet.computePrayerTimes(2026, 8, 1, 24.8607, 67.0011, 5.0)
+            tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 8, 1)
+            latitude = 24.8607
+            longitude = 67.0011
+            timeZoneOffset = 5.0
+        })
         }
         
         // Benchmark
         val duration = measureTime {
             for (i in 0..1000) {
-                tauqeet.computePrayerTimes(2026, 8, 1, 24.8607, 67.0011, 5.0)
+                tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 8, 1)
+            latitude = 24.8607
+            longitude = 67.0011
+            timeZoneOffset = 5.0
+        })
             }
         }
         

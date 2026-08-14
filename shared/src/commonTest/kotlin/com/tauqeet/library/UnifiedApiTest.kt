@@ -55,11 +55,14 @@ class UnifiedApiTest {
     @Test
     fun testPolarDayResolutionMetadataIsPropagated() {
         val tauqeet = Tauqeet()
-        val result = tauqeet.computePrayerTimes(
-            prayerRequest {
+        val result = tauqeet.computePrayerTimes(prayerRequest {
+            date = prayerRequest {
                 latitude = 69.6492
                 longitude = 18.9553
-                date = DateComponents(2026, 6, 21)
+                date = DateComponents(2026
+            latitude = 6
+            longitude = 21
+        })
                 timeZoneOffset = 1.0
             }
         )
@@ -72,11 +75,14 @@ class UnifiedApiTest {
     @Test
     fun testPolarNightResolutionMetadataIsPropagated() {
         val tauqeet = Tauqeet()
-        val result = tauqeet.computePrayerTimes(
-            prayerRequest {
+        val result = tauqeet.computePrayerTimes(prayerRequest {
+            date = prayerRequest {
                 latitude = 69.6492
                 longitude = 18.9553
-                date = DateComponents(2026, 12, 21)
+                date = DateComponents(2026
+            latitude = 12
+            longitude = 21
+        })
                 timeZoneOffset = 1.0
             }
         )
@@ -89,11 +95,14 @@ class UnifiedApiTest {
     @Test
     fun testHighLatitudeFallbackFlagIsRaisedForEdgeCaseLatitude() {
         val tauqeet = Tauqeet()
-        val result = tauqeet.computePrayerTimes(
-            prayerRequest {
+        val result = tauqeet.computePrayerTimes(prayerRequest {
+            date = prayerRequest {
                 latitude = 69.6492
                 longitude = 18.9553
-                date = DateComponents(2026, 6, 21)
+                date = DateComponents(2026
+            latitude = 6
+            longitude = 21
+        })
                 timeZoneOffset = 1.0
                 calculation {
                     method = CalculationMethod.MWL
@@ -114,11 +123,14 @@ class UnifiedApiTest {
     @Test
     fun testHighLatitudePartialResolutionKeepsDhuhrIntact() {
         val tauqeet = Tauqeet()
-        val result = tauqeet.computePrayerTimes(
-            prayerRequest {
+        val result = tauqeet.computePrayerTimes(prayerRequest {
+            date = prayerRequest {
                 latitude = 69.6492
                 longitude = 18.9553
-                date = DateComponents(2026, 6, 21)
+                date = DateComponents(2026
+            latitude = 6
+            longitude = 21
+        })
                 timeZoneOffset = 1.0
             }
         )
@@ -131,7 +143,12 @@ class UnifiedApiTest {
     @Suppress("DEPRECATION")
     fun testDeprecatedFlatOverloadsStillWork() {
         val tauqeet = Tauqeet()
-        val result = tauqeet.computePrayerTimes(2026, 8, 1, 35.6764, 139.6500, 9.0)
+        val result = tauqeet.computePrayerTimes(prayerRequest {
+            date = DateComponents(2026, 8, 1)
+            latitude = 35.6764
+            longitude = 139.6500
+            timeZoneOffset = 9.0
+        })
         assertNotNull(result.dhuhr)
         assertTrue(result.resolutionInfo != null)
     }

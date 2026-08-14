@@ -60,4 +60,39 @@ class QiblaTest {
         val mecca = tauqeetQibla(21.422487, 39.826206)
         assertNull(mecca, "Should return null for coincident coordinates (distance < 0.001 km)")
     }
+
+    @Test
+    fun testEquatorAndPoles() {
+        // Equator at same longitude as Mecca
+        val equator = tauqeetQibla(0.0, 39.826206)
+        assertNotNull(equator)
+        assertEquals(0.0, equator.bearing, 1.0)
+        
+        // North Pole (should just return non-null)
+        val northPole = tauqeetQibla(90.0, 0.0)
+        assertNotNull(northPole)
+
+        // South Pole (should just return non-null)
+        val southPole = tauqeetQibla(-90.0, 0.0)
+        assertNotNull(southPole)
+    }
+
+    @Test
+    fun testMoreKnownLocations() {
+        val tokyo = tauqeetQibla(35.6762, 139.6503)
+        assertNotNull(tokyo)
+        assertEquals(293.0, tokyo.bearing, 1.5) // Approximate bearing to Mecca from Tokyo
+
+        val oslo = tauqeetQibla(59.9139, 10.7522)
+        assertNotNull(oslo)
+        assertEquals(139.5, oslo.bearing, 1.5) // Approximate bearing to Mecca from Oslo
+    }
+
+    @Test
+    fun testEdgeDistances() {
+        // Just outside Mecca should yield valid bearing but small distance
+        val nearMecca = tauqeetQibla(21.43, 39.83)
+        assertNotNull(nearMecca)
+        assertTrue(nearMecca.distanceKm > 0.0 && nearMecca.distanceKm < 2.0)
+    }
 }

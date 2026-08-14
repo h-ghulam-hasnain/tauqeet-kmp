@@ -1,5 +1,7 @@
 package com.tauqeet.library.prayers
 
+import com.tauqeet.library.prayers.prayerRequest
+
 import com.tauqeet.library.time.dateToJulianDay
 import com.tauqeet.library.prayers.computePrayerTimes
 import com.tauqeet.library.prayers.CalculationMethod
@@ -7,7 +9,7 @@ import com.tauqeet.library.prayers.Madhab
 import com.tauqeet.library.prayers.HighLatitudeRule
 import kotlin.test.Test
 import kotlin.test.assertTrue
-
+import com.tauqeet.library.DateComponents
 class ChronologicalOrderTest {
     @Test
     fun testChronologicalOrderInvariant() {
@@ -23,7 +25,12 @@ class ChronologicalOrderTest {
                 // Ensure times are chronologically ordered in local mean time.
                 // We add tzOffset corresponding to local mean time to avoid negative UTC wrap-arounds.
                 val lng = 0.0 // Arbitrary longitude for LMT test
-                val result = computePrayerTimes(lat, lng, jd, CalculationMethod.MWL, Madhab.SHAFI, HighLatitudeRule.MIDDLE_OF_NIGHT)
+                val result = computePrayerTimes(prayerRequest {
+    date = DateComponents(year, 6, 21)
+    latitude = lat
+    longitude = lng
+    timeZoneOffset = 0.0
+})
                 
                 // Normalizing to local day
                 val msPerDay = 86400000L
