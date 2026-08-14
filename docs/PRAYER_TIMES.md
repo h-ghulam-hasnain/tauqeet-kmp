@@ -2,6 +2,15 @@
 
 The `tauqeet-kmp` prayer times engine is built upon the highly accurate **VSOP87** theory for solar position and mechanics. It supports a wide array of globally recognized calculation methods and includes robust handling for extreme geographical locations.
 
+## Entry Points & APIs
+
+Two primary APIs are available:
+
+- **Safe API** (Recommended for production): `getPrayerTimesSafe { ... }` or `tauqeet.computePrayerTimesSafe(request)` returns `SafeResult<PrayerTimesResult>` (no exceptions thrown).
+- **Throwing API** (Legacy/simple cases): `getPrayerTimes { ... }` or `tauqeet.computePrayerTimes(request)` throws `TauqeetException` on invalid input.
+
+Both use the same underlying `PrayerRequest` DSL builder, which is **inline-compiled** with zero runtime overhead.
+
 ---
 
 ## 1. Input Parameters & Data Types

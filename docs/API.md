@@ -29,7 +29,8 @@ repositories {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.2.0")
+            implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.3.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
         }
     }
 }
@@ -45,19 +46,19 @@ Calculating the Qibla is incredibly simple. You just provide your `latitude` and
 Use `qiblaDirection()` to retrieve the bearing and distance bundled together in a neat data class.
 
 ```kotlin
-import com.tauqeet.library.Tauqeet
+import com.tauqeet.library.qibla.tauqeetQibla
 
 val lat = 51.5072
 val lng = -0.1276
 
-val tauqeet = Tauqeet()
-val qibla = tauqeet.qiblaDirection(lat, lng)
+val qibla = tauqeetQibla(lat, lng)
 
-if (qibla != null) {
-    println("Turn your compass to: ${qibla.bearing}°") 
-    println("Distance to Mecca: ${qibla.distanceKm} km")
-} else {
-    println("You are standing exactly inside the Kaaba!")
+when (qibla) {
+    null -> println("You are standing exactly inside the Kaaba!")
+    else -> {
+        println("Turn your compass to: ${qibla.bearing}°") 
+        println("Distance to Mecca: ${qibla.distanceKm} km")
+    }
 }
 ```
 
@@ -88,9 +89,36 @@ You don't need to write any error-handling loops; the library manages edge cases
 
 The prayer time engine is robust yet simple to instantiate. 
 
-### **Preferred Request Style (Unified API)**
-The recommended public entry point is the unified `PrayerRequest` DSL, which keeps date, location, timezone, and calculation settings together in a single clean request object.
+### **Preferred Request Style (Unified DSL API)**
+The recommended public entry point is the unified `PrayerRequest` DSL, which keeps date, location, timezone, and calculation settings together in a single clean request object. The DSL is **inline-compiled** (zero runtime overhead) and offers both throwing and safe variants.
 
+#### **Option 1: Safe API (Recommended for Apps)**
+```kotlin
+import com.tauqeet.library.DateComponents
+import com.tauqeet.library.getPrayerTimesSafe
+import com.tauqeet.library.prayers.SafeResult
+import com.tauqeet.library.toTimeString
+
+val result = getPrayerTimesSafe {
+    latitude = 24.8607
+    longitude = 67.0011
+    date = DateComponents(2026, 8, 1)
+    timeZoneOffset = 5.0 // Pakistan Standard Time (UTC+5)
+}
+
+when (result) {
+    is SafeResult.Success -> {
+        println("Fajr: ${result.data.fajr?.toTimeString()}")
+        println("Dhuhr: ${result.data.dhuhr?.toTimeString()}")
+    }
+    is SafeResult.Failure -> {
+        println("Error (${result.code}): ${result.message}")
+        // result.cause contains the underlying TauqeetException if needed
+    }
+}
+```
+
+#### **Option 2: Throwing API (For Simple Cases)**
 ```kotlin
 import com.tauqeet.library.DateComponents
 import com.tauqeet.library.Tauqeet

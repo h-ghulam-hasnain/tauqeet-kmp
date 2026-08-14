@@ -16,14 +16,42 @@ If you are standing near the antipodal point of the Kaaba, the iterative Vincent
 
 ## API Reference
 
-### `Tauqeet.qiblaDirection(lat: Double, lng: Double): QiblaResult?`
-This is the preferred public API. It returns both the bearing (in degrees from true north) and the distance (in kilometers). If the provided coordinates are extremely close to the Kaaba (distance < 1 meter), the function returns `null` because all directions face the Kaaba.
+### Primary Entry Point (Recommended)
 
-### `Tauqeet.qiblaBearing(lat: Double, lng: Double): Double?`
-A backward-compatible convenience method that returns just the bearing. Internally, it delegates to the same underlying geodetic calculation and discards the distance component.
+**`tauqeetQibla(lat: Double, lng: Double): QiblaResult?`**
 
-### `tauqeetQibla(lat: Double, lng: Double): QiblaResult?`
-A lower-level free function that exposes the same calculation logic for advanced callers and internal use.
+A top-level free function that provides the most concise API. Returns both bearing and distance to Mecca. This is the recommended choice for most use cases.
+
+```kotlin
+import com.tauqeet.library.qibla.tauqeetQibla
+
+val qibla = tauqeetQibla(lat = 51.5072, lng = -0.1276)
+when (qibla) {
+    null -> println("You are at the Kaaba")
+    else -> println("Bearing: ${qibla.bearing}°, Distance: ${qibla.distanceKm} km")
+}
+```
+
+### Instance Methods (With Environmental Parameters)
+
+If you need to influence the calculation with environmental parameters (elevation, temperature, pressure), use the instance methods on `Tauqeet`:
+
+**`Tauqeet.qiblaDirection(lat: Double, lng: Double): QiblaResult?`**
+
+Returns both bearing and distance, with the environmental parameters configured on the `Tauqeet` instance applied.
+
+```kotlin
+val tauqeet = Tauqeet(
+    elevationMeters = 1000.0,  // mountain location
+    temperatureC = 5.0,
+    pressureMbar = 950.0
+)
+val qibla = tauqeet.qiblaDirection(lat = 51.5072, lng = -0.1276)
+```
+
+**`Tauqeet.qiblaBearing(lat: Double, lng: Double): Double?`**
+
+A backward-compatible convenience method that returns just the bearing angle (ignoring distance). Internally delegates to `qiblaDirection()`.
 
 ## Best Practices
 - Remember that the bearing returned is relative to **True North**, not Magnetic North. If you are building a compass app, you must account for magnetic declination based on the user's location to point the hardware compass correctly.

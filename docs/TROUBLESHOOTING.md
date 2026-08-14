@@ -4,7 +4,68 @@ Common questions and issues when integrating `tauqeet-kmp`.
 
 ---
 
+## API & Error Handling
+
+### "Which API should I use: Safe or Throwing?"
+
+**Use Safe API** (`getPrayerTimesSafe`, `computePrayerTimesSafe`) for:
+- Production application code (don't want unhandled exceptions crashing the app)
+- Structured error handling with error codes
+- Pattern matching with `when` blocks
+- Clean separation of success and failure paths
+
+**Use Throwing API** (`getPrayerTimes`, `computePrayerTimes`) for:
+- Scripts or internal tools where crashes are acceptable
+- Backward compatibility with existing code
+- Quick prototyping
+
+### "What's a `SafeResult`?"
+
+It's a sealed class with two branches:
+```kotlin
+when (val result = getPrayerTimesSafe { /* ... */ }) {
+    is SafeResult.Success -> {
+        // result.data contains the PrayerTimesResult
+        println("Fajr: ${result.data.fajr?.toTimeString()}")
+    }
+    is SafeResult.Failure -> {
+        // result.code contains error code (e.g., "INVALID_LATITUDE")
+        // result.message contains human-readable message
+        // result.cause contains the underlying TauqeetException if needed
+        println("Error: ${result.message}")
+    }
+}
+```
+
+### "I got `INVALID_LATITUDE` error. What went wrong?"
+
+**Common causes:**
+- Latitude is `NaN` or `Infinity`
+- Latitude is outside [-90.0, 90.0] range
+
+**Fix:**
+```kotlin
+if (lat.isFinite() && lat in -90.0..90.0) {
+    // Safe to use
+} else {
+    showErrorMessage("Invalid location")
+}
+```
+
+---
+
 ## Prayer Times
+
+### "How do I format the times returned?"
+
+Use the built-in extension functions on `Long`:
+```kotlin
+val fajrMs = times.fajr ?: return
+println(fajrMs.toTimeString())           // "05:14:32"
+println(fajrMs.toTimeStringShort())      // "05:14"
+println(fajrMs.toISOTimeString())        // "05:14:32"
+println(fajrMs.toISOTimeStringWithMillis()) // "05:14:32.412"
+```
 
 ### "Fajr or Isha is `null` in my app"
 
@@ -66,18 +127,19 @@ val tauqeet = Tauqeet(madhab = Madhab.SHAFI) // or HANAFI
 
 ### "Times are correct but shown in UTC instead of local time"
 
-**Cause:** You did not pass `timezoneOffset`.
+**Cause:** You did not pass `timeZoneOffset`.
 
-**Fix:** Pass the correct offset in decimal hours using the request-based API:
+**Fix:** Pass the correct offset in decimal hours using the DSL:
 ```kotlin
-tauqeet.computePrayerTimes(
-    prayerRequest {
-        latitude = lat
-        longitude = lng
-        date = DateComponents(year, month, day)
-        timeZoneOffset = 5.0 // UTC+5
-    }
-)
+val result = getPrayerTimesSafe {
+    latitude = lat
+    longitude = lng
+    date = DateComponents(year, month, day)
+    timeZoneOffset = 5.0 // UTC+5
+}
+```
+
+Always check that `timeZoneOffset` is set correctly. Default is `0.0` (UTC).
 
 tauqeet.computePrayerTimes(
     prayerRequest {

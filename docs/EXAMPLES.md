@@ -2,20 +2,42 @@
 
 This document provides exhaustive, real-world Kotlin code examples covering every input parameter, all geographic scenarios, and all possible edge cases documented in [PRAYER_TIMES.md](PRAYER_TIMES.md).
 
+**Key Takeaway**: Both **safe** (non-throwing) and **throwing** APIs are available. For application code, prefer the **safe API** with `SafeResult` to avoid try/catch boilerplate.
+
 ---
 
 ## Quick Reference: Required vs Optional Inputs
 
 ```kotlin
+// === SAFE API (Recommended) ===
+val result = getPrayerTimesSafe {
+    latitude = 24.8607
+    longitude = 67.0011
+    date = DateComponents(2026, 8, 1)
+    timeZoneOffset = 5.0
+    calculation {
+        method = CalculationMethod.KARACHI
+        madhab = Madhab.HANAFI
+        highLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT
+        elevationMeters = 0.0
+        temperatureC = 12.714
+        pressureMbar = 1010.0
+    }
+}
+
+when (result) {
+    is SafeResult.Success -> println("Times: ${result.data}")
+    is SafeResult.Failure -> println("Error: ${result.message}")
+}
+
+// === THROWING API (Legacy) ===
 val tauqeet = Tauqeet(
-    // --- ALL OPTIONAL (Engine Configuration) ---
-    method             = CalculationMethod.KARACHI,    // Default: KARACHI
-    madhab             = Madhab.HANAFI,                // Default: HANAFI
-    highLatitudeRule   = HighLatitudeRule.MIDDLE_OF_NIGHT, // Default: MIDDLE_OF_NIGHT
-    elevationMeters    = 0.0,                          // Default: 0.0
-    temperatureC       = 12.714,                       // Default: 12.714
-    pressureMbar       = 1010.0,                       // Default: 1010.0
-    customMethodParams = null                          // Default: null
+    method = CalculationMethod.KARACHI,
+    madhab = Madhab.HANAFI,
+    highLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT,
+    elevationMeters = 0.0,
+    temperatureC = 12.714,
+    pressureMbar = 1010.0
 )
 
 val times = tauqeet.computePrayerTimes(
@@ -24,7 +46,6 @@ val times = tauqeet.computePrayerTimes(
         longitude = 67.0011
         date = DateComponents(2026, 8, 1)
         timeZoneOffset = 5.0
-        includeAdvancedMetadata = false
     }
 )
 ```

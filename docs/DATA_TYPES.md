@@ -2,6 +2,43 @@
 
 This document details all data types returned by `tauqeet-kmp`, what they mean, and their edge cases (error states).
 
+## `SafeResult<T>` (Sealed Class)
+Returned by all `*Safe()` variants (e.g., `getPrayerTimesSafe()`, `computePrayerTimesSafe()`).
+
+```kotlin
+sealed class SafeResult<out T> {
+    data class Success<out T>(val data: T) : SafeResult<T>()
+    data class Failure(
+        val code: String,
+        val message: String,
+        val cause: Throwable? = null
+    ) : SafeResult<Nothing>()
+}
+```
+
+### Usage with Pattern Matching
+```kotlin
+when (val result = getPrayerTimesSafe { /* ... */ }) {
+    is SafeResult.Success -> {
+        println("Fajr: ${result.data.fajr?.toTimeString()}")
+    }
+    is SafeResult.Failure -> {
+        println("Error Code: ${result.code}")
+        println("Message: ${result.message}")
+        result.cause?.printStackTrace() // TauqeetException
+    }
+}
+```
+
+### Common Error Codes
+- `INVALID_LATITUDE` — latitude outside [-90.0, 90.0]
+- `INVALID_LONGITUDE` — longitude outside [-180.0, 180.0]
+- `INVALID_DATE` — month/day out of range
+- `INVALID_TIMEZONE_OFFSET` — outside [-12.0, +14.0]
+- `INVALID_ELEVATION` — outside [-500, 9000] meters
+- `INVALID_TEMPERATURE` — outside [-90, 80] Celsius
+- `INVALID_PRESSURE` — outside [100, 1100] millibars
+
 ## `QiblaResult`
 Returned by `tauqeetQibla()` and `Tauqeet().qiblaDirection()`.
 

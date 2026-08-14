@@ -38,12 +38,13 @@ Each method encodes the solar depression angles used by a specific Islamic autho
 
 The recommended way to apply these values is through the request-based API. Constructor settings act as defaults, while a per-request `calculation { ... }` block can override them for a single computation.
 
+**Using Safe API:**
 ```kotlin
 import com.tauqeet.library.DateComponents
-import com.tauqeet.library.Tauqeet
+import com.tauqeet.library.getPrayerTimesSafe
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.CalculationMethodParameters
-import com.tauqeet.library.prayers.prayerRequest
+import com.tauqeet.library.prayers.SafeResult
 
 val myCustomMethod = CalculationMethodParameters(
     fajrAngle    = 15.5,  // degrees
@@ -53,11 +54,8 @@ val myCustomMethod = CalculationMethodParameters(
     maghribInterval = 0   // minutes after sunset (0 = use maghribAngle)
 )
 
-val tauqeet = Tauqeet(method = CalculationMethod.KARACHI)
-
-val times = tauqeet.computePrayerTimes(
-    prayerRequest {
-        latitude = 24.8607
+val result = getPrayerTimesSafe {
+    latitude = 24.8607
         longitude = 67.0011
         date = DateComponents(2026, 8, 1)
         timeZoneOffset = 5.0

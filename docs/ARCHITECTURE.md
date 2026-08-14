@@ -7,7 +7,10 @@
 1. **Zero-Allocation Core**: The core mathematical and astronomical algorithms are designed to minimize object allocations during calculations. This is crucial for high-performance applications (such as AR applications displaying Qibla directions 60 times a second).
 2. **Mathematical Parity**: The library guarantees 1:1 mathematical parity with the original `tauqeet-js` TypeScript implementation, bringing the same rigorous astronomical standards to the Kotlin ecosystem.
 3. **Graceful Fallbacks**: The library is built to avoid crashes in extreme edge cases (like standing exactly at the Kaaba or at its antipode, or computing prayer times inside the Arctic Circle).
-4. **Unified Public API**: The public surface now prefers a `PrayerRequest` DSL that packages date, location, timezone, and calculation configuration into a single request object while keeping the old flat overloads as deprecated compatibility shims.
+4. **Unified Public API with Dual Entry Points**: 
+   - **Safe API** (`getPrayerTimesSafe`, `computePrayerTimesSafe`): Returns `SafeResult<T>` (no exceptions). Ideal for application code that needs structured error handling.
+   - **Throwing API** (`getPrayerTimes`, `computePrayerTimes`): Throws `TauqeetException` on invalid input. Backward compatible for legacy code.
+   - Both share the same underlying `PrayerRequest` DSL builder, which is **inline-compiled** (zero runtime overhead).
 5. **Solver Metadata Transparency**: The final result now exposes `resolutionInfo` and `flags` so callers can understand whether the engine resolved a request as `NORMAL`, `HIGH_LATITUDE`, `POLAR_DAY`, or `POLAR_NIGHT`.
 
 ## Project Structure
