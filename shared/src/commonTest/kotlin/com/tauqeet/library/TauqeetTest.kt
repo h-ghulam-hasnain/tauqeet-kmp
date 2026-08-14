@@ -107,14 +107,14 @@ class TauqeetTest {
         val date = DateComponents(2026, 8, 1)
 
         val fromInts   = tauqeet.computePrayerTimes(prayerRequest {
-            date = DateComponents(2026, 8, 1)
-            latitude = 24.8607
-            longitude = 67.0011
+            this.date = DateComponents(2026, 8, 1)
+            this.latitude = 24.8607
+            this.longitude = 67.0011
         })
         val fromComponents = tauqeet.computePrayerTimes(prayerRequest {
-            date = date
-            latitude = 24.8607
-            longitude = 67.0011
+            this.date = date
+            this.latitude = 24.8607
+            this.longitude = 67.0011
         })
 
         assertEquals(fromInts.fajr,  fromComponents.fajr,  "DateComponents overload must match int overload")

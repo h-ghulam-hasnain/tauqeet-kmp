@@ -3,6 +3,7 @@ package com.tauqeet.library.prayers
 import com.tauqeet.library.prayers.prayerRequest
 
 import com.tauqeet.library.Tauqeet
+import com.tauqeet.library.DateComponents
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.random.Random
@@ -22,11 +23,11 @@ class FormulaInvariantTest {
             val day = random.nextInt(1, 28)
             
             val result = tauqeet.computePrayerTimes(prayerRequest {
-            date = DateComponents(2026, month, day)
-            latitude = lat
-            longitude = lng
-            timeZoneOffset = tz
-        })
+                this.date = DateComponents(2026, month, day)
+                this.latitude = lat
+                this.longitude = lng
+                this.timeZoneOffset = tz
+            })
             
             // Extract times
             val fajr = result.fajr

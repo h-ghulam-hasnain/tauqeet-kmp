@@ -145,6 +145,55 @@ fun main() {
 }
 ```
 
+## Safe API and Modern Kotlin Features
+
+`tauqeet-kmp` provides a `SafeResult` wrapper and Kotlin top-level helpers to avoid `try/catch` boilerplate, similar to modern JavaScript patterns. It also provides built-in overloads for `kotlinx-datetime`.
+
+### 1. `getPrayerTimesSafe` & `SafeResult`
+Instead of catching `TauqeetException` on invalid inputs (like invalid coordinates), use the safe API and `when` pattern matching:
+
+```kotlin
+import com.tauqeet.library.getPrayerTimesSafe
+import com.tauqeet.library.prayers.SafeResult
+
+val result = getPrayerTimesSafe {
+    latitude = 24.8607
+    longitude = 67.0011
+    date = com.tauqeet.library.DateComponents(2026, 4, 27)
+}
+
+when (result) {
+    is SafeResult.Success -> {
+        println("Fajr is at: ${result.data.fajr}")
+    }
+    is SafeResult.Failure -> {
+        // e.g., result.code == "INVALID_LATITUDE"
+        println("Error [${result.code}]: ${result.message}")
+    }
+}
+```
+
+### 2. `kotlinx-datetime` Integration
+If you are using `org.jetbrains.kotlinx:kotlinx-datetime`, you can seamlessly pass `LocalDate` or `Instant` without manually extracting `year`, `month`, and `day`:
+
+```kotlin
+import com.tauqeet.library.Tauqeet
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+
+val tauqeet = Tauqeet()
+val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
+// Pass LocalDate directly
+val times = tauqeet.computePrayerTimes(
+    date = today,
+    lat = 24.8607,
+    lng = 67.0011,
+    timezoneOffset = 5.0
+)
+```
+
 ## Supported Calculation Methods
 - `MWL` (Muslim World League)
 - `ISNA` (Islamic Society of North America)

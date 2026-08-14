@@ -3,7 +3,8 @@ package com.tauqeet.library.prayers
 import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.DateComponents
 import com.tauqeet.library.prayers.prayerRequest
-
+import kotlin.test.Test
+import kotlin.test.assertTrue
 class HighLatitudeTest {
     @Test
     fun testHighLatitudePartialResolutionDoesNotReturnNull() {

@@ -3,7 +3,7 @@ package com.tauqeet.library.prayers
 import com.tauqeet.library.prayers.prayerRequest
 
 import com.tauqeet.library.time.dateToJulianDay
-import com.tauqeet.library.prayers.computePrayerTimes
+import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.Madhab
 import com.tauqeet.library.prayers.HighLatitudeRule
@@ -25,12 +25,12 @@ class ChronologicalOrderTest {
                 // Ensure times are chronologically ordered in local mean time.
                 // We add tzOffset corresponding to local mean time to avoid negative UTC wrap-arounds.
                 val lng = 0.0 // Arbitrary longitude for LMT test
-                val result = computePrayerTimes(prayerRequest {
-    date = DateComponents(year, 6, 21)
-    latitude = lat
-    longitude = lng
-    timeZoneOffset = 0.0
-})
+                val result = Tauqeet().computePrayerTimes(prayerRequest {
+                    this.date = DateComponents(year, 6, 21)
+                    this.latitude = lat
+                    this.longitude = lng
+                    this.timeZoneOffset = 0.0
+                })
                 
                 // Normalizing to local day
                 val msPerDay = 86400000L

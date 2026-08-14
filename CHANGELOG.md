@@ -3,6 +3,16 @@
 All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/) and follows [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-08-14
+
+### Added
+- Added `kotlinx-datetime` support with seamless `LocalDate` and `Instant` overloads for `computePrayerTimes`.
+- Introduced `SafeResult` and `getPrayerTimesSafe` to allow for idiomatic Kotlin pattern matching without `try/catch` blocks.
+- Added domain-specific error codes to `TauqeetException` (e.g., `INVALID_LATITUDE`, `DATE_OUT_OF_RANGE`) for structured error handling.
+- Added top-level convenience functions `getPrayerTimes` and `getPrayerTimesSafe` for clean, single-call executions.
+
+### Fixed
+- Fixed timezone offset double-application bugs in tests and ensured robust calculation defaults.
 ## [0.2.0] - 2026-08-04
 
 ### Added

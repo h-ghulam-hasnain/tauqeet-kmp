@@ -3,6 +3,7 @@ package com.tauqeet.library.integration
 import com.tauqeet.library.prayers.prayerRequest
 
 import com.tauqeet.library.Tauqeet
+import com.tauqeet.library.DateComponents
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -18,10 +19,10 @@ class RealWorldCitiesTest {
 
         // Karachi (Standard)
         val karachi = tauqeet.computePrayerTimes(prayerRequest {
-            date = DateComponents(year, month, day)
-            latitude = 24.8607
-            longitude = 67.0011
-            timeZoneOffset = 5.0
+            this.date = DateComponents(year, month, day)
+            this.latitude = 24.8607
+            this.longitude = 67.0011
+            this.timeZoneOffset = 5.0
         })
         assertNotNull(karachi.fajr)
         assertNotNull(karachi.dhuhr)
@@ -31,10 +32,10 @@ class RealWorldCitiesTest {
 
         // London (High Latitude)
         val london = tauqeet.computePrayerTimes(prayerRequest {
-            date = DateComponents(year, month, day)
-            latitude = 51.5072
-            longitude = -0.1276
-            timeZoneOffset = 1.0
+            this.date = DateComponents(year, month, day)
+            this.latitude = 51.5072
+            this.longitude = -0.1276
+            this.timeZoneOffset = 1.0
         })
         assertNotNull(london.fajr)
         assertNotNull(london.dhuhr)
@@ -44,10 +45,10 @@ class RealWorldCitiesTest {
 
         // Tokyo (Far East)
         val tokyo = tauqeet.computePrayerTimes(prayerRequest {
-            date = DateComponents(year, month, day)
-            latitude = 35.6762
-            longitude = 139.6503
-            timeZoneOffset = 9.0
+            this.date = DateComponents(year, month, day)
+            this.latitude = 35.6762
+            this.longitude = 139.6503
+            this.timeZoneOffset = 9.0
         })
         assertNotNull(tokyo.fajr)
         assertNotNull(tokyo.dhuhr)
@@ -57,10 +58,10 @@ class RealWorldCitiesTest {
 
         // Mecca (Near equator)
         val mecca = tauqeet.computePrayerTimes(prayerRequest {
-            date = DateComponents(year, month, day)
-            latitude = 21.4225
-            longitude = 39.8262
-            timeZoneOffset = 3.0
+            this.date = DateComponents(year, month, day)
+            this.latitude = 21.4225
+            this.longitude = 39.8262
+            this.timeZoneOffset = 3.0
         })
         assertNotNull(mecca.fajr)
         assertNotNull(mecca.dhuhr)
@@ -70,10 +71,10 @@ class RealWorldCitiesTest {
 
         // Oslo (Extreme High Latitude)
         val oslo = tauqeet.computePrayerTimes(prayerRequest {
-            date = DateComponents(year, month, day)
-            latitude = 59.9139
-            longitude = 10.7522
-            timeZoneOffset = 2.0
+            this.date = DateComponents(year, month, day)
+            this.latitude = 59.9139
+            this.longitude = 10.7522
+            this.timeZoneOffset = 2.0
         })
         assertNotNull(oslo.fajr)
         assertNotNull(oslo.dhuhr)

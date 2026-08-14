@@ -56,14 +56,10 @@ class UnifiedApiTest {
     fun testPolarDayResolutionMetadataIsPropagated() {
         val tauqeet = Tauqeet()
         val result = tauqeet.computePrayerTimes(prayerRequest {
-            date = prayerRequest {
-                latitude = 69.6492
-                longitude = 18.9553
-                date = DateComponents(2026
-            latitude = 6
-            longitude = 21
-        })
-                timeZoneOffset = 1.0
+            this.latitude = 69.6492
+            this.longitude = 18.9553
+            this.date = DateComponents(2026, 6, 21)
+            this.timeZoneOffset = 1.0
             }
         )
 
@@ -76,14 +72,10 @@ class UnifiedApiTest {
     fun testPolarNightResolutionMetadataIsPropagated() {
         val tauqeet = Tauqeet()
         val result = tauqeet.computePrayerTimes(prayerRequest {
-            date = prayerRequest {
-                latitude = 69.6492
-                longitude = 18.9553
-                date = DateComponents(2026
-            latitude = 12
-            longitude = 21
-        })
-                timeZoneOffset = 1.0
+            this.latitude = 69.6492
+            this.longitude = 18.9553
+            this.date = DateComponents(2026, 12, 21)
+            this.timeZoneOffset = 1.0
             }
         )
 
@@ -96,14 +88,10 @@ class UnifiedApiTest {
     fun testHighLatitudeFallbackFlagIsRaisedForEdgeCaseLatitude() {
         val tauqeet = Tauqeet()
         val result = tauqeet.computePrayerTimes(prayerRequest {
-            date = prayerRequest {
-                latitude = 69.6492
-                longitude = 18.9553
-                date = DateComponents(2026
-            latitude = 6
-            longitude = 21
-        })
-                timeZoneOffset = 1.0
+            this.latitude = 69.6492
+            this.longitude = 18.9553
+            this.date = DateComponents(2026, 6, 21)
+            this.timeZoneOffset = 1.0
                 calculation {
                     method = CalculationMethod.MWL
                     highLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT
@@ -124,14 +112,10 @@ class UnifiedApiTest {
     fun testHighLatitudePartialResolutionKeepsDhuhrIntact() {
         val tauqeet = Tauqeet()
         val result = tauqeet.computePrayerTimes(prayerRequest {
-            date = prayerRequest {
-                latitude = 69.6492
-                longitude = 18.9553
-                date = DateComponents(2026
-            latitude = 6
-            longitude = 21
-        })
-                timeZoneOffset = 1.0
+            this.latitude = 69.6492
+            this.longitude = 18.9553
+            this.date = DateComponents(2026, 6, 21)
+            this.timeZoneOffset = 1.0
             }
         )
 

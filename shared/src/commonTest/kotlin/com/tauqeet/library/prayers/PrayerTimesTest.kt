@@ -26,15 +26,12 @@ class PrayerTimesTest {
         }
         val tauqeet = Tauqeet()
         val result = tauqeet.computePrayerTimes(request)
-        // Convert to local timezone (UTC+5)
-        val tzOffsetMs = (5.0 * 3600000.0).toLong()
-        val msPerDay = 86400000L
-        val fajrLocal = (result.fajr!! + tzOffsetMs + msPerDay) % msPerDay
-        val sunriseLocal = (result.sunrise!! + tzOffsetMs + msPerDay) % msPerDay
-        val dhuhrLocal = (result.dhuhr!! + tzOffsetMs + msPerDay) % msPerDay
-        val asrLocal = (result.asr!! + tzOffsetMs + msPerDay) % msPerDay
-        val maghribLocal = (result.maghrib!! + tzOffsetMs + msPerDay) % msPerDay
-        val ishaLocal = (result.isha!! + tzOffsetMs + msPerDay) % msPerDay
+        val fajrLocal = result.fajr!!
+        val sunriseLocal = result.sunrise!!
+        val dhuhrLocal = result.dhuhr!!
+        val asrLocal = result.asr!!
+        val maghribLocal = result.maghrib!!
+        val ishaLocal = result.isha!!
         assertTrue(fajrLocal > 0)
         assertTrue(sunriseLocal > fajrLocal)
         assertTrue(dhuhrLocal > sunriseLocal)

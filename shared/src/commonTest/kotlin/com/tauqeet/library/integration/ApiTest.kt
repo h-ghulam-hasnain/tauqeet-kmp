@@ -18,10 +18,10 @@ class ApiTest {
         
         val date = DateComponents(2024, 4, 27)
         val result = tauqeet.computePrayerTimes(prayerRequest {
-            date = date
-            latitude = 24.8607
-            longitude = 67.0011
-            timeZoneOffset = 5.0
+            this.date = date
+            this.latitude = 24.8607
+            this.longitude = 67.0011
+            this.timeZoneOffset = 5.0
         })
         
         // Asserting string conversions properly map

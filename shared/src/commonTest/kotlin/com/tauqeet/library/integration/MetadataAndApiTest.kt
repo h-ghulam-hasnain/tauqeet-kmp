@@ -4,6 +4,7 @@ import com.tauqeet.library.prayers.prayerRequest
 
 import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.prayers.CalculationMethod
+import com.tauqeet.library.DateComponents
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -18,11 +19,11 @@ class MetadataAndApiTest {
         
         // Use true for advanced metadata
         val result = tauqeet.computePrayerTimes(prayerRequest {
-            date = DateComponents(2026, 8, 15)
-            latitude = 24.8607
-            longitude = 67.0011
-            timeZoneOffset = 5.0
-            includeAdvancedMetadata = true
+            this.date = DateComponents(2026, 8, 15)
+            this.latitude = 24.8607
+            this.longitude = 67.0011
+            this.timeZoneOffset = 5.0
+            this.includeAdvancedMetadata = true
         })
         
         // Assert basic metadata
@@ -58,11 +59,11 @@ class MetadataAndApiTest {
         
         // Tromsø, Norway in Summer (Midnight Sun)
         val result = tauqeet.computePrayerTimes(prayerRequest {
-            date = DateComponents(2026, 6, 21)
-            latitude = 69.6492
-            longitude = 18.9553
-            timeZoneOffset = 2.0
-            includeAdvancedMetadata = true
+            this.date = DateComponents(2026, 6, 21)
+            this.latitude = 69.6492
+            this.longitude = 18.9553
+            this.timeZoneOffset = 2.0
+            this.includeAdvancedMetadata = true
         })
         
         assertNotNull(result.metadata)

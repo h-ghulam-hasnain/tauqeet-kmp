@@ -14,6 +14,11 @@ import com.tauqeet.library.qibla.tauqeetQibla
 import com.tauqeet.library.qibla.QiblaResult
 import com.tauqeet.library.time.dateToJulianDay
 import kotlin.math.roundToLong
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import com.tauqeet.library.prayers.SafeResult
 
 data class DateComponents(val year: Int, val month: Int, val day: Int)
 
@@ -243,4 +248,77 @@ class Tauqeet(
         validateLongitude(lng)
         return bearingToMecca(lat, lng)
     }
+
+    /**
+     * Safe wrapper for computing prayer times that returns a [SafeResult] instead of throwing.
+     */
+    fun computePrayerTimesSafe(request: PrayerRequest): SafeResult<PrayerTimesResult> {
+        return try {
+            SafeResult.Success(computePrayerTimes(request))
+        } catch (e: TauqeetException) {
+            SafeResult.Failure(e.errorCode, e.message ?: "Unknown error", e)
+        }
+    }
+
+    /**
+     * Safe wrapper that takes a builder block. This catches validation errors that happen 
+     * during the construction of the [PrayerRequest].
+     */
+    fun computePrayerTimesSafe(builder: com.tauqeet.library.prayers.PrayerRequestBuilder.() -> Unit): SafeResult<PrayerTimesResult> {
+        return try {
+            SafeResult.Success(computePrayerTimes(prayerRequest(builder)))
+        } catch (e: TauqeetException) {
+            SafeResult.Failure(e.errorCode, e.message ?: "Unknown error", e)
+        }
+    }
+
+    /**
+     * Convenience overload accepting [LocalDate].
+     */
+    fun computePrayerTimes(
+        date: LocalDate,
+        lat: Double,
+        lng: Double,
+        timezoneOffset: Double = 0.0,
+        includeAdvancedMetadata: Boolean = false
+    ): PrayerTimesResult = computePrayerTimes(prayerRequest {
+        this.latitude = lat
+        this.longitude = lng
+        this.date = DateComponents(date.year, date.monthNumber, date.dayOfMonth)
+        this.timeZoneOffset = timezoneOffset
+        this.includeAdvancedMetadata = includeAdvancedMetadata
+        calculation {
+            method = this@Tauqeet.method
+            madhab = this@Tauqeet.madhab
+            highLatitudeRule = this@Tauqeet.highLatitudeRule
+            elevationMeters = this@Tauqeet.elevationMeters
+            temperatureC = this@Tauqeet.temperatureC
+            pressureMbar = this@Tauqeet.pressureMbar
+            customMethodParams = this@Tauqeet.customMethodParams
+        }
+    })
+
+    /**
+     * Convenience overload accepting [Instant], deriving date using UTC.
+     */
+    fun computePrayerTimes(
+        instant: Instant,
+        lat: Double,
+        lng: Double,
+        timezoneOffset: Double = 0.0,
+        includeAdvancedMetadata: Boolean = false
+    ): PrayerTimesResult {
+        val date = instant.toLocalDateTime(TimeZone.UTC).date
+        return computePrayerTimes(date, lat, lng, timezoneOffset, includeAdvancedMetadata)
+    }
 }
+
+/** Top-level convenience function for quick, one-off calculations */
+fun getPrayerTimes(request: PrayerRequest): PrayerTimesResult = Tauqeet().computePrayerTimes(request)
+
+/** Top-level convenience function for safe, one-off calculations */
+fun getPrayerTimesSafe(request: PrayerRequest): SafeResult<PrayerTimesResult> = Tauqeet().computePrayerTimesSafe(request)
+
+/** Top-level convenience function for safe, one-off calculations using a builder block */
+fun getPrayerTimesSafe(builder: com.tauqeet.library.prayers.PrayerRequestBuilder.() -> Unit): SafeResult<PrayerTimesResult> = 
+    Tauqeet().computePrayerTimesSafe(builder)
