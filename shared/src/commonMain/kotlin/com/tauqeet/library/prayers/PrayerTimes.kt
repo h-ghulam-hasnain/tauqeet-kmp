@@ -84,6 +84,7 @@ data class PrayerTimesResult(
     val asr: Long?,
     val maghrib: Long?,
     val isha: Long?,
+    val status: PrayerStatus = PrayerStatus.SUCCESS,
     val metadata: PrayerTimesMetadata? = null,
     val astronomicalMetadata: AstronomicalMetadata? = null,
     val flags: Int = 0,
@@ -360,6 +361,13 @@ fun computePrayerTimes(
         )
     } else null
 
+    val overallStatus = when {
+        isPolarDay || resolutionInfo.solver == SolverKind.POLAR_DAY -> PrayerStatus.POLAR_DAY
+        isPolarNight || resolutionInfo.solver == SolverKind.POLAR_NIGHT -> PrayerStatus.POLAR_NIGHT
+        fallbackApplied || resolutionInfo.solver == SolverKind.HIGH_LATITUDE -> PrayerStatus.CONTINUOUS_TWILIGHT
+        else -> PrayerStatus.SUCCESS
+    }
+
     return PrayerTimesResult(
         fajr = finalFajr?.let { (it * hoursToMs).roundToLong() },
         sunrise = finalSunrise?.let { (it * hoursToMs).roundToLong() },
@@ -368,6 +376,7 @@ fun computePrayerTimes(
         asr = finalAsr?.let { (it * hoursToMs).roundToLong() },
         maghrib = finalMaghrib?.let { (it * hoursToMs).roundToLong() },
         isha = finalIsha?.let { (it * hoursToMs).roundToLong() },
+        status = overallStatus,
         metadata = PrayerTimesMetadata(
             method = methodName,
             madhab = madhab.name,

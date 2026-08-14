@@ -115,10 +115,10 @@ internal class HighLatitudeResolver(
     fun resolve(
         fajrHr: Double?, sunriseHr: Double?, sunsetHr: Double?, ishaHr: Double?, dhuhrHr: Double, lat: Double, solarDeclination: Double
     ): HighLatitudeResult {
-        var finalFajr: Double = fajrHr ?: (dhuhrHr - 8.0)
-        var finalSunrise: Double = sunriseHr ?: (dhuhrHr - 6.0)
-        var finalSunset: Double = sunsetHr ?: (dhuhrHr + 6.0)
-        var finalIsha: Double = ishaHr ?: (dhuhrHr + 8.0)
+        var finalFajr: Double? = fajrHr
+        var finalSunrise: Double? = sunriseHr
+        var finalSunset: Double? = sunsetHr
+        var finalIsha: Double? = ishaHr
         var isPolarDay = false
         var isPolarNight = false
 
@@ -126,31 +126,30 @@ internal class HighLatitudeResolver(
 
         if (sunriseHr != null && sunsetHr != null) {
             // Night duration calculation
-            var nightDuration = if (finalSunrise < finalSunset) {
-                24.0 - (finalSunset - finalSunrise)
+            var nightDuration = if (finalSunrise!! < finalSunset!!) {
+                24.0 - (finalSunset!! - finalSunrise!!)
             } else {
-                finalSunrise - finalSunset
+                finalSunrise!! - finalSunset!!
             }
             if (nightDuration < 0.001) nightDuration = 0.001
 
             if (fajrHr == null || ishaHr == null) {
-                isPolarDay = true
                 when (highLatRule) {
                     HighLatitudeRule.MIDDLE_OF_NIGHT -> {
                         val halfNight = nightDuration / 2.0
-                        if (fajrHr == null) finalFajr = finalSunrise - halfNight
-                        if (ishaHr == null) finalIsha = finalSunset + halfNight
+                        if (fajrHr == null) finalFajr = finalSunrise!! - halfNight
+                        if (ishaHr == null) finalIsha = finalSunset!! + halfNight
                     }
                     HighLatitudeRule.SEVENTH_OF_NIGHT -> {
                         val seventhNight = nightDuration / 7.0
-                        if (fajrHr == null) finalFajr = finalSunrise - seventhNight
-                        if (ishaHr == null) finalIsha = finalSunset + seventhNight
+                        if (fajrHr == null) finalFajr = finalSunrise!! - seventhNight
+                        if (ishaHr == null) finalIsha = finalSunset!! + seventhNight
                     }
                     HighLatitudeRule.TWILIGHT_ANGLE -> {
                         val fajrProportion = methodParams.fajrAngle / 60.0
                         val ishaProportion = methodParams.ishaAngle / 60.0
-                        if (fajrHr == null) finalFajr = finalSunrise - nightDuration * fajrProportion
-                        if (ishaHr == null) finalIsha = finalSunset + nightDuration * ishaProportion
+                        if (fajrHr == null) finalFajr = finalSunrise!! - nightDuration * fajrProportion
+                        if (ishaHr == null) finalIsha = finalSunset!! + nightDuration * ishaProportion
                     }
                 }
             }

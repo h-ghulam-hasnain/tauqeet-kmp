@@ -88,6 +88,11 @@ class ParityExportTest {
                         this.longitude = loc.lng
                         this.date = DateComponents(year, month, day)
                         this.timeZoneOffset = 0.0
+                        calculation {
+                            method = CalculationMethod.MWL
+                            madhab = Madhab.SHAFI
+                            highLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT
+                        }
                     })
 
                     sb.append(
@@ -109,7 +114,7 @@ class ParityExportTest {
 
         sb.append("\n]")
 
-        val outFile = File(projectRoot, "../comparison/kmp_results.json")
+        val outFile = File(cwd, "../../comparison/kmp_results.json").canonicalFile
         outFile.writeText(sb.toString())
         println("✅ KMP parity results written to ${outFile.absolutePath} (${locations.size * dates.size} entries)")
     }
