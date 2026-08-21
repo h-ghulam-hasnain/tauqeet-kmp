@@ -7,6 +7,13 @@ import com.tauqeet.library.validateLongitude
 import com.tauqeet.library.validateTimezoneOffset
 
 /**
+ * Supported rounding strategies for calculating final prayer times.
+ */
+enum class RoundingStrategy {
+    FIQH_IHTIYAT
+}
+
+/**
  * Encapsulates the configuration parameters for prayer time calculation.
  */
 data class PrayerCalculationParameters(
@@ -16,7 +23,8 @@ data class PrayerCalculationParameters(
     val elevationMeters: Double = 0.0,
     val temperatureC: Double = 12.714,
     val pressureMbar: Double = 1010.0,
-    val customMethodParams: CalculationMethodParameters? = null
+    val customMethodParams: CalculationMethodParameters? = null,
+    val roundingStrategy: RoundingStrategy = RoundingStrategy.FIQH_IHTIYAT
 )
 
 /**
@@ -84,6 +92,7 @@ class PrayerCalculationParametersBuilder {
     var temperatureC: Double = 12.714
     var pressureMbar: Double = 1010.0
     var customMethodParams: CalculationMethodParameters? = null
+    var roundingStrategy: RoundingStrategy = RoundingStrategy.FIQH_IHTIYAT
 
     fun toParams(): PrayerCalculationParameters = PrayerCalculationParameters(
         method = method,
@@ -92,6 +101,7 @@ class PrayerCalculationParametersBuilder {
         elevationMeters = elevationMeters,
         temperatureC = temperatureC,
         pressureMbar = pressureMbar,
-        customMethodParams = customMethodParams
+        customMethodParams = customMethodParams,
+        roundingStrategy = roundingStrategy
     )
 }

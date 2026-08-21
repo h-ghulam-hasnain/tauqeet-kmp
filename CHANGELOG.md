@@ -13,6 +13,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/) and follo
 
 ### Fixed
 - Fixed timezone offset double-application bugs in tests and ensured robust calculation defaults.
+
+### Notes
+
+- Progress Report: Safe Nulls & Explicit Status for `tauqeet-kmp` (summary):
+	- `PrayerTimesResult.status` added and populated by `computePrayerTimes`.
+	- `HighLatitudeResolver` updated to use nullable `Double?` fields and to return `null` for unresolved times during Polar Day/Night where appropriate.
+	- Test run: `./gradlew :shared:allTests` — 86 passed, 2 failed; two unit tests that assumed `dhuhr != null` during Polar Night are now stale and need updating.
+	- Parity run: `npm run parity` showed remaining mismatches (12 failures) rooted in missing Continuous-Twilight 4-case logic — KMP currently applies MIDDLE_OF_NIGHT uniformly where JS intentionally returns `null` for some cases.
+	- Recommended next steps: update the two stale tests to accept `dhuhr == null` in Polar Night (to match JS), implement the Continuous-Twilight 4-case handling in `HighLatitudeResolver`, regenerate `kmp_results.json`, and re-run the parity harness.
+
+Run tests locally:
+```bash
+./gradlew :shared:allTests
+./gradlew :shared:jvmTest --tests "com.tauqeet.library.ParityExportTest"
+cd ../tauqeet-js && npm run parity
+```
+
+
+
 ## [0.2.0] - 2026-08-04
 
 ### Added

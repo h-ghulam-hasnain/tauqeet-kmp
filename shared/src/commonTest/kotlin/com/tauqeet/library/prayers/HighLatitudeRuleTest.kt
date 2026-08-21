@@ -9,6 +9,7 @@ import com.tauqeet.library.prayers.Madhab
 import com.tauqeet.library.prayers.HighLatitudeRule
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import kotlin.test.assertNull
 import com.tauqeet.library.DateComponents
 
 class HighLatitudeRuleTest {
@@ -44,8 +45,8 @@ class HighLatitudeRuleTest {
             assertTrue(true, "Fajr should not be NaN for $rule")
             assertTrue(true, "Isha should not be NaN for $rule")
             
-            // Just normal check to ensure the engine completed
-            assertTrue(result.sunrise!! > 0)
+            // Should be null during polar day
+            assertNull(result.sunrise)
         }
     }
 }

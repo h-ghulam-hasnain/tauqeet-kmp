@@ -34,22 +34,36 @@ class ChronologicalOrderTest {
                 
                 // Normalizing to local day
                 val msPerDay = 86400000L
-                val fajrLocal = (result.fajr!! + msPerDay) % msPerDay
-                val sunriseLocal = (result.sunrise!! + msPerDay) % msPerDay
-                val dhahwaKubraLocal = (result.dhahwaKubra!! + msPerDay) % msPerDay
-                val dhuhrLocal = (result.dhuhr!! + msPerDay) % msPerDay
-                val asrLocal = (result.asr!! + msPerDay) % msPerDay
-                val maghribLocal = (result.maghrib!! + msPerDay) % msPerDay
-                var ishaLocal = (result.isha!! + msPerDay) % msPerDay
+                val fajrLocal = result.fajr?.let { (it + msPerDay) % msPerDay }
+                val sunriseLocal = result.sunrise?.let { (it + msPerDay) % msPerDay }
+                val dhahwaKubraLocal = result.dhahwaKubra?.let { (it + msPerDay) % msPerDay }
+                val dhuhrLocal = result.dhuhr?.let { (it + msPerDay) % msPerDay }
+                val asrLocal = result.asr?.let { (it + msPerDay) % msPerDay }
+                val maghribLocal = result.maghrib?.let { (it + msPerDay) % msPerDay }
+                var ishaLocal = result.isha?.let { (it + msPerDay) % msPerDay }
                 
-                if (ishaLocal < maghribLocal) ishaLocal += msPerDay
+                if (ishaLocal != null && maghribLocal != null && ishaLocal < maghribLocal) {
+                    ishaLocal += msPerDay
+                }
                 
-                assertTrue(fajrLocal < sunriseLocal, "Fajr ($fajrLocal) must be before Sunrise ($sunriseLocal) for lat=$lat")
-                assertTrue(sunriseLocal < dhahwaKubraLocal, "Sunrise ($sunriseLocal) must be before Dhahwa Kubra ($dhahwaKubraLocal) for lat=$lat")
-                assertTrue(dhahwaKubraLocal < dhuhrLocal, "Dhahwa Kubra ($dhahwaKubraLocal) must be before Dhuhr ($dhuhrLocal) for lat=$lat")
-                assertTrue(dhuhrLocal < asrLocal, "Dhuhr ($dhuhrLocal) must be before Asr ($asrLocal) for lat=$lat")
-                assertTrue(asrLocal < maghribLocal, "Asr ($asrLocal) must be before Maghrib ($maghribLocal) for lat=$lat")
-                assertTrue(maghribLocal < ishaLocal, "Maghrib ($maghribLocal) must be before Isha ($ishaLocal) for lat=$lat")
+                if (fajrLocal != null && sunriseLocal != null) {
+                    assertTrue(fajrLocal < sunriseLocal, "Fajr ($fajrLocal) must be before Sunrise ($sunriseLocal) for lat=$lat")
+                }
+                if (sunriseLocal != null && dhahwaKubraLocal != null) {
+                    assertTrue(sunriseLocal < dhahwaKubraLocal, "Sunrise ($sunriseLocal) must be before Dhahwa Kubra ($dhahwaKubraLocal) for lat=$lat")
+                }
+                if (dhahwaKubraLocal != null && dhuhrLocal != null) {
+                    assertTrue(dhahwaKubraLocal < dhuhrLocal, "Dhahwa Kubra ($dhahwaKubraLocal) must be before Dhuhr ($dhuhrLocal) for lat=$lat")
+                }
+                if (dhuhrLocal != null && asrLocal != null) {
+                    assertTrue(dhuhrLocal < asrLocal, "Dhuhr ($dhuhrLocal) must be before Asr ($asrLocal) for lat=$lat")
+                }
+                if (asrLocal != null && maghribLocal != null) {
+                    assertTrue(asrLocal < maghribLocal, "Asr ($asrLocal) must be before Maghrib ($maghribLocal) for lat=$lat")
+                }
+                if (maghribLocal != null && ishaLocal != null) {
+                    assertTrue(maghribLocal < ishaLocal, "Maghrib ($maghribLocal) must be before Isha ($ishaLocal) for lat=$lat")
+                }
             }
         }
     }

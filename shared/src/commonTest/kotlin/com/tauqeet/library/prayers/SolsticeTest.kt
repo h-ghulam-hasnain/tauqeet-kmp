@@ -6,6 +6,7 @@ import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.DateComponents
 import kotlin.test.Test
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SolsticeTest {
@@ -22,13 +23,12 @@ class SolsticeTest {
         })
         
         assertNotNull(result.dhuhr)
-        // With Midnight Sun, the library should fallback and provide some values for fajr/maghrib
-        assertNotNull(result.fajr)
-        assertNotNull(result.maghrib)
         
-        // Assert invariants despite fallback
-        assertTrue(result.fajr!! < result.dhuhr!!)
-        assertTrue(result.dhuhr!! < result.maghrib!!)
+        // With Polar Day, these should be explicitly null according to new specs
+        assertNull(result.fajr)
+        assertNull(result.sunrise)
+        assertNull(result.maghrib)
+        assertNull(result.isha)
     }
 
     @Test
@@ -42,12 +42,11 @@ class SolsticeTest {
             timeZoneOffset = 1.0
         })
         
-        assertNotNull(result.dhuhr)
-        assertNotNull(result.fajr)
-        assertNotNull(result.maghrib)
-
-        // Assert invariants
-        assertTrue(result.fajr!! < result.dhuhr!!)
-        assertTrue(result.dhuhr!! < result.maghrib!!)
+        // With Polar Night, everything including dhuhr should be null
+        assertNull(result.dhuhr)
+        assertNull(result.fajr)
+        assertNull(result.sunrise)
+        assertNull(result.maghrib)
+        assertNull(result.isha)
     }
 }

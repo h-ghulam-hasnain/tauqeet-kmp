@@ -6,6 +6,7 @@ import com.tauqeet.library.prayers.Madhab
 import com.tauqeet.library.prayers.PrayerRequest
 import com.tauqeet.library.prayers.PrayerTimesResult
 import com.tauqeet.library.prayers.ResolutionInfo
+import com.tauqeet.library.prayers.RoundingStrategy
 import com.tauqeet.library.prayers.SolverKind
 import com.tauqeet.library.prayers.computePrayerTimes as internalComputePrayerTimes
 import com.tauqeet.library.prayers.prayerRequest
@@ -58,7 +59,8 @@ class Tauqeet(
     val elevationMeters: Double = 0.0,
     val temperatureC: Double = 12.714,
     val pressureMbar: Double = 1010.0,
-    val customMethodParams: com.tauqeet.library.prayers.CalculationMethodParameters? = null
+    val customMethodParams: com.tauqeet.library.prayers.CalculationMethodParameters? = null,
+    val roundingStrategy: RoundingStrategy = RoundingStrategy.FIQH_IHTIYAT
 ) {
     // Validate constructor-level environmental parameters immediately on construction.
     init {
@@ -130,6 +132,7 @@ class Tauqeet(
                 temperatureC = this@Tauqeet.temperatureC
                 pressureMbar = this@Tauqeet.pressureMbar
                 customMethodParams = this@Tauqeet.customMethodParams
+                roundingStrategy = this@Tauqeet.roundingStrategy
             }
         }
     )
@@ -187,7 +190,7 @@ class Tauqeet(
             request.latitude, request.longitude, jd, paramsToUse, methodName,
             request.calculationParameters.madhab, request.calculationParameters.highLatitudeRule,
             request.calculationParameters.elevationMeters, request.calculationParameters.temperatureC, request.calculationParameters.pressureMbar,
-            request.includeAdvancedMetadata
+            request.includeAdvancedMetadata, request.calculationParameters.roundingStrategy
         )
 
         val tzOffsetMs = (request.timeZoneOffset * 3600000.0).roundToLong()

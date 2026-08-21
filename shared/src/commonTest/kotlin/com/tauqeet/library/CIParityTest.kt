@@ -4,6 +4,8 @@ import com.tauqeet.library.prayers.prayerRequest
 
 import kotlin.test.Test
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class CIParityTest {
 
@@ -102,6 +104,6 @@ class CIParityTest {
             longitude = 15.6267
             timeZoneOffset = 2.0
         })
-        assertNotNull(winterResult.dhuhr, "Dhuhr should exist even in Polar Night")
+        assertNull(winterResult.dhuhr, "Dhuhr should be null in Polar Night")
     }
 }

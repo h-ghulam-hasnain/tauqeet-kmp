@@ -4,7 +4,12 @@ import com.tauqeet.library.astronomy.computeSolarPosition
 import com.tauqeet.library.toISOTimeString
 import kotlin.math.abs
 import kotlin.math.roundToLong
+import kotlin.math.floor
+import kotlin.math.ceil
+import kotlin.math.round
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class PrayerTimesMetadata(
     val method: String,
     val madhab: String,
@@ -13,6 +18,7 @@ data class PrayerTimesMetadata(
     val isPolarNight: Boolean
 )
 
+@Serializable
 enum class PrayerStatus {
     SUCCESS,
     CONTINUOUS_TWILIGHT,
@@ -22,6 +28,7 @@ enum class PrayerStatus {
     FAILED
 }
 
+@Serializable
 data class TwilightMetadata(
     val status: PrayerStatus,
     val DEC_deg: Double?,
@@ -30,6 +37,7 @@ data class TwilightMetadata(
     val iterations: Int?
 )
 
+@Serializable
 data class SunriseSunsetMetadata(
     val status: PrayerStatus,
     val DEC_deg: Double?,
@@ -41,18 +49,21 @@ data class SunriseSunsetMetadata(
     val iterations: Int?
 )
 
+@Serializable
 data class DhahwaKubraMetadata(
     val status: PrayerStatus,
     val fajrTimeHr: Double?,
     val maghribTimeHr: Double?
 )
 
+@Serializable
 data class DhuhrMetadata(
     val status: PrayerStatus,
     val EOT_min: Double,
     val iterations: Int
 )
 
+@Serializable
 data class AsrMetadata(
     val status: PrayerStatus,
     val DEC_of_Dhuhr_deg: Double?,
@@ -66,6 +77,7 @@ data class AsrMetadata(
     val iterations: Int?
 )
 
+@Serializable
 data class AstronomicalMetadata(
     val fajr: TwilightMetadata?,
     val sunrise: SunriseSunsetMetadata?,
@@ -76,6 +88,7 @@ data class AstronomicalMetadata(
     val isha: TwilightMetadata?
 )
 
+@Serializable
 data class PrayerTimesResult(
     val fajr: Long?,
     val sunrise: Long?,
@@ -104,10 +117,35 @@ data class PrayerTimesResult(
 
     val isHighLatitudeFallback: Boolean
         get() = (flags and FLAG_HIGH_LATITUDE_FALLBACK) != 0
+
+    fun toSummaryString(): String {
+        val meta = metadata
+        val astro = astronomicalMetadata
+        val sb = StringBuilder()
+        sb.appendLine("=== Prayer Times Summary ===")
+        sb.appendLine("Status: \$status")
+        if (meta != null) {
+            sb.appendLine("Method: \${meta.method}")
+            sb.appendLine("Madhab: \${meta.madhab}")
+            sb.appendLine("High Latitude Rule: \${meta.highLatitudeRule}")
+        }
+        if (astro != null) {
+            sb.appendLine("--- Astronomical Data ---")
+            sb.appendLine("Sunrise DEC: \${astro.sunrise?.DEC_deg?.let { \"\${it}°\" } ?: \"N/A\"}")
+            sb.appendLine("Dhuhr EOT: \${astro.dhuhr?.EOT_min?.let { \"\${it} min\" } ?: \"N/A\"}")
+            sb.appendLine("Sunrise Refraction: \${astro.sunrise?.refraction_deg?.let { \"\${it}°\" } ?: \"N/A\"}")
+        }
+        if (resolutionInfo != null) {
+            sb.appendLine("Solver: \${resolutionInfo.solver}")
+        }
+        return sb.toString()
+    }
 }
 
+@Serializable
 enum class SolverKind { NORMAL, HIGH_LATITUDE, POLAR_DAY, POLAR_NIGHT }
 
+@Serializable
 data class ResolutionInfo(
     val solver: SolverKind,
     val ruleApplied: HighLatitudeRule? = null
@@ -155,9 +193,10 @@ fun computePrayerTimes(
     elevationMeters: Double = 0.0,
     temperatureC: Double = 10.0,
     pressureMbar: Double = 1010.0,
-    includeAdvancedMetadata: Boolean = false
+    includeAdvancedMetadata: Boolean = false,
+    roundingStrategy: RoundingStrategy = RoundingStrategy.FIQH_IHTIYAT
 ): PrayerTimesResult {
-    return computePrayerTimes(lat, lng, jd, method.params, method.name, madhab, highLatRule, elevationMeters, temperatureC, pressureMbar, includeAdvancedMetadata)
+    return computePrayerTimes(lat, lng, jd, method.params, method.name, madhab, highLatRule, elevationMeters, temperatureC, pressureMbar, includeAdvancedMetadata, roundingStrategy)
 }
 
 fun computePrayerTimes(
@@ -171,7 +210,8 @@ fun computePrayerTimes(
     elevationMeters: Double = 0.0,
     temperatureC: Double = 10.0,
     pressureMbar: Double = 1010.0,
-    includeAdvancedMetadata: Boolean = false
+    includeAdvancedMetadata: Boolean = false,
+    roundingStrategy: RoundingStrategy = RoundingStrategy.FIQH_IHTIYAT
 ): PrayerTimesResult {
     val solver = IterativeSolver(jd, lat, lng)
     
@@ -225,7 +265,16 @@ fun computePrayerTimes(
     }
 
     val highLatitudeResolver = HighLatitudeResolver(highLatRule, methodParams)
-    val hlResult = highLatitudeResolver.resolve(fajrHr, sunriseHr, sunsetHr, ishaHr, dhuhrHr, lat, transitSp.declination)
+    val yesterdaySunsetHr = if (highLatRule == HighLatitudeRule.MIDDLE_OF_NIGHT && sunriseHr != null && sunsetHr != null) {
+        val yesterdaySolver = IterativeSolver(jd - 1.0, lat, lng)
+        val yesterdaySunsetRes = SunriseSunsetSolver(yesterdaySolver, elevationMeters, temperatureC, pressureMbar).solveSunset(dhuhrHr)
+        if (yesterdaySunsetRes?.error == true) null else yesterdaySunsetRes?.hours
+    } else {
+        null
+    }
+    val hlResult = highLatitudeResolver.resolve(
+        fajrHr, sunriseHr, sunsetHr, ishaHr, dhuhrHr, lat, transitSp.declination, yesterdaySunsetHr
+    )
 
     val finalFajr = hlResult.fajr
     val finalSunrise = hlResult.sunrise
@@ -368,14 +417,27 @@ fun computePrayerTimes(
         else -> PrayerStatus.SUCCESS
     }
 
+    val applyRounding: (Double?, Boolean) -> Long? = { timeHr, isFloor ->
+        timeHr?.let {
+            val ms = it * hoursToMs
+            val seconds = ms / 1000.0
+            val roundedSeconds = if (roundingStrategy == RoundingStrategy.FIQH_IHTIYAT) {
+                if (isFloor) floor(seconds) else ceil(seconds)
+            } else {
+                round(seconds)
+            }
+            (roundedSeconds * 1000).toLong()
+        }
+    }
+
     return PrayerTimesResult(
-        fajr = finalFajr?.let { (it * hoursToMs).roundToLong() },
-        sunrise = finalSunrise?.let { (it * hoursToMs).roundToLong() },
-        dhahwaKubra = dhahwaKubraHr?.let { (it * hoursToMs).roundToLong() },
-        dhuhr = dhuhrHr.let { (it * hoursToMs).roundToLong() },
-        asr = finalAsr?.let { (it * hoursToMs).roundToLong() },
-        maghrib = finalMaghrib?.let { (it * hoursToMs).roundToLong() },
-        isha = finalIsha?.let { (it * hoursToMs).roundToLong() },
+        fajr = applyRounding(finalFajr, true),
+        sunrise = applyRounding(finalSunrise, true),
+        dhahwaKubra = applyRounding(dhahwaKubraHr, true),
+        dhuhr = if (isPolarNight) null else applyRounding(dhuhrHr, false),
+        asr = applyRounding(finalAsr, false),
+        maghrib = applyRounding(finalMaghrib, false),
+        isha = applyRounding(finalIsha, false),
         status = overallStatus,
         metadata = PrayerTimesMetadata(
             method = methodName,

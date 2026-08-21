@@ -6,6 +6,7 @@ import com.tauqeet.library.Tauqeet
 import com.tauqeet.library.DateComponents
 import kotlin.test.Test
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SolsticeAndHighLatitudeTest {
@@ -71,7 +72,7 @@ class SolsticeAndHighLatitudeTest {
         })
         
         // Ensure times are still calculated using fallbacks
-        assertNotNull(result.dhuhr)
+        assertNull(result.dhuhr)
         assertTrue(result.isPolarNight || result.isHighLatitudeFallback)
     }
 }

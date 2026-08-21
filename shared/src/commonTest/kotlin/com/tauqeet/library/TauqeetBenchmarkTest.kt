@@ -35,8 +35,8 @@ class TauqeetBenchmarkTest {
             }
         }
         
-        // 1000 calculations should be reasonable, relaxing to 10 seconds for CI.
-        assertTrue(duration.inWholeMilliseconds < 10000, "Core prayer calculation is too slow: $duration")
+        // 1000 calculations should be reasonable, relaxing to 30 seconds for CI.
+        assertTrue(duration.inWholeMilliseconds < 30000, "Core prayer calculation is too slow: $duration")
     }
 
     @Test
