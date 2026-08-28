@@ -76,8 +76,8 @@ internal class SunriseSunsetSolver(
         90.0 + refraction0 + sp.semidiameter / 60.0 - sp.horizontalParallax / 60.0 + dip
     }
     
-    fun solveSunrise(dhuhrHr: Double) = solver.solve(-1, dhuhrHr - 6.0, zenithFn)
-    fun solveSunset(dhuhrHr: Double) = solver.solve(1, dhuhrHr + 6.0, zenithFn)
+    fun solveSunrise(dhuhrHr: Double) = solver.solve(-1, 6.0 - solver.lng / 15.0, zenithFn)
+    fun solveSunset(dhuhrHr: Double) = solver.solve(1, 18.0 - solver.lng / 15.0, zenithFn)
 }
 
 internal class AsrSolver(
@@ -89,7 +89,7 @@ internal class AsrSolver(
     private val transitSp: SolarPositionResult
 ) {
     fun solve(dhuhrHr: Double): SolverResult? {
-        return solver.solve(1, dhuhrHr + 4.0) { sp ->
+        return solver.solve(1, 15.0 - solver.lng / 15.0) { sp ->
             val zZuhr = abs(lat - transitSp.declination)
             val sdZuhr = transitSp.semidiameter / 60.0
             val refrZuhr = getRefractionDegrees(90.0 - zZuhr, temperatureC, pressureMbar)

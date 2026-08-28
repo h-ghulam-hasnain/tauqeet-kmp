@@ -234,10 +234,10 @@ fun computePrayerTimes(
     val sunsetRes = srSsSolver.solveSunset(dhuhrHr)
     val sunsetHr = if (sunsetRes?.error == true) null else sunsetRes?.hours
 
-    val fajrRes = solver.solve(-1, dhuhrHr - 8.0) { 90.0 + methodParams.fajrAngle }
+    val fajrRes = solver.solve(-1, 6.0 - lng / 15.0) { 90.0 + methodParams.fajrAngle }
     val fajrHr = if (fajrRes?.error == true) null else fajrRes?.hours
 
-    val ishaRes = if (methodParams.ishaInterval > 0 && sunsetHr != null) null else solver.solve(1, dhuhrHr + 8.0) { 90.0 + methodParams.ishaAngle }
+    val ishaRes = if (methodParams.ishaInterval > 0 && sunsetHr != null) null else solver.solve(1, 18.0 - lng / 15.0) { 90.0 + methodParams.ishaAngle }
     val ishaHr = if (methodParams.ishaInterval > 0 && sunsetHr != null) {
         sunsetHr + methodParams.ishaInterval / 60.0
     } else {
@@ -251,7 +251,7 @@ fun computePrayerTimes(
     val maghribRes = if (methodParams.maghribInterval > 0 && sunsetHr != null) {
         null
     } else if (methodParams.maghribAngle > 0.0) {
-        solver.solve(1, dhuhrHr + 6.5) { 90.0 + methodParams.maghribAngle }
+        solver.solve(1, 18.0 - lng / 15.0) { 90.0 + methodParams.maghribAngle }
     } else {
         null
     }

@@ -41,7 +41,7 @@ data class DateComponents(val year: Int, val month: Int, val day: Int)
  *                            Default: 0.0
  * @param temperatureC        Ambient temperature in Celsius (range: −90 to 80).
  *                            Affects atmospheric refraction near the horizon.
- *                            Default: 12.714
+ *                            Default: 10.0
  * @param pressureMbar        Atmospheric pressure in millibars (range: 100 to 1100).
  *                            Affects atmospheric refraction near the horizon.
  *                            Default: 1010.0
@@ -57,7 +57,7 @@ class Tauqeet(
     val madhab: Madhab = Madhab.HANAFI,
     val highLatitudeRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT,
     val elevationMeters: Double = 0.0,
-    val temperatureC: Double = 12.714,
+    val temperatureC: Double = 10.0,
     val pressureMbar: Double = 1010.0,
     val customMethodParams: com.tauqeet.library.prayers.CalculationMethodParameters? = null,
     val roundingStrategy: RoundingStrategy = RoundingStrategy.FIQH_IHTIYAT

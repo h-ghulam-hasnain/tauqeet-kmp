@@ -21,7 +21,7 @@ data class PrayerCalculationParameters(
     val madhab: Madhab = Madhab.HANAFI,
     val highLatitudeRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT,
     val elevationMeters: Double = 0.0,
-    val temperatureC: Double = 12.714,
+    val temperatureC: Double = 10.0,
     val pressureMbar: Double = 1010.0,
     val customMethodParams: CalculationMethodParameters? = null,
     val roundingStrategy: RoundingStrategy = RoundingStrategy.FIQH_IHTIYAT
@@ -89,7 +89,7 @@ class PrayerCalculationParametersBuilder {
     var madhab: Madhab = Madhab.HANAFI
     var highLatitudeRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT
     var elevationMeters: Double = 0.0
-    var temperatureC: Double = 12.714
+    var temperatureC: Double = 10.0
     var pressureMbar: Double = 1010.0
     var customMethodParams: CalculationMethodParameters? = null
     var roundingStrategy: RoundingStrategy = RoundingStrategy.FIQH_IHTIYAT
