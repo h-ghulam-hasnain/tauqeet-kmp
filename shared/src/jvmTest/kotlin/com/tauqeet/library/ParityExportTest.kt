@@ -22,100 +22,117 @@ class ParityExportTest {
 
     data class Location(val name: String, val lat: Double, val lng: Double)
 
-    private fun parseVectors(json: String): Pair<List<Location>, List<String>> {
+    private fun parseVectors(json: String): ParsedVectors {
         val locations = mutableListOf<Location>()
-        val dates = mutableListOf<String>()
-
-        // Parse locations array
+        
         val locBlock = json.substringAfter("\"locations\"").substringAfter("[").substringBefore("]")
         val locEntries = locBlock.split("},").map { it.trim().trimEnd('}').trim() + "}" }
         for (raw in locEntries) {
             val name = raw.substringAfter("\"name\"").substringAfter("\"").substringBefore("\"")
             val lat = raw.substringAfter("\"lat\"").substringAfter(":").substringBefore(",").trim().toDouble()
-            // lng may be the last field (no trailing comma) or have a trailing comma
             val lngStr = raw.substringAfter("\"lng\"").substringAfter(":").substringBefore("}").trim().trimEnd(',').trim()
             val lng = lngStr.toDouble()
             locations.add(Location(name, lat, lng))
         }
 
-        // Parse dates array
-        val dateBlock = json.substringAfter("\"dates\"").substringAfter("[").substringBefore("]")
-        val dateEntries = dateBlock.split(",").map { it.trim().trim('"') }.filter { it.isNotBlank() }
-        dates.addAll(dateEntries)
+        fun parseArray(key: String): List<String> {
+            val block = json.substringAfter("\"$key\"").substringAfter("[").substringBefore("]")
+            return block.split(",").map { it.trim().trim('"') }.filter { it.isNotBlank() }
+        }
 
-        return locations to dates
+        return ParsedVectors(
+            locations = locations,
+            dates = parseArray("dates"),
+            methods = parseArray("methods"),
+            madhabs = parseArray("madhabs"),
+            highLatitudeRules = parseArray("highLatitudeRules")
+        )
     }
+
+    data class ParsedVectors(
+        val locations: List<Location>,
+        val dates: List<String>,
+        val methods: List<String>,
+        val madhabs: List<String>,
+        val highLatitudeRules: List<String>
+    )
 
     @Test
     fun exportKmpParity() {
-        // Locate the vectors file relative to the working directory.
-        // Gradle sets user.dir to the subproject dir (shared/), so we walk up
-        // two levels: shared/ → tauqeet-kmp/ → library/
         val cwd = File(System.getProperty("user.dir"))
         val vectorsFile = File(cwd, "../../comparison/parity_vectors.json").canonicalFile
         require(vectorsFile.exists()) {
-            "Cannot find parity_vectors.json at ${vectorsFile.absolutePath}. " +
-                    "CWD is ${cwd.absolutePath}."
+            "Cannot find parity_vectors.json at ${vectorsFile.absolutePath}. CWD is ${cwd.absolutePath}."
         }
 
         val vectorsJson = vectorsFile.readText()
-        val (locations, dates) = parseVectors(vectorsJson)
-
-        // We use MWL + Shafi + MiddleOfNight to match the vectors config
-        val tauqeet = Tauqeet(
-            method = CalculationMethod.MWL,
-            madhab = Madhab.SHAFI,
-            highLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT
-        )
+        val parsed = parseVectors(vectorsJson)
 
         val sb = StringBuilder()
         sb.append("[\n")
         var first = true
 
-        for (loc in locations) {
-            for (dateStr in dates) {
-                val parts = dateStr.split("-").map { it.toInt() }
-                val year = parts[0]
-                val month = parts[1]
-                val day = parts[2]
+        for (loc in parsed.locations) {
+            for (dateStr in parsed.dates) {
+                for (methodStr in parsed.methods) {
+                    for (madhabStr in parsed.madhabs) {
+                        for (highLatStr in parsed.highLatitudeRules) {
+                            val parts = dateStr.split("-").map { it.toInt() }
+                            val year = parts[0]
+                            val month = parts[1]
+                            val day = parts[2]
 
-                if (!first) sb.append(",\n")
-                first = false
+                            if (!first) sb.append(",\n")
+                            first = false
 
-                try {
-                    val result = tauqeet.computePrayerTimes(prayerRequest {
-                        this.latitude = loc.lat
-                        this.longitude = loc.lng
-                        this.date = DateComponents(year, month, day)
-                        this.timeZoneOffset = 0.0
-                        calculation {
-                            method = CalculationMethod.MWL
-                            madhab = Madhab.SHAFI
-                            highLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT
+                            try {
+                                val methodEnum = CalculationMethod.valueOf(methodStr.uppercase())
+                                val madhabEnum = Madhab.valueOf(madhabStr.uppercase())
+                                // Kotlin KMP enum names are uppercase with underscores, the JS strings are PascalCase
+                                // MiddleOfNight -> MIDDLE_OF_NIGHT
+                                val highLatEnumStr = highLatStr.replace(Regex("([a-z])([A-Z]+)"), "$1_$2").uppercase()
+                                val highLatEnum = HighLatitudeRule.valueOf(highLatEnumStr)
+
+                                val tauqeet = Tauqeet()
+                                val result = tauqeet.computePrayerTimes(prayerRequest {
+                                    this.latitude = loc.lat
+                                    this.longitude = loc.lng
+                                    this.date = DateComponents(year, month, day)
+                                    this.timeZoneOffset = 0.0
+                                    calculation {
+                                        method = methodEnum
+                                        madhab = madhabEnum
+                                        highLatitudeRule = highLatEnum
+                                    }
+                                })
+
+                                sb.append(
+                                    """  {"location":"${loc.name}","lat":${loc.lat},"lng":${loc.lng},"date":"$dateStr","method":"$methodStr","madhab":"$madhabStr","highLatitudeRule":"$highLatStr",""" +
+                                            """"fajr":${result.fajr},""" +
+                                            """"sunrise":${result.sunrise},""" +
+                                            """"dhuhr":${result.dhuhr},""" +
+                                            """"asr":${result.asr},""" +
+                                            """"maghrib":${result.maghrib},""" +
+                                            """"isha":${result.isha},""" +
+                                            """"status":"${result.status}",""" +
+                                            """"metadata":{"method":"${result.metadata?.method}","madhab":"${result.metadata?.madhab}","highLatitudeRule":"${result.metadata?.highLatitudeRule}","isPolarDay":${result.metadata?.isPolarDay},"isPolarNight":${result.metadata?.isPolarNight}},""" +
+                                            """"resolutionInfo":{"solver":"${result.resolutionInfo?.solver}","ruleApplied":"${result.resolutionInfo?.ruleApplied?.name}"}}"""
+                                )
+                            } catch (e: Exception) {
+                                sb.append(
+                                    """  {"location":"${loc.name}","lat":${loc.lat},"lng":${loc.lng},"date":"$dateStr","method":"$methodStr","madhab":"$madhabStr","highLatitudeRule":"$highLatStr",""" +
+                                            """"error":"${e.message?.replace("\"", "\\\"")}"}"""
+                                )
+                            }
                         }
-                    })
-
-                    sb.append(
-                        """  {"location":"${loc.name}","lat":${loc.lat},"lng":${loc.lng},"date":"$dateStr",""" +
-                                """"fajr":${result.fajr},""" +
-                                """"sunrise":${result.sunrise},""" +
-                                """"dhuhr":${result.dhuhr},""" +
-                                """"asr":${result.asr},""" +
-                                """"maghrib":${result.maghrib},""" +
-                                """"isha":${result.isha}}"""
-                    )
-                } catch (e: Exception) {
-                    sb.append(
-                        """  {"location":"${loc.name}","lat":${loc.lat},"lng":${loc.lng},"date":"$dateStr","error":"${e.message?.replace("\"", "'")}"}"""
-                    )
+                    }
                 }
             }
         }
-
         sb.append("\n]")
 
         val outFile = File(cwd, "../../comparison/kmp_results.json").canonicalFile
         outFile.writeText(sb.toString())
-        println("✅ KMP parity results written to ${outFile.absolutePath} (${locations.size * dates.size} entries)")
+        println("✅ KMP parity results written to ${outFile.absolutePath} (${parsed.locations.size * parsed.dates.size * parsed.methods.size * parsed.madhabs.size * parsed.highLatitudeRules.size} entries)")
     }
 }

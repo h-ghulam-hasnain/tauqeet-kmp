@@ -156,7 +156,11 @@ internal class HighLatitudeResolver(
                         val seventhNight = nightDuration / 7.0
                         finalFajr = finalSunrise!! - seventhNight
                     }
-                    HighLatitudeRule.TWILIGHT_ANGLE -> {
+                    HighLatitudeRule.ANGLE_BASED -> {
+                        val fajrProportion = methodParams.fajrAngle / 60.0
+                        finalFajr = finalSunrise!! - nightDuration * fajrProportion
+                    }
+                    HighLatitudeRule.NEAREST_LATITUDE, HighLatitudeRule.NONE -> {
                         val fajrProportion = methodParams.fajrAngle / 60.0
                         finalFajr = finalSunrise!! - nightDuration * fajrProportion
                     }

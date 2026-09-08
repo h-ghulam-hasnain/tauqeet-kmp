@@ -1,9 +1,10 @@
 package com.tauqeet.library
 
-import com.tauqeet.library.prayers.SafeResult
+import com.tauqeet.library.SafeResult
 import com.tauqeet.library.prayers.prayerRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class SafeApiTest {
@@ -16,8 +17,8 @@ class SafeApiTest {
             date = DateComponents(2024, 4, 27)
             timeZoneOffset = 5.0
         }
-        assertTrue(result is SafeResult.Success)
-        assertTrue(result.data.fajr != null)
+        assertTrue(result is SafeResult.Success<*>)
+        assertNotNull(result.getOrNull()?.fajr)
     }
 
     @Test
@@ -28,7 +29,7 @@ class SafeApiTest {
             date = DateComponents(2024, 4, 27)
         }
         assertTrue(result is SafeResult.Failure)
-        assertEquals("INVALID_LATITUDE", result.code)
+        assertEquals(TauqeetErrorCode.INVALID_LATITUDE, (result as SafeResult.Failure).errorCode)
         assertTrue(result.message.contains("Invalid latitude"))
     }
 
@@ -40,7 +41,7 @@ class SafeApiTest {
             date = DateComponents(2024, 4, 27)
         }
         assertTrue(result is SafeResult.Failure)
-        assertEquals("INVALID_LONGITUDE", result.code)
+        assertEquals(TauqeetErrorCode.INVALID_LONGITUDE, (result as SafeResult.Failure).errorCode)
     }
 
     @Test
@@ -51,6 +52,6 @@ class SafeApiTest {
             date = DateComponents(2024, 13, 27) // Invalid month
         }
         assertTrue(result is SafeResult.Failure)
-        assertEquals("DATE_OUT_OF_RANGE", result.code)
+        assertEquals(TauqeetErrorCode.INVALID_DATE, (result as SafeResult.Failure).errorCode)
     }
 }

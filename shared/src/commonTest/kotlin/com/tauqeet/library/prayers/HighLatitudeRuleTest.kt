@@ -26,7 +26,7 @@ class HighLatitudeRuleTest {
         val methods = listOf(
             HighLatitudeRule.MIDDLE_OF_NIGHT,
             HighLatitudeRule.SEVENTH_OF_NIGHT,
-            HighLatitudeRule.TWILIGHT_ANGLE
+            HighLatitudeRule.ANGLE_BASED
         )
         
         for (rule in methods) {

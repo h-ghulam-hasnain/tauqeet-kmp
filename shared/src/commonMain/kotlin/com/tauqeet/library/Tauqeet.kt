@@ -19,7 +19,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import com.tauqeet.library.prayers.SafeResult
+// SafeResult is in the same package; no import needed
 
 data class DateComponents(val year: Int, val month: Int, val day: Int)
 
