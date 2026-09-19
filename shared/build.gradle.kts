@@ -23,6 +23,7 @@ kotlin {
     iosSimulatorArm64()
 
     js(IR) {
+        useEsModules()
         browser {
             testTask {
                 useMocha {
@@ -38,6 +39,7 @@ kotlin {
             }
         }
         binaries.executable()
+        binaries.library()
         generateTypeScriptDefinitions()
         compilations["main"].packageJson {
             customField("name", "tauqeet")
