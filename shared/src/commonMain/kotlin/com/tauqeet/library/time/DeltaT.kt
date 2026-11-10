@@ -1,11 +1,14 @@
 package com.tauqeet.library.time
 
+import com.tauqeet.library.TauqeetErrorCode
+import com.tauqeet.library.TauqeetException
 import kotlin.math.floor
 import kotlin.math.pow
 
+@Throws(TauqeetException::class)
 fun calculateDeltaT(year: Double): Double {
     if (year < -2000.0 || year > 3000.0) {
-        throw IllegalArgumentException("Year out of range. Astronomical models are only valid between years -2000 and 3000.")
+        throw TauqeetException(TauqeetErrorCode.INVALID_DATE, "Year out of range. Astronomical models are only valid between years -2000 and 3000.")
     }
     if (year < -500.0) {
         val u = (year - 1820.0) / 100.0

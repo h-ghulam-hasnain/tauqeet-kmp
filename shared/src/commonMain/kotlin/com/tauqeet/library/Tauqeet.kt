@@ -52,7 +52,7 @@ data class DateComponents(val year: Int, val month: Int, val day: Int)
  *
  * @throws TauqeetException if any parameter is outside its valid range.
  */
-class Tauqeet(
+class Tauqeet @Throws(TauqeetException::class) constructor(
     val method: CalculationMethod = CalculationMethod.KARACHI,
     val madhab: Madhab = Madhab.HANAFI,
     val highLatitudeRule: HighLatitudeRule = HighLatitudeRule.MIDDLE_OF_NIGHT,
@@ -109,6 +109,7 @@ class Tauqeet(
             "computePrayerTimes(prayerRequest { latitude = lat; longitude = lng; date = DateComponents(year, month, day); timeZoneOffset = timezoneOffset; includeAdvancedMetadata = includeAdvancedMetadata })"
         )
     )
+    @Throws(TauqeetException::class)
     fun computePrayerTimes(
         year: Int,
         month: Int,
@@ -150,6 +151,7 @@ class Tauqeet(
             "computePrayerTimes(prayerRequest { latitude = lat; longitude = lng; date = date; timeZoneOffset = timezoneOffset; includeAdvancedMetadata = includeAdvancedMetadata })"
         )
     )
+    @Throws(TauqeetException::class)
     fun computePrayerTimes(
         date: DateComponents,
         lat: Double,
@@ -181,6 +183,7 @@ class Tauqeet(
      *
      * @throws TauqeetException if any input parameter inside the request is outside its valid range.
      */
+    @Throws(TauqeetException::class)
     fun computePrayerTimes(request: PrayerRequest): PrayerTimesResult {
         val jd = dateToJulianDay(request.date.year, request.date.month, request.date.day.toDouble())
         val paramsToUse = request.calculationParameters.customMethodParams ?: request.calculationParameters.method.params
@@ -230,6 +233,7 @@ class Tauqeet(
      *
      * @throws TauqeetException if [lat] or [lng] is out of range.
      */
+    @Throws(TauqeetException::class)
     fun qiblaDirection(lat: Double, lng: Double): QiblaResult? {
         validateLatitude(lat)
         validateLongitude(lng)
@@ -246,6 +250,7 @@ class Tauqeet(
      *
      * @throws TauqeetException if [lat] or [lng] is out of range.
      */
+    @Throws(TauqeetException::class)
     fun qiblaBearing(lat: Double, lng: Double): Double? {
         validateLatitude(lat)
         validateLongitude(lng)
@@ -278,6 +283,7 @@ class Tauqeet(
     /**
      * Convenience overload accepting [LocalDate].
      */
+    @Throws(TauqeetException::class)
     fun computePrayerTimes(
         date: LocalDate,
         lat: Double,
@@ -304,6 +310,7 @@ class Tauqeet(
     /**
      * Convenience overload accepting [Instant], deriving date using UTC.
      */
+    @Throws(TauqeetException::class)
     fun computePrayerTimes(
         instant: Instant,
         lat: Double,
@@ -317,6 +324,7 @@ class Tauqeet(
 }
 
 /** Top-level convenience function for quick, one-off calculations */
+@Throws(TauqeetException::class)
 fun getPrayerTimes(request: PrayerRequest): PrayerTimesResult = Tauqeet().computePrayerTimes(request)
 
 /** Top-level convenience function for safe, one-off calculations */

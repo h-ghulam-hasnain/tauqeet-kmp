@@ -44,7 +44,7 @@ import com.tauqeet.library.DateComponents
 import com.tauqeet.library.getPrayerTimesSafe
 import com.tauqeet.library.prayers.CalculationMethod
 import com.tauqeet.library.prayers.CalculationMethodParameters
-import com.tauqeet.library.prayers.SafeResult
+import com.tauqeet.library.SafeResult
 
 val myCustomMethod = CalculationMethodParameters(
     fajrAngle    = 15.5,  // degrees

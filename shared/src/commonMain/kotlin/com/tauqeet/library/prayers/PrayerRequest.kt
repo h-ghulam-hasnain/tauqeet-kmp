@@ -1,6 +1,7 @@
 package com.tauqeet.library.prayers
 
 import com.tauqeet.library.DateComponents
+import com.tauqeet.library.TauqeetException
 import com.tauqeet.library.validateDate
 import com.tauqeet.library.validateLatitude
 import com.tauqeet.library.validateLongitude
@@ -10,7 +11,8 @@ import com.tauqeet.library.validateTimezoneOffset
  * Supported rounding strategies for calculating final prayer times.
  */
 enum class RoundingStrategy {
-    FIQH_IHTIYAT
+    FIQH_IHTIYAT,
+    NEAREST
 }
 
 /**
@@ -45,6 +47,7 @@ data class PrayerRequest internal constructor(
  * Inline DSL entry point. The builder is compiled away and remains allocation-light
  * for Kotlin Multiplatform use-cases.
  */
+@Throws(TauqeetException::class)
 inline fun prayerRequest(builder: PrayerRequestBuilder.() -> Unit): PrayerRequest =
     PrayerRequestBuilder().apply(builder).build()
 
@@ -64,6 +67,7 @@ class PrayerRequestBuilder {
         calculation.apply(builder)
     }
 
+    @Throws(TauqeetException::class)
     fun build(): PrayerRequest {
         validateLatitude(latitude)
         validateLongitude(longitude)

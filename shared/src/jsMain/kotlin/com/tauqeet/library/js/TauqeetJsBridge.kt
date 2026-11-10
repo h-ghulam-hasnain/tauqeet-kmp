@@ -12,17 +12,18 @@ import kotlin.js.JsExport
 
 @JsExport
 class PrayerTimesJsResult(
-    val fajr: Long?,
-    val sunrise: Long?,
-    val dhahwaKubra: Long?,
-    val dhuhr: Long?,
-    val asr: Long?,
-    val maghrib: Long?,
-    val isha: Long?,
+    val fajr: Double?,
+    val sunrise: Double?,
+    val dhahwaKubra: Double?,
+    val dhuhr: Double?,
+    val asr: Double?,
+    val maghrib: Double?,
+    val isha: Double?,
     val status: String?,
     val method: String?,
     val madhab: String?,
-    val highLatitudeRule: String?
+    val highLatitudeRule: String?,
+    val errorMessage: String? = null
 )
 
 @JsExport
@@ -64,35 +65,57 @@ fun calculatePrayerTimesKmp(
     highLatitudeRule: String = "MIDDLE_OF_NIGHT",
     timezoneOffset: Double = 0.0
 ): PrayerTimesJsResult {
-    val result = Tauqeet(
-        method = CalculationMethod.valueOf(method),
-        madhab = Madhab.valueOf(madhab),
-        highLatitudeRule = HighLatitudeRule.valueOf(highLatitudeRule)
-    ).computePrayerTimes(
-        prayerRequest {
-            latitude = lat
-            longitude = lng
-            date = DateComponents(year, month, day)
-            timeZoneOffset = timezoneOffset
-            calculation {
-                this.method = CalculationMethod.valueOf(method)
-                this.madhab = Madhab.valueOf(madhab)
-                this.highLatitudeRule = HighLatitudeRule.valueOf(highLatitudeRule)
-            }
-        }
-    )
+    return try {
+        val calcMethod = CalculationMethod.entries.find { it.name.equals(method, ignoreCase = true) } ?: CalculationMethod.KARACHI
+        val calcMadhab = Madhab.entries.find { it.name.equals(madhab, ignoreCase = true) } ?: Madhab.HANAFI
+        val calcHighLatRule = HighLatitudeRule.entries.find { it.name.equals(highLatitudeRule, ignoreCase = true) } ?: HighLatitudeRule.MIDDLE_OF_NIGHT
 
-    return PrayerTimesJsResult(
-        fajr = result.fajr,
-        sunrise = result.sunrise,
-        dhahwaKubra = result.dhahwaKubra,
-        dhuhr = result.dhuhr,
-        asr = result.asr,
-        maghrib = result.maghrib,
-        isha = result.isha,
-        status = result.status.name,
-        method = result.metadata?.method ?: method,
-        madhab = result.metadata?.madhab ?: madhab,
-        highLatitudeRule = result.metadata?.highLatitudeRule ?: highLatitudeRule
-    )
+        val result = Tauqeet(
+            method = calcMethod,
+            madhab = calcMadhab,
+            highLatitudeRule = calcHighLatRule
+        ).computePrayerTimes(
+            prayerRequest {
+                latitude = lat
+                longitude = lng
+                date = DateComponents(year, month, day)
+                timeZoneOffset = timezoneOffset
+                calculation {
+                    this.method = calcMethod
+                    this.madhab = calcMadhab
+                    this.highLatitudeRule = calcHighLatRule
+                }
+            }
+        )
+
+        PrayerTimesJsResult(
+            fajr = result.fajr?.toDouble(),
+            sunrise = result.sunrise?.toDouble(),
+            dhahwaKubra = result.dhahwaKubra?.toDouble(),
+            dhuhr = result.dhuhr?.toDouble(),
+            asr = result.asr?.toDouble(),
+            maghrib = result.maghrib?.toDouble(),
+            isha = result.isha?.toDouble(),
+            status = result.status.name,
+            method = result.metadata?.method ?: calcMethod.name,
+            madhab = result.metadata?.madhab ?: calcMadhab.name,
+            highLatitudeRule = result.metadata?.highLatitudeRule ?: calcHighLatRule.name,
+            errorMessage = null
+        )
+    } catch (e: Throwable) {
+        PrayerTimesJsResult(
+            fajr = null,
+            sunrise = null,
+            dhahwaKubra = null,
+            dhuhr = null,
+            asr = null,
+            maghrib = null,
+            isha = null,
+            status = "ERROR",
+            method = method,
+            madhab = madhab,
+            highLatitudeRule = highLatitudeRule,
+            errorMessage = e.message
+        )
+    }
 }

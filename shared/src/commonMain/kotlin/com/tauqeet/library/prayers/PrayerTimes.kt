@@ -1,5 +1,6 @@
 package com.tauqeet.library.prayers
 
+import com.tauqeet.library.TauqeetException
 import com.tauqeet.library.astronomy.computeSolarPosition
 import com.tauqeet.library.toISOTimeString
 import kotlin.math.abs
@@ -183,6 +184,7 @@ private fun resolveSolver(
  * Returns the times in UTC hours since midnight (0.0 to 24.0).
  * Multiply by 60 for minutes since midnight.
  */
+@Throws(TauqeetException::class)
 fun computePrayerTimes(
     lat: Double,
     lng: Double,
@@ -199,6 +201,7 @@ fun computePrayerTimes(
     return computePrayerTimes(lat, lng, jd, method.params, method.name, madhab, highLatRule, elevationMeters, temperatureC, pressureMbar, includeAdvancedMetadata, roundingStrategy)
 }
 
+@Throws(TauqeetException::class)
 fun computePrayerTimes(
     lat: Double,
     lng: Double,

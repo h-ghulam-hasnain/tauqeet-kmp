@@ -96,7 +96,7 @@ The recommended public entry point is the unified `PrayerRequest` DSL, which kee
 ```kotlin
 import com.tauqeet.library.DateComponents
 import com.tauqeet.library.getPrayerTimesSafe
-import com.tauqeet.library.prayers.SafeResult
+import com.tauqeet.library.SafeResult
 import com.tauqeet.library.toTimeString
 
 val result = getPrayerTimesSafe {

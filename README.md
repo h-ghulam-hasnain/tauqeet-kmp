@@ -154,7 +154,7 @@ Instead of catching `TauqeetException` on invalid inputs (like invalid coordinat
 
 ```kotlin
 import com.tauqeet.library.getPrayerTimesSafe
-import com.tauqeet.library.prayers.SafeResult
+import com.tauqeet.library.SafeResult
 
 val result = getPrayerTimesSafe {
     latitude = 24.8607
