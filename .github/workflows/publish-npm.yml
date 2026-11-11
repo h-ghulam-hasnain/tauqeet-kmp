@@ -1,0 +1,35 @@
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref (tag or branch) to publish from'
+        required: true
+        default: 'v0.2.1'
+
+jobs:
+  publish-npm:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: 'gradle'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Publish to npm
+        env:
+          NPM_TOKEN: ${{ secrets.TAUQEETKMP }}
+        run: ./gradlew :shared:publishJsPackageToNpmjsRegistry --no-configuration-cache --stacktrace
