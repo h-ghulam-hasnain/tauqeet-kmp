@@ -28,5 +28,3 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build --no-daemon --no-configuration-cache --continue --parallel --stacktrace
 
-    - name: Run Tests
-      run: ./gradlew :shared:testDebugUnitTest :shared:jsNodeTest --no-daemon --no-configuration-cache --continue --parallel --stacktrace
