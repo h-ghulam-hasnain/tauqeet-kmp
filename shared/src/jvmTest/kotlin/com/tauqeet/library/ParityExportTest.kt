@@ -61,9 +61,11 @@ class ParityExportTest {
     fun exportKmpParity() {
         val cwd = File(System.getProperty("user.dir"))
         val vectorsFile = File(cwd, "../../comparison/parity_vectors.json").canonicalFile
-        require(vectorsFile.exists()) {
-            "Cannot find parity_vectors.json at ${vectorsFile.absolutePath}. CWD is ${cwd.absolutePath}."
-        }
+        org.junit.Assume.assumeTrue(
+            "Parity vectors missing at ${vectorsFile.absolutePath} (CWD: ${cwd.absolutePath}); " +
+            "developer differential test, skipping on CI.",
+            vectorsFile.exists()
+        )
 
         val vectorsJson = vectorsFile.readText()
         val parsed = parseVectors(vectorsJson)
