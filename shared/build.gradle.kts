@@ -1,3 +1,5 @@
+import dev.petuska.npm.publish.task.NpmPublishTask
+
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization") version "2.0.0"
@@ -137,5 +139,14 @@ npmPublish {
                 }
             }
         }
+    }
+}
+
+tasks.withType<NpmPublishTask>().configureEach {
+    val nodeHomePath = System.getenv("NODE_HOME")
+    if (!nodeHomePath.isNullOrBlank()) {
+        nodeHome.set(file(nodeHomePath))
+        node.set(file("$nodeHomePath/bin/node"))
+        npm.set(file("$nodeHomePath/bin/npm"))
     }
 }
