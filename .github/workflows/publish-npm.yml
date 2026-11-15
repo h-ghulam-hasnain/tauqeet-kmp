@@ -29,6 +29,11 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Export NODE_HOME
+        run: |
+          NODE_BIN="$(which node)"
+          echo "NODE_HOME=$(dirname "$(dirname "$NODE_BIN")")" >> "$GITHUB_ENV"
+
       - name: Publish to npm
         env:
           NPM_TOKEN: ${{ secrets.TAUQEETKMP }}
