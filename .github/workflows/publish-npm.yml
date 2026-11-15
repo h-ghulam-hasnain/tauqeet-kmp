@@ -6,7 +6,7 @@ on:
       ref:
         description: 'Git ref (tag or branch) to publish from'
         required: true
-        default: 'v0.2.1'
+        default: 'main'
 
 jobs:
   publish-npm:
