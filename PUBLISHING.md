@@ -2,6 +2,8 @@
 
 This library is configured to publish to **Maven Central via Sonatype Central Portal** (for Android, JVM, and iOS targets) and **npm** (for the JS/Node.js target).
 
+> Last released: v0.2.1 (2026-11-15)
+
 ---
 
 ## 1. Prerequisites — GitHub Repository Secrets
@@ -31,14 +33,14 @@ The release workflow (`.github/workflows/release.yml`) is triggered automaticall
 ./gradlew build
 
 # 2. Update the version in shared/build.gradle.kts
-#    coordinates(groupId = "io.github.h-ghulam-hasnain", artifactId = "tauqeet-kmp", version = "0.2.0")
+#    coordinates(groupId = "io.github.h-ghulam-hasnain", artifactId = "tauqeet-kmp", version = "0.2.1")
 
 # 3. Commit the version bump
 git add shared/build.gradle.kts
-git commit -m "chore: bump version to 0.2.0"
+git commit -m "chore: bump version to 0.2.1"
 
 # 4. Create and push a version tag — this triggers the publish workflow
-git tag v0.2.0
+git tag v0.2.1
 git push origin main --tags
 ```
 

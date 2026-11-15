@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.2.0")
+    implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.2.1")
 }
 ```
 
@@ -54,7 +54,7 @@ dependencies {
 Install the package via npm:
 
 ```bash
-npm install tauqeet-js
+npm install tauqeet-kmp@0.2.1
 ```
 
 ### iOS (CocoaPods)

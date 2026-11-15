@@ -135,7 +135,7 @@ npmPublish {
                 description = "High-precision Islamic prayer-times & Qibla calculation library for Kotlin Multiplatform."
                 repository {
                     type = "git"
-                    url = "https://github.com/h-ghulam-hasnain/tauqeet-kmp.git"
+                    url = "git+https://github.com/h-ghulam-hasnain/tauqeet-kmp.git"
                 }
             }
         }
