@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "io.github.h-ghulam-hasnain"
-version = "0.2.1"
+version = "0.2.2"
 
 kotlin {
     jvm {
@@ -42,7 +42,7 @@ kotlin {
         generateTypeScriptDefinitions()
         compilations["main"].packageJson {
             customField("name", "tauqeet")
-            customField("version", "0.2.1")
+            customField("version", "0.2.2")
             customField("description", "A high-precision Islamic prayer times and Qibla calculation library.")
             customField("repository", mapOf("type" to "git", "url" to "https://github.com/h-ghulam-hasnain/tauqeet-kmp.git"))
             customField("license", "MIT")
@@ -84,7 +84,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.h-ghulam-hasnain",
         artifactId = "tauqeet-kmp",
-        version = "0.2.1"
+        version = "0.2.2"
     )
 
     pom {
@@ -126,7 +126,7 @@ npmPublish {
     }
     packages {
         named("js") {
-            version = "0.2.1"
+            version = "0.2.2"
             packageName = "tauqeet-kmp"
             readme = file("../README.md")
             packageJson {
