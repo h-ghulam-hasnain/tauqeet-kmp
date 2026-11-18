@@ -3,7 +3,12 @@ package com.tauqeet.library
 import kotlin.math.roundToInt
 
 /**
- * Converts a time represented as milliseconds since midnight into a "HH:mm:ss" formatted string.
+ * Formats this [Long] millisecond-since-midnight value as a `HH:mm:ss` string.
+ *
+ * Values outside the range 0–86 399 999 ms are normalised (wrapped) to fit within a single day.
+ *
+ * @receiver Milliseconds since UTC midnight.
+ * @return A zero-padded 24-hour time string, e.g. `"05:32:07"` or `"23:59:59"`.
  */
 fun Long.toTimeString(): String {
     val totalSeconds = (this / 1000.0).roundToInt()
@@ -19,7 +24,12 @@ fun Long.toTimeString(): String {
 }
 
 /**
- * Converts a time represented as milliseconds since midnight into a "HH:mm" formatted string (no seconds).
+ * Formats this [Long] millisecond-since-midnight value as a `HH:mm` string (seconds omitted).
+ *
+ * Values outside the range 0–86 399 999 ms are normalised (wrapped) to fit within a single day.
+ *
+ * @receiver Milliseconds since UTC midnight.
+ * @return A zero-padded 24-hour time string without seconds, e.g. `"05:32"`.
  */
 fun Long.toTimeStringShort(): String {
     val totalSeconds = (this / 1000.0).roundToInt()
@@ -33,15 +43,26 @@ fun Long.toTimeStringShort(): String {
 }
 
 /**
- * Converts a time represented as milliseconds since midnight into a "HH:mm:ss" formatted string.
- * This matches the default JS library's rounding behavior for time-only strings.
+ * Formats this [Long] millisecond-since-midnight value as an ISO 8601 time string (`HH:mm:ss`).
+ *
+ * Delegates to [toTimeString]. Provided for consistency with JS library behaviour where
+ * `Date` objects produce `HH:mm:ss` by default.
+ *
+ * @receiver Milliseconds since UTC midnight.
+ * @return A zero-padded ISO 8601 time string, e.g. `"04:32:00"`.
  */
 fun Long.toISOTimeString(): String {
     return this.toTimeString()
 }
 
 /**
- * Converts a time represented as milliseconds since midnight into a "HH:mm:ss.SSS" formatted string.
+ * Formats this [Long] millisecond-since-midnight value as an ISO 8601 time string with
+ * millisecond precision (`HH:mm:ss.SSS`).
+ *
+ * Values outside the range 0–86 399 999 ms are normalised (wrapped) to fit within a single day.
+ *
+ * @receiver Milliseconds since UTC midnight.
+ * @return A zero-padded time string with milliseconds, e.g. `"04:32:00.750"`.
  */
 fun Long.toISOTimeStringWithMillis(): String {
     val normalizedMs = ((this % 86400000L) + 86400000L) % 86400000L

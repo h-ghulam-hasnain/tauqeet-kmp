@@ -10,6 +10,7 @@ import kotlin.math.ceil
 import kotlin.math.round
 import kotlinx.serialization.Serializable
 
+/** Calculation metadata attached to every [PrayerTimesResult]: the method, madhab, high-latitude rule, and polar-condition flags used for a given computation. */
 @Serializable
 data class PrayerTimesMetadata(
     val method: String,
@@ -29,6 +30,7 @@ enum class PrayerStatus {
     FAILED
 }
 
+/** Per-event astronomical diagnostic data for a twilight prayer (Fajr or Isha): solver status, solar declination, equation of time, zenith angle, and iteration count. */
 @Serializable
 data class TwilightMetadata(
     val status: PrayerStatus,
@@ -38,6 +40,7 @@ data class TwilightMetadata(
     val iterations: Int?
 )
 
+/** Per-event astronomical diagnostic data for Sunrise or Sunset/Maghrib: solver status, declination, equation of time, horizontal parallax, semi-diameter, atmospheric refraction, observer elevation, and iteration count. */
 @Serializable
 data class SunriseSunsetMetadata(
     val status: PrayerStatus,
@@ -50,6 +53,7 @@ data class SunriseSunsetMetadata(
     val iterations: Int?
 )
 
+/** Diagnostic data for Dhahwa Kubra (the midpoint between Fajr and Maghrib): solver status and the two source times used to compute the midpoint. */
 @Serializable
 data class DhahwaKubraMetadata(
     val status: PrayerStatus,
@@ -57,6 +61,7 @@ data class DhahwaKubraMetadata(
     val maghribTimeHr: Double?
 )
 
+/** Diagnostic data for Dhuhr (solar transit): solver status, equation of time in minutes, and iteration count. */
 @Serializable
 data class DhuhrMetadata(
     val status: PrayerStatus,
@@ -64,6 +69,7 @@ data class DhuhrMetadata(
     val iterations: Int
 )
 
+/** Diagnostic data for Asr: solver status, solar declination at Dhuhr and Asr, equation of time, semi-diameters, atmospheric refractions, shadow-angle, and iteration count. */
 @Serializable
 data class AsrMetadata(
     val status: PrayerStatus,
@@ -78,6 +84,7 @@ data class AsrMetadata(
     val iterations: Int?
 )
 
+/** Container holding per-prayer [TwilightMetadata], [SunriseSunsetMetadata], [DhahwaKubraMetadata], [DhuhrMetadata], and [AsrMetadata] diagnostic records for a single computation. Only populated when `includeAdvancedMetadata = true`. */
 @Serializable
 data class AstronomicalMetadata(
     val fajr: TwilightMetadata?,
@@ -89,6 +96,32 @@ data class AstronomicalMetadata(
     val isha: TwilightMetadata?
 )
 
+/**
+ * Result of a single prayer-time computation for one day and location.
+ *
+ * All time fields are milliseconds since **UTC midnight** of the requested date,
+ * adjusted by the caller's `timeZoneOffset`. A `null` value means the event
+ * could not be computed (e.g., polar night, continuous twilight).
+ *
+ * @property fajr            Fajr (pre-dawn twilight) time in milliseconds, or `null`.
+ * @property sunrise         Sunrise time in milliseconds, or `null`.
+ * @property dhahwaKubra     Dhahwa Kubra (midpoint of Fajr–Sunset) in milliseconds, or `null`.
+ * @property dhuhr           Dhuhr (solar transit) time in milliseconds, or `null` during polar night.
+ * @property asr             Asr time in milliseconds, or `null`.
+ * @property maghrib         Maghrib (sunset) time in milliseconds, or `null`.
+ * @property isha            Isha (evening twilight) time in milliseconds, or `null`.
+ * @property status          Overall computation status. See [PrayerStatus] for possible values.
+ * @property metadata        Calculation metadata (method, madhab, high-latitude rule, polar flags).
+ *                           Always populated.
+ * @property astronomicalMetadata  Per-prayer VSOP87 solver diagnostics. `null` unless
+ *                           `includeAdvancedMetadata = true` was passed to [computePrayerTimes].
+ * @property flags           Bitmask of condition flags. Use [isPolarDay], [isPolarNight],
+ *                           and [isHighLatitudeFallback] for type-safe access.
+ * @property resolutionInfo  Which solver branch was used and which high-latitude rule was applied.
+ * @property isPolarDay      `true` when the sun does not set (continuous daylight). Fajr/Isha are `null`.
+ * @property isPolarNight    `true` when the sun does not rise (continuous darkness). Most prayers are `null`.
+ * @property isHighLatitudeFallback  `true` when at least one prayer used a high-latitude estimation rule.
+ */
 @Serializable
 data class PrayerTimesResult(
     val fajr: Long?,
@@ -119,6 +152,25 @@ data class PrayerTimesResult(
     val isHighLatitudeFallback: Boolean
         get() = (flags and FLAG_HIGH_LATITUDE_FALLBACK) != 0
 
+    /**
+     * Returns a human-readable multi-line summary of this result, suitable for logging or debugging.
+     *
+     * Includes overall status, calculation method/madhab/high-latitude rule (when [metadata] is
+     * present), key astronomical values (when [astronomicalMetadata] is present), and the solver
+     * kind from [resolutionInfo].
+     *
+     * Example output:
+     * ```
+     * === Prayer Times Summary ===
+     * Status: SUCCESS
+     * Method: KARACHI
+     * Madhab: HANAFI
+     * High Latitude Rule: MIDDLE_OF_NIGHT
+     * Solver: NORMAL
+     * ```
+     *
+     * @return A formatted multi-line string. The exact format is not stable across versions.
+     */
     fun toSummaryString(): String {
         val meta = metadata
         val astro = astronomicalMetadata
@@ -146,6 +198,7 @@ data class PrayerTimesResult(
 @Serializable
 enum class SolverKind { NORMAL, HIGH_LATITUDE, POLAR_DAY, POLAR_NIGHT }
 
+/** Records which internal solver branch was chosen for a computation and which high-latitude rule (if any) was applied. Attached to every [PrayerTimesResult.resolutionInfo]. */
 @Serializable
 data class ResolutionInfo(
     val solver: SolverKind,
@@ -179,10 +232,24 @@ private fun resolveSolver(
 }
 
 /**
- * Computes the exact prayer times for a given date, location, and method.
- * Uses a standard iterative convergence over the day's changing solar position.
- * Returns the times in UTC hours since midnight (0.0 to 24.0).
- * Multiply by 60 for minutes since midnight.
+ * Computes Islamic prayer times for the given date, location, and [CalculationMethod].
+ *
+ * Convenience overload that resolves [method] to its [CalculationMethodParameters] automatically.
+ * Delegates to the primary [computePrayerTimes] overload that accepts raw parameters.
+ *
+ * @param lat                  Observer's latitude in decimal degrees (−90.0 to 90.0).
+ * @param lng                  Observer's longitude in decimal degrees (−180.0 to 180.0).
+ * @param jd                   Julian Day number for the requested date (use [dateToJulianDay] to obtain).
+ * @param method               The [CalculationMethod] whose angle/interval parameters to use.
+ * @param madhab               Juristic school for the Asr shadow multiplier. Default: [Madhab.SHAFI].
+ * @param highLatRule          High-latitude fallback strategy. Default: [HighLatitudeRule.MIDDLE_OF_NIGHT].
+ * @param elevationMeters      Observer's altitude above sea level in metres. Default: 0.0.
+ * @param temperatureC         Ambient temperature in Celsius for refraction correction. Default: 10.0.
+ * @param pressureMbar         Atmospheric pressure in millibars for refraction correction. Default: 1010.0.
+ * @param includeAdvancedMetadata  When `true`, populates [PrayerTimesResult.astronomicalMetadata]. Default: false.
+ * @param roundingStrategy     Rounding convention applied to raw millisecond values. Default: [RoundingStrategy.FIQH_IHTIYAT].
+ * @return [PrayerTimesResult] with millisecond-UTC timestamps for each prayer.
+ * @throws TauqeetException if any parameter is outside its valid range.
  */
 @Throws(TauqeetException::class)
 fun computePrayerTimes(
@@ -201,6 +268,31 @@ fun computePrayerTimes(
     return computePrayerTimes(lat, lng, jd, method.params, method.name, madhab, highLatRule, elevationMeters, temperatureC, pressureMbar, includeAdvancedMetadata, roundingStrategy)
 }
 
+/**
+ * Primary prayer-time computation engine.
+ *
+ * Runs a full VSOP87/IAU-2000B ephemeris pipeline: it derives the solar transit (Dhuhr)
+ * via iterative convergence, computes Sunrise/Sunset with atmospheric refraction and
+ * observer-elevation corrections, then solves Fajr, Isha, Asr, and Maghrib using the
+ * supplied method angles/intervals. High-latitude fallback rules are applied last.
+ *
+ * @param lat                  Observer's latitude in decimal degrees (−90.0 to 90.0).
+ * @param lng                  Observer's longitude in decimal degrees (−180.0 to 180.0).
+ * @param jd                   Julian Day number for the requested date.
+ * @param methodParams         Raw angle and interval parameters for the calculation authority.
+ * @param methodName           Display name stored in [PrayerTimesResult.metadata]. Default: `"CUSTOM"`.
+ * @param madhab               Juristic school for the Asr shadow multiplier. Default: [Madhab.SHAFI].
+ * @param highLatRule          High-latitude fallback strategy. Default: [HighLatitudeRule.MIDDLE_OF_NIGHT].
+ * @param elevationMeters      Observer's altitude above sea level in metres. Default: 0.0.
+ * @param temperatureC         Ambient temperature in Celsius for refraction correction. Default: 10.0.
+ * @param pressureMbar         Atmospheric pressure in millibars for refraction correction. Default: 1010.0.
+ * @param includeAdvancedMetadata  When `true`, populates [PrayerTimesResult.astronomicalMetadata]
+ *                             with per-event VSOP87 solver diagnostics. Default: false.
+ * @param roundingStrategy     Rounding convention applied to raw millisecond values. Default: [RoundingStrategy.FIQH_IHTIYAT].
+ * @return [PrayerTimesResult] with millisecond-UTC timestamps for each prayer, overall [PrayerStatus],
+ *         calculation [PrayerTimesMetadata], and optional [AstronomicalMetadata].
+ * @throws TauqeetException if any parameter is outside its valid range.
+ */
 @Throws(TauqeetException::class)
 fun computePrayerTimes(
     lat: Double,
@@ -455,6 +547,7 @@ fun computePrayerTimes(
     )
 }
 
+/** All seven prayer times from a [PrayerTimesResult] formatted as ISO 8601 time strings (`HH:mm:ss`). Obtain via [PrayerTimesResult.toISOTimes]. */
 data class PrayerTimesISO(
     val fajr: String,
     val sunrise: String,
@@ -465,6 +558,22 @@ data class PrayerTimesISO(
     val isha: String
 )
 
+/**
+ * Converts all seven prayer-time millisecond values to ISO 8601 `HH:mm:ss` strings.
+ *
+ * Times that are `null` (e.g., during polar night or continuous twilight) are represented
+ * as `"Invalid Date"` to maintain a stable shape for JSON serialization.
+ *
+ * Example:
+ * ```kotlin
+ * val iso = result.toISOTimes()
+ * println(iso.fajr)    // "04:32:00"
+ * println(iso.sunrise) // "06:15:00"
+ * ```
+ *
+ * @return [PrayerTimesISO] with all seven prayer times as `HH:mm:ss` strings,
+ *         or `"Invalid Date"` for any `null` field.
+ */
 fun PrayerTimesResult.toISOTimes(): PrayerTimesISO {
     return PrayerTimesISO(
         fajr = this.fajr?.toISOTimeString() ?: "Invalid Date",

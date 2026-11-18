@@ -3,6 +3,12 @@ package com.tauqeet.library.astronomy
 
 import kotlin.math.cos
 
+/**
+ * Heliocentric state of the Earth in the VSOP87 theory: ecliptic longitude (radians),
+ * latitude (radians), and radius vector (AU).
+ *
+ * ⚠️ **Not part of the stable public API.** Will be made `internal` in 0.3.0.
+ */
 class EarthHeliocentricState(
     val longitude: Double,
     val latitude: Double,
@@ -10,12 +16,21 @@ class EarthHeliocentricState(
 )
 
 /**
- * Evaluates a single VSOP87 trigonometric series using 3 parallel DoubleArrays.
+ * Evaluates a single VSOP87 trigonometric series using 3 parallel [DoubleArray]s.
  *
  * Implements a 2-lane unrolled Kahan compensated summation to eliminate
  * loop-carried dependencies (pipeline stalls), increasing ILP.
  *
  * Complexity: O(N) time, O(1) space.
+ *
+ * ⚠️ **Not part of the stable public API.** Will be made `internal` in 0.3.0.
+ * Do not depend on this from external code.
+ *
+ * @param tau  Time argument in Julian millennia since J2000.0.
+ * @param A    Amplitude coefficients array.
+ * @param B    Phase coefficients array.
+ * @param C    Frequency coefficients array.
+ * @return     Kahan-compensated sum of `A[i] * cos(B[i] + tau * C[i])` over all `i`.
  */
 fun seriesSum(tau: Double, A: DoubleArray, B: DoubleArray, C: DoubleArray): Double {
     var sum1 = 0.0
@@ -65,6 +80,18 @@ private fun sumSeriesParallel(series: ParallelSeries, tau: Double): Double {
     return seriesSum(tau, series.A, series.B, series.C)
 }
 
+/**
+ * Computes the heliocentric state of the Earth (longitude, latitude, radius) for a given
+ * Julian epoch using the VSOP87 theory truncated to series L0–L5, B0–B2, and R0–R5.
+ *
+ * ⚠️ **Not part of the stable public API.** Will be made `internal` in 0.3.0.
+ * Do not depend on this from external code.
+ *
+ * @param tau  Time argument in Julian millennia since J2000.0
+ *             (`tau = (JD − 2451545.0) / 365250.0`).
+ * @return [EarthHeliocentricState] containing ecliptic longitude (radians),
+ *         latitude (radians), and radius vector (AU).
+ */
 fun computeEarthHeliocentricState(tau: Double): EarthHeliocentricState {
     val sumL0 = sumSeriesParallel(L0, tau)
     val sumL1 = sumSeriesParallel(L1, tau)

@@ -102,6 +102,7 @@ class Tauqeet @Throws(TauqeetException::class) constructor(
      *         in the requested timezone (UTC when [timezoneOffset] = 0.0).
      *
      * @throws TauqeetException if any input parameter is outside its valid range.
+     * @deprecated Use the unified DSL `prayerRequest { … }` overload instead.
      */
     @Deprecated(
         message = "Use the unified DSL prayerRequest { ... } overload instead.",
@@ -143,7 +144,14 @@ class Tauqeet @Throws(TauqeetException::class) constructor(
      *
      * All parameter contracts are identical to the primary [computePrayerTimes] overload.
      *
+     * @param date               Date as a [DateComponents] value.
+     * @param lat                Observer's latitude in decimal degrees (−90.0 to 90.0).
+     * @param lng                Observer's longitude in decimal degrees (−180.0 to 180.0).
+     * @param timezoneOffset     Hours offset from UTC (−12.0 to +14.0). Default: 0.0.
+     * @param includeAdvancedMetadata  When `true`, populates astronomical metadata. Default: false.
+     * @return [PrayerTimesResult] with millisecond timestamps.
      * @throws TauqeetException if any input parameter is outside its valid range.
+     * @deprecated Use the unified DSL `prayerRequest { … }` overload instead.
      */
     @Deprecated(
         message = "Use the unified DSL prayerRequest { ... } overload instead.",
@@ -178,9 +186,21 @@ class Tauqeet @Throws(TauqeetException::class) constructor(
     )
 
     /**
-     * Modern overload that encapsulates all inputs into a clean [com.tauqeet.library.prayers.PrayerRequest].
-     * Avoids parameter-ordering errors and makes the call site much cleaner.
+     * Computes the Islamic prayer times from a fully-configured [PrayerRequest].
      *
+     * This is the **preferred** overload. Build a request using the type-safe DSL:
+     * ```kotlin
+     * val result = tauqeet.computePrayerTimes(prayerRequest {
+     *     latitude = 24.4539; longitude = 54.3773
+     *     date = DateComponents(2026, 1, 15)
+     *     timeZoneOffset = 4.0
+     *     calculation { method = CalculationMethod.DUBAI }
+     * })
+     * ```
+     *
+     * @param request A [PrayerRequest] containing location, date, timezone, and calculation parameters.
+     * @return [PrayerTimesResult] where each time field is milliseconds since midnight
+     *         in the requested timezone.
      * @throws TauqeetException if any input parameter inside the request is outside its valid range.
      */
     @Throws(TauqeetException::class)
@@ -258,7 +278,15 @@ class Tauqeet @Throws(TauqeetException::class) constructor(
     }
 
     /**
-     * Safe wrapper for computing prayer times that returns a [SafeResult] instead of throwing.
+     * Computes prayer times without throwing exceptions.
+     *
+     * Returns [SafeResult.Success] with the [PrayerTimesResult] on success, or
+     * [SafeResult.Failure] with the [TauqeetErrorCode] and message on validation failure.
+     * Use this when you prefer pattern-matching over try/catch.
+     *
+     * @param request A [PrayerRequest] containing location, date, timezone, and calculation parameters.
+     * @return [SafeResult.Success] on success, [SafeResult.Failure] on validation error.
+     * @see computePrayerTimes for the throwing variant.
      */
     fun computePrayerTimesSafe(request: PrayerRequest): SafeResult<PrayerTimesResult> {
         return try {
@@ -269,8 +297,15 @@ class Tauqeet @Throws(TauqeetException::class) constructor(
     }
 
     /**
-     * Safe wrapper that takes a builder block. This catches validation errors that happen 
-     * during the construction of the [PrayerRequest].
+     * Computes prayer times without throwing exceptions, accepting a DSL builder block.
+     *
+     * This variant also catches validation errors that occur during the construction
+     * of the [PrayerRequest] itself (e.g., invalid latitude set inside the builder).
+     *
+     * @param builder A lambda with receiver on [PrayerRequestBuilder][com.tauqeet.library.prayers.PrayerRequestBuilder]
+     *                that configures the request.
+     * @return [SafeResult.Success] on success, [SafeResult.Failure] on validation error.
+     * @see computePrayerTimesSafe for the overload accepting a pre-built [PrayerRequest].
      */
     fun computePrayerTimesSafe(builder: com.tauqeet.library.prayers.PrayerRequestBuilder.() -> Unit): SafeResult<PrayerTimesResult> {
         return try {
@@ -281,7 +316,15 @@ class Tauqeet @Throws(TauqeetException::class) constructor(
     }
 
     /**
-     * Convenience overload accepting [LocalDate].
+     * Convenience overload accepting a [LocalDate] instead of year/month/day integers.
+     *
+     * @param date               A kotlinx-datetime [LocalDate].
+     * @param lat                Observer's latitude in decimal degrees (−90.0 to 90.0).
+     * @param lng                Observer's longitude in decimal degrees (−180.0 to 180.0).
+     * @param timezoneOffset     Hours offset from UTC (−12.0 to +14.0). Default: 0.0.
+     * @param includeAdvancedMetadata  When `true`, populates astronomical metadata. Default: false.
+     * @return [PrayerTimesResult] with millisecond timestamps.
+     * @throws TauqeetException if any input parameter is outside its valid range.
      */
     @Throws(TauqeetException::class)
     fun computePrayerTimes(
@@ -308,7 +351,17 @@ class Tauqeet @Throws(TauqeetException::class) constructor(
     })
 
     /**
-     * Convenience overload accepting [Instant], deriving date using UTC.
+     * Convenience overload accepting a kotlinx-datetime [Instant].
+     *
+     * The date is derived by converting the instant to a [LocalDate] in UTC.
+     *
+     * @param instant            A point in time from which the Gregorian date is extracted (UTC).
+     * @param lat                Observer's latitude in decimal degrees (−90.0 to 90.0).
+     * @param lng                Observer's longitude in decimal degrees (−180.0 to 180.0).
+     * @param timezoneOffset     Hours offset from UTC (−12.0 to +14.0). Default: 0.0.
+     * @param includeAdvancedMetadata  When `true`, populates astronomical metadata. Default: false.
+     * @return [PrayerTimesResult] with millisecond timestamps.
+     * @throws TauqeetException if any input parameter is outside its valid range.
      */
     @Throws(TauqeetException::class)
     fun computePrayerTimes(
@@ -323,13 +376,36 @@ class Tauqeet @Throws(TauqeetException::class) constructor(
     }
 }
 
-/** Top-level convenience function for quick, one-off calculations */
+/**
+ * Top-level convenience function for quick, one-off prayer-time calculations.
+ *
+ * Creates a default [Tauqeet] instance and delegates to [Tauqeet.computePrayerTimes].
+ *
+ * @param request A [PrayerRequest] containing location, date, timezone, and calculation parameters.
+ * @return [PrayerTimesResult] with millisecond timestamps.
+ * @throws TauqeetException if any input parameter is outside its valid range.
+ */
 @Throws(TauqeetException::class)
 fun getPrayerTimes(request: PrayerRequest): PrayerTimesResult = Tauqeet().computePrayerTimes(request)
 
-/** Top-level convenience function for safe, one-off calculations */
+/**
+ * Top-level convenience function for safe, one-off calculations.
+ *
+ * Creates a default [Tauqeet] instance and delegates to [Tauqeet.computePrayerTimesSafe].
+ *
+ * @param request A [PrayerRequest] containing location, date, timezone, and calculation parameters.
+ * @return [SafeResult.Success] on success, [SafeResult.Failure] on validation error.
+ */
 fun getPrayerTimesSafe(request: PrayerRequest): SafeResult<PrayerTimesResult> = Tauqeet().computePrayerTimesSafe(request)
 
-/** Top-level convenience function for safe, one-off calculations using a builder block */
+/**
+ * Top-level convenience function for safe, one-off calculations using a DSL builder block.
+ *
+ * Creates a default [Tauqeet] instance and delegates to [Tauqeet.computePrayerTimesSafe].
+ *
+ * @param builder A lambda with receiver on [PrayerRequestBuilder][com.tauqeet.library.prayers.PrayerRequestBuilder]
+ *                that configures the request.
+ * @return [SafeResult.Success] on success, [SafeResult.Failure] on validation error.
+ */
 fun getPrayerTimesSafe(builder: com.tauqeet.library.prayers.PrayerRequestBuilder.() -> Unit): SafeResult<PrayerTimesResult> = 
     Tauqeet().computePrayerTimesSafe(builder)
