@@ -1,3 +1,6 @@
+# Manual fallback for re-publishing npm without re-publishing Maven.
+# Primary release path: .github/workflows/release.yml (runs on tag push).
+# This workflow can be triggered manually via workflow_dispatch.
 name: Publish to npm
 
 on:

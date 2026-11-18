@@ -1,4 +1,4 @@
-name: Publish to Maven Central
+name: Publish to Maven Central and npm
 
 on:
   push:
@@ -34,3 +34,33 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.GPG_SIGNING_KEY_ID }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_SIGNING_PASSWORD }}
+
+  publish-npm:
+    name: Publish npm package
+    runs-on: macos-latest
+    needs: publish
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+          cache: 'gradle'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Export NODE_HOME
+        run: |
+          NODE_BIN="$(which node)"
+          echo "NODE_HOME=$(dirname "$(dirname "$NODE_BIN")")" >> "$GITHUB_ENV"
+
+      - name: Publish to npm
+        env:
+          NPM_TOKEN: ${{ secrets.TAUQEETKMP }}
+        run: ./gradlew :shared:publishJsPackageToNpmjsRegistry --no-configuration-cache --stacktrace
