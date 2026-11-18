@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: macos-latest
@@ -25,6 +29,16 @@ jobs:
       with:
         node-version: '22'
 
+    - name: Cache Kotlin/Native
+      uses: actions/cache@v4
+      with:
+        path: ~/.konan
+        key: konan-${{ runner.os }}-${{ hashFiles('**/libs.versions.toml', '**/*.gradle.kts') }}
+        restore-keys: |
+          konan-${{ runner.os }}-
+
     - name: Build with Gradle
-      run: ./gradlew build --no-daemon --no-configuration-cache --continue --parallel --stacktrace
+      run: |
+        ./gradlew :shared:jvmTest :shared:jsNodeTest :shared:jsBrowserTest \
+          --continue --parallel --stacktrace
 
