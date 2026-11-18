@@ -1,9 +1,23 @@
 # Tauqeet KMP
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.h-ghulam-hasnain/tauqeet-kmp.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.h-ghulam-hasnain/tauqeet-kmp)
-[![npm version](https://img.shields.io/npm/v/tauqeet-js.svg)](https://www.npmjs.com/package/tauqeet-js)
+> High-precision Islamic prayer times & Qibla calculation for **Kotlin Multiplatform** — pure Kotlin, zero platform-specific hacks, 1:1 mathematical parity with the original tauqeet-js engine.
+
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.h-ghulam-hasnain/tauqeet-kmp.svg)](https://central.sonatype.com/artifact/io.github.h-ghulam-hasnain/tauqeet-kmp)
+[![npm version](https://img.shields.io/npm/v/tauqeet-kmp.svg)](https://www.npmjs.com/package/tauqeet-kmp)
+[![CI](https://github.com/h-ghulam-hasnain/tauqeet-kmp/actions/workflows/build.yml/badge.svg)](https://github.com/h-ghulam-hasnain/tauqeet-kmp/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/tauqeet/tauqeet-kmp/actions/workflows/build.yml/badge.svg)](https://github.com/tauqeet/tauqeet-kmp/actions/workflows/build.yml)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.0.0-blue.svg)](https://kotlinlang.org)
+
+## Table of Contents
+- [Features](#features)
+- [Installation](#installation)
+- [Unified API – PrayerRequest DSL](#unified-api--prayerrequest-dsl)
+- [Supported Platforms](#supported-platforms)
+- [Supported Calculation Methods](#supported-calculation-methods)
+- [Testing & Quality Assurance](#testing--quality-assurance)
+- [Documentation](#documentation)
+- [License](#license)
+
 A high-precision Islamic prayer times and Qibla calculation library for Kotlin Multiplatform (Android, iOS, JVM, JS).
 Ported from the robust [tauqeet-js](https://github.com/tauqeet/tauqeet-js) library, maintaining 1:1 mathematical precision based on VSOP87 algorithms.
 
@@ -46,7 +60,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.2.1")
+    implementation("io.github.h-ghulam-hasnain:tauqeet-kmp:0.2.2")
 }
 ```
 
@@ -54,11 +68,21 @@ dependencies {
 Install the package via npm:
 
 ```bash
-npm install tauqeet-kmp@0.2.1
+npm install tauqeet-kmp@0.2.2
 ```
 
 ### iOS (CocoaPods)
 If using CocoaPods, include the shared framework in your Podfile (assuming integration via KMP plugin).
+
+## Supported Platforms
+
+| Platform | Status | Artifact |
+|----------|--------|----------|
+| **JVM** (desktop, server) | ✅ Fully supported | `tauqeet-kmp-jvm` |
+| **Android** | ✅ Fully supported | `tauqeet-kmp-jvm` (via Gradle) |
+| **JavaScript** (browser + Node.js) | ✅ Fully supported | `tauqeet-kmp` (npm) |
+| **iOS** (arm64, x64, simulator) | ✅ Fully supported | `tauqeet-kmp-iosarm64`, `tauqeet-kmp-iosx64`, `tauqeet-kmp-iossimulatorarm64` |
+| **WASM** | 🚧 Planned for 0.4.0 | — |
 
 ## Unified API – PrayerRequest DSL
 
@@ -208,6 +232,12 @@ val times = tauqeet.computePrayerTimes(
 
 ## Supported Madhabs
 The library supports all classical schools of thought. `SHAFI` mathematically encompasses `MALIKI`, `HANBALI`, and `JAAFARI` (shadow factor 1), while `HANAFI` uses shadow factor 2. For convenience, aliases (`MALIKI`, `HANBALI`, `JAAFARI`) are included in the enum.
+
+## Documentation
+
+- **API reference (KDoc/Dokka):** `tauqeet-kmp-0.2.2-javadoc.jar` on [Maven Central](https://repo1.maven.org/maven2/io/github/h-ghulam-hasnain/tauqeet-kmp/0.2.2/)
+- **Android Studio / IntelliJ:** inline KDoc appears automatically in autocomplete after adding the dependency
+- **JS API:** `tauqeet-kmp-shared.d.ts` provides full TypeScript types after `npm install tauqeet-kmp@0.2.2`
 
 ## Testing & Quality Assurance
 
